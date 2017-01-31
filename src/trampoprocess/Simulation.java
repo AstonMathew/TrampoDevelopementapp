@@ -32,19 +32,26 @@ import java.util.logging.Logger;
 import constants.SimulationStatuses;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import java.util.concurrent.TimeUnit;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
 
 /**
  *
- * @author Administrator 
+ * @author Administrator
+ *
  * TODOGUINOW 
- * troubleshoot the pb1.
- * make CCM+ version a variable in the pb, and trouble shoot meshCount pb;
- * output list of files no match= Status= "CANCELLED:" , put Sims in canceled folder 
- * simulationLog.txt gets overwritten, check why and simulationStatus.txt does not list the various simulation status one after another with date/time
- * File LogFile = new File(getSimulationLogPath()); // don't create a new log file at every process, need to do 1 after the Simulation params have loaded;
- * TODOLATER 
- * This code breaks if the simulation folder already exists.
- * star-CCM+ version used to determine version used by customer to create the file needs to be adjusted to default version.
+ * output list of files no * match=  * Status= "CANCELLED:" , put Sims in canceled folder simulationLog.txt gets
+ * overwritten // check why and simulationStatus.txt does not list the various
+ * simulation status one after another with date/time File LogFile = new
+ * File(getSimulationLogPath()); // don't create a new log file at every
+ * process, need to do 1 after the Simulation params have loaded; //meshcount()
+ * Simulation name needs to be udated to latest sim file in folder tree.
+ *
+ * TODOLATER This code breaks if the simulation folder already exists. star-CCM+
+ * version used to determine version used by customer to create the file needs
+ * to be adjusted to default version. make CCM+ version a variable in all the pb
+ * and use CCM+ default version to run versioncheck and meshcount
  */
 public class Simulation {
 
@@ -57,13 +64,15 @@ public class Simulation {
     // testing
     // only
 
-    Integer _simulationNumber =1; // = 65;
+    Integer _simulationNumber = 1; // = 65;
     String _customerNumber = "5543813196";
     String _submissionDate = "2016/12/01"; // UTC date
     String _submissionTime = "17:05";// UTC Time
     Integer _maxSeconds = 30;
-    String _simulation = "Cube.sim";
+    String _simulation = null;
     String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
+    String _localHostNP = "localhost:" + _numberComputeCores;
+
     String _PODkey = "5vq0W6k4A3CThu7rcwFeS23KtqY";
     Integer _fileCount;
 
@@ -72,8 +81,6 @@ public class Simulation {
     Process _simulationProcess = null;
     LocalTime _startTime = null;
     LocalTime _startSimulationTime = null;
-
-    
 
     /**
      * @param _simulationNumber
@@ -99,21 +106,66 @@ public class Simulation {
         return _maxSeconds;
     }
 
-    public void runSimulation() throws Exception {
+    public void runSimulationWorkflow() throws Exception {
         // System.out.println("1+1=" + 1 + 1);
         _startTime = LocalTime.now();
+        System.out.println("_simulation without final quote= " + _simulation);
+        // for some reason, _simulation is missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
+        _simulation = _simulation.concat("""); 
+        _simulation = _simulation.replaceAll("\\s+", "");
+        System.out.println("_simulation with final quote= " + _simulation);
+
         CreateSimulationRunFolder();
-                CreateLogAndStatusFiles();
+        CreateLogAndStatusFiles();
         writeLog(getSimulationLogPath(), "Starting processing time: " + _startTime);
 //        checkFiles(); Not working
         CopyCustomerSyncFolderIntoSimulationRunFolder();
-        FindSimulationFileAndStarCCMPlusVersion();
+        FindStarCCMPlusVersion();
         UseStarCCMPlusDefaultVersion(); //Not tested
         RunSimulationAndUpdateStatus();
         //CopyResultsBackToSynchronised folder();
         meshcount();
         // check that the running simulation is “alive” in all processes.
         System.out.println("End");
+    }
+
+    private void CreateSimulationRunFolder() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
+//Files.createDirectory(getSimulationRunningFolderPath());
+// Files.createTempFile(simulationSendingToTrampoFolderPath,
+        // "tmp",".txt");
+        if (Files.isDirectory(getSimulationRunningFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getSimulationRunningFolderPath());
+            System.out.println("simulationRunningFolder created " + getSimulationRunningFolderPath());
+            //System.out.println("src folder will show below as Directory copied");
+        } else {
+            System.err.println(
+                    "ERROR: SIMULATIONRUNNINGFOLDER EXISTING !!! with Path: " + getSimulationRunningFolderPath());
+            // this needs to make the simulation exist the queue as it indicates a major problem
+            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
+        }
+    }
+    
+    private void CreateLogAndStatusFiles() throws IOException, InterruptedException {
+
+        String[] paths = {getSimulationLogPath(), getSimulationStatusPath()};
+        // create Log and Status files
+        for (String path : paths) {
+            writeLog(path, "");
+            writeLog(path, "simulationNumber = " + _simulationNumber + "\n");
+            writeLog(path, "customerNumber = " + _customerNumber + "\n");
+            writeLog(path, "submissionDate = " + _submissionDate + "\n");
+            writeLog(path, "maxSeconds = " + _maxSeconds + "\n");
+            writeLog(path, "Simulation = " + _simulation + "\n");
+            writeLog(path, "simulationRunningFolder = " + getSimulationRunningFolderPath() + "\n");
+            writeLog(path, "----------------------------------------------------------------------------------------------------------------\n");
+        }
+    }
+    
+    private void writeLog(String filename, String text) throws IOException {
+        try (FileWriter fw = new FileWriter(filename, true);
+                BufferedWriter writer = new BufferedWriter(fw);) {
+            writer.write(text + "\n");
+        }
     }
 
     public void checkFiles() throws Exception { // test the sim exits is file count and file name is wrong
@@ -137,6 +189,133 @@ public class Simulation {
         }
     }
 
+    private void CopyCustomerSyncFolderIntoSimulationRunFolder() throws IOException, InterruptedException {
+
+        MyFileVisitor visitor = new MyFileVisitor(getSimulationSendingToTrampoFolderPath(),
+                getSimulationRunningFolderPath());
+        Files.walkFileTree(getSimulationSendingToTrampoFolderPath(), visitor);
+    }
+
+    private void FindStarCCMPlusVersion() throws IOException, InterruptedException {
+        // find sim file
+        File[] files = getSimulationRunningFolderPath().toFile().listFiles(new SimulationFileFilter());
+        for (File f : files) {
+            String simulationFilename = f.getName();
+            System.out.println("The simulation file name is: " + simulationFilename);
+        }
+
+        System.out.println(TRAMPOCLUSTERUTILFOLDERPATH + "\\ccmPlusVersion.java");
+        System.out.println("_simulation: " + _simulation);
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-macro",
+                TRAMPOCLUSTERUTILFOLDERPATH + "//ccmPlusVersion.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
+                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
+                _simulation);
+        File LogFile = new File(getSimulationLogPath());
+        //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
+        //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
+        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
+
+        pb.redirectOutput(LogFile);
+        pb.redirectError(LogFile);
+
+        pb.directory(pbWorkingDirectory);
+        System.out.println("" + pb.directory());
+        Process p = pb.start();
+        p.waitFor();
+
+        String StarCcmPlusVersion = new String(
+                readAllBytes(get(getSimulationRunningFolderPath() + "//ccmplusversion.txt")));
+        StarCcmPlusVersion = StarCcmPlusVersion.replace(" ", "");
+        System.out.println("StarCcmPlusVersion=" + StarCcmPlusVersion);
+    }
+
+    private void UseStarCCMPlusDefaultVersion() throws IOException, InterruptedException {
+        // Check that this version of Star-CCM+ is installed on computer.
+        String InstalledStarCcmPlusVersionsString = new String(
+                readAllBytes(get(TRAMPOCLUSTERUTILFOLDERPATH + "//InstalledCCMPlusVersions.txt")));
+        List<String> InstalledStarCcmPlusVersionsArrayList = Arrays
+                .asList(InstalledStarCcmPlusVersionsString.split("\\s*,\\s*"));
+        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.04.012\")"
+                + InstalledStarCcmPlusVersionsArrayList.contains("11.04.012"));
+        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.06.10\")"
+                + InstalledStarCcmPlusVersionsArrayList.contains("11.06.10"));
+        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.06.11\")"
+                + InstalledStarCcmPlusVersionsArrayList.contains("11.06.11"));
+        int i = 0;
+        for (String version : InstalledStarCcmPlusVersionsArrayList) {
+            InstalledStarCcmPlusVersionsArrayList.set(i, version.replace(" ", ""));
+            System.out.println(version);
+            i++;
+        }
+
+        if (!InstalledStarCcmPlusVersionsArrayList.contains(_StarCcmPlusVersion)) {
+            _StarCcmPlusVersion = InstalledStarCcmPlusVersionsArrayList
+                    .get(InstalledStarCcmPlusVersionsArrayList.size() - 1);
+        } else {
+            System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(StarCcmPlusVersion)");
+        }
+        System.out.println("StarCcmPlusVersion=" + _StarCcmPlusVersion);
+    }
+
+    private void RunSimulationAndUpdateStatus() throws Exception {
+        ProcessBuilder pb = new ProcessBuilder(
+                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-macro",
+                TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
+                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
+                _simulation);
+
+        File LogFile = new File(getSimulationLogPath());
+        //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
+        //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
+        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
+
+        pb.redirectOutput(LogFile);
+        pb.redirectError(LogFile);
+        pb.directory(pbWorkingDirectory);
+        try {
+            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.RUNNING);
+            _startSimulationTime = LocalTime.now();
+            writeLog(getSimulationLogPath(), "Starting simulation time: " + _startSimulationTime);
+            // _simulationProcess = pb.start(); //
+            writeLog(getSimulationLogPath(), "End simulation time: " + LocalTime.now());
+            writeLog(getSimulationLogPath(), "Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
+            new WebAppGate().updateSimulationActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
+            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.COMPLETED);
+            writeLog(getSimulationLogPath(), "Simulation complete...");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void meshcount() throws IOException, InterruptedException {
+
+        //Simulation name needs to be udated to latest sim file in folder.
+        ProcessBuilder pb = new ProcessBuilder(
+                "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-macro",
+                TRAMPOCLUSTERUTILFOLDERPATH + "//meshCount.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
+                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
+                _simulation);
+
+        File LogFile = new File(getSimulationLogPath());
+        //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
+        //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
+        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
+
+        pb.redirectOutput(LogFile);
+        pb.redirectError(LogFile);
+        pb.directory(pbWorkingDirectory);
+        Process p = pb.start();
+        if (p.isAlive() == true) {
+            p.waitFor(1, TimeUnit.MINUTES);
+        } else {
+            p.destroyForcibly();
+        }
+
+    }
+
     public long currentRunTimeInSeconds() {
         return timeInSeconds(_startTime);
     }
@@ -150,7 +329,7 @@ public class Simulation {
 
     public void abort() throws InterruptedException {
         // To be implemented: soft abort with a grace period
-        File file = new File(getSimulationRunningFolderPath() + "ABORT.txt");
+        File file = new File(getSimulationRunningFolderPath() + "\\ABORT.txt");
 
         try {
             //Create the file
@@ -205,13 +384,6 @@ public class Simulation {
         // folder
     }
 
-    private void CopyCustomerSyncFolderIntoSimulationRunFolder() throws IOException, InterruptedException {
-
-        MyFileVisitor visitor = new MyFileVisitor(getSimulationSendingToTrampoFolderPath(),
-                getSimulationRunningFolderPath());
-        Files.walkFileTree(getSimulationSendingToTrampoFolderPath(), visitor);
-    }
-
     private String getSimulationLogPath() {
         return getSimulationRunningFolderPath() + "\\simulationLog.txt";
     }
@@ -220,164 +392,6 @@ public class Simulation {
         return getSimulationRunningFolderPath() + "\\simulationStatus.txt";
     }
 
-    private void writeLog(String filename, String text) throws IOException {
-        try (FileWriter fw = new FileWriter(filename, true);
-                BufferedWriter writer = new BufferedWriter(fw);) {
-            writer.write(text + "\n");
-        }
-    }
+    
 
-    private void CreateLogAndStatusFiles() throws IOException, InterruptedException {
-
-        String[] paths = {getSimulationLogPath(), getSimulationStatusPath()};
-        // create Log and Status files
-        for (String path : paths) {
-            writeLog(path, "");
-            writeLog(path, "simulationNumber = " + _simulationNumber + "\n");
-            writeLog(path, "customerNumber = " + _customerNumber + "\n");
-            writeLog(path, "submissionDate = " + _submissionDate + "\n");
-            writeLog(path, "maxSeconds = " + _maxSeconds + "\n");
-            writeLog(path, "Simulation = " + _simulation + "\n");
-            writeLog(path, "simulationRunningFolder = " + getSimulationRunningFolderPath() + "\n");
-            writeLog(path, "----------------------------------------------------------------------------------------------------------------\n");
-        }
-    }
-
-    private void FindSimulationFileAndStarCCMPlusVersion() throws IOException, InterruptedException {
-        // find sim file
-        File[] files = getSimulationRunningFolderPath().toFile().listFiles(new SimulationFileFilter());
-        for (File f : files) {
-            String simulationFilename = f.getName();
-            System.out.println("The simulation file name is: " + simulationFilename);
-        }
-
-        System.out.println(TRAMPOCLUSTERUTILFOLDERPATH + "\\ccmPlusVersion.java");
-//        ProcessBuilder pb = new ProcessBuilder(
-//                "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-macro",
-//                TRAMPOCLUSTERUTILFOLDERPATH + "//ccmPlusVersion.java", "-on", "localhost:7", "-np", _numberComputeCores, "-power",
-//                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
-//                _simulationFilename);
-
-        ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-macro",
-                TRAMPOCLUSTERUTILFOLDERPATH + "//ccmPlusVersion.java", "-on", "localhost:7", "-np", "7", "-power",
-                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", "5vq0W6k4A3CThu7rcwFeS23KtqY",
-                "Cube.sim");
-        File LogFile = new File(getSimulationLogPath());
-    //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
-    //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
-    File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
-
-        pb.redirectOutput(LogFile);
-        pb.redirectError(LogFile);
-
-        pb.directory(pbWorkingDirectory);
-        System.out.println("" + pb.directory());
-        Process p = pb.start();
-        p.waitFor();
-
-        String StarCcmPlusVersion = new String(
-                readAllBytes(get(getSimulationRunningFolderPath() + "//ccmplusversion.txt")));
-        StarCcmPlusVersion = StarCcmPlusVersion.replace(" ", "");
-        System.out.println("StarCcmPlusVersion=" + StarCcmPlusVersion);
-    }
-
-    private void UseStarCCMPlusDefaultVersion() throws IOException, InterruptedException {
-        // Check that this version of Star-CCM+ is installed on computer.
-        String InstalledStarCcmPlusVersionsString = new String(
-                readAllBytes(get(TRAMPOCLUSTERUTILFOLDERPATH + "//InstalledCCMPlusVersions.txt")));
-        List<String> InstalledStarCcmPlusVersionsArrayList = Arrays
-                .asList(InstalledStarCcmPlusVersionsString.split("\\s*,\\s*"));
-        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.04.012\")"
-                + InstalledStarCcmPlusVersionsArrayList.contains("11.04.012"));
-        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.06.10\")"
-                + InstalledStarCcmPlusVersionsArrayList.contains("11.06.10"));
-        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.06.11\")"
-                + InstalledStarCcmPlusVersionsArrayList.contains("11.06.11"));
-        int i = 0;
-        for (String version : InstalledStarCcmPlusVersionsArrayList) {
-            InstalledStarCcmPlusVersionsArrayList.set(i, version.replace(" ", ""));
-            System.out.println(version);
-            i++;
-        }
-
-        if (!InstalledStarCcmPlusVersionsArrayList.contains(_StarCcmPlusVersion)) {
-            _StarCcmPlusVersion = InstalledStarCcmPlusVersionsArrayList
-                    .get(InstalledStarCcmPlusVersionsArrayList.size() - 1);
-        } else {
-            System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(StarCcmPlusVersion)");
-        }
-        System.out.println("StarCcmPlusVersion=" + _StarCcmPlusVersion);
-    }
-
-    private void RunSimulationAndUpdateStatus() throws Exception {
-        ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-macro",
-                TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-on", "localhost:7", "-np", _numberComputeCores, "-power",
-                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
-                _simulationFilename);
-        
-        File LogFile = new File(getSimulationLogPath());
-    //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
-    //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
-    File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
-        
-        pb.redirectOutput(LogFile);
-        pb.redirectError(LogFile);
-        pb.directory(pbWorkingDirectory);
-        try {
-            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.RUNNING);
-            _startSimulationTime = LocalTime.now();
-            writeLog(getSimulationLogPath(), "Starting simulation time: " + _startSimulationTime);
-            // _simulationProcess = pb.start(); //
-            writeLog(getSimulationLogPath(), "End simulation time: " + LocalTime.now());
-            writeLog(getSimulationLogPath(), "Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
-            new WebAppGate().updateSimulationActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
-            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.COMPLETED);
-            writeLog(getSimulationLogPath(), "Simulation complete...");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    private void meshcount() throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-macro",
-                TRAMPOCLUSTERUTILFOLDERPATH + "//meshCount.java", "-on", "localhost:7", "-np", _numberComputeCores, "-power",
-                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
-                _simulationFilename);
-        
-        File LogFile = new File(getSimulationLogPath());
-    //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
-    //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
-    File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
-        
-        pb.redirectOutput(LogFile);
-        pb.redirectError(LogFile);
-        pb.directory(pbWorkingDirectory);
-        Process p = pb.start();
-        if (p.isAlive() == true) {
-            p.waitFor(1, TimeUnit.MINUTES);
-        } else {
-            p.destroyForcibly();
-        }
-
-    }
-
-    private void CreateSimulationRunFolder() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
-//Files.createDirectory(getSimulationRunningFolderPath());
-// Files.createTempFile(simulationSendingToTrampoFolderPath,
-        // "tmp",".txt");
-        if (Files.isDirectory(getSimulationRunningFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
-            Files.createDirectories(getSimulationRunningFolderPath());
-            System.out.println("simulationRunningFolder created " + getSimulationRunningFolderPath());
-            //System.out.println("src folder will show below as Directory copied");
-        } else {
-            System.err.println(
-                    "ERROR: SIMULATIONRUNNINGFOLDER EXISTING !!! with Path: " + getSimulationRunningFolderPath());
-            // this needs to make the simulation exist the queue as it indicates a major problem
-            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
-        }
-    }
 }

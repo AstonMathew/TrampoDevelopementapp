@@ -20,7 +20,7 @@ public class SimulationQueue {
 		public void run() {
 			System.out.println("Running in a thread");
 			 try {
-				_sim.runSimulation();
+				_sim.runSimulationWorkflow();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -37,27 +37,27 @@ public class SimulationQueue {
 	// static and not static functions and members
 	/**
 	 * public class SimulationRequest{ static final int DEFINED = 1; static
-	 * final int STARTED = 2; static final int COMPLETE = 3;
-	 * 
-	 * Integer _status = null;
-	 * 
-	 * public SimulationRequest() { _status = DEFINED; }
-	 * 
-	 * public int maximumClocktimeInSeconds() { return 60; }
-	 * 
-	 * public void runSimulation() { _status = STARTED; System.out.println(
-	 * "Running simulation in a thread"); ProcessBuilder pb = new
-	 * ProcessBuilder("c:\\Temp\\test.bat"); try { pb.start(); } catch
-	 * (IOException e) { e.printStackTrace(); } finally { _status = COMPLETE; }
-	 * }
-	 * 
-	 * public void abortSimulation() { System.out.println("Aborting simulation"
-	 * ); _status = COMPLETE; }
-	 * 
-	 * public void abortNow() { System.out.println("Stop the simulation now..."
-	 * ); _status = COMPLETE; }
-	 * 
-	 * public Integer getStatus() { return _status; } }
+ final int STARTED = 2; static final int COMPLETE = 3;
+ 
+ Integer _status = null;
+ 
+ public SimulationRequest() { _status = DEFINED; }
+ 
+ public int maximumClocktimeInSeconds() { return 60; }
+ 
+ public void runSimulationWorkflow() { _status = STARTED; System.out.println(
+ "Running simulation in a thread"); ProcessBuilder pb = new
+ ProcessBuilder("c:\\Temp\\test.bat"); try { pb.start(); } catch
+ (IOException e) { e.printStackTrace(); } finally { _status = COMPLETE; }
+ }
+ 
+ public void abortSimulation() { System.out.println("Aborting simulation"
+ ); _status = COMPLETE; }
+ 
+ public void abortNow() { System.out.println("Stop the simulation now..."
+ ); _status = COMPLETE; }
+ 
+ public Integer getStatus() { return _status; } }
 	 */
 
 	// Store the list of simulation requests
