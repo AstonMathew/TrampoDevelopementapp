@@ -12,9 +12,7 @@ package trampoprocess;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -25,28 +23,24 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import static java.nio.file.Files.readAllBytes;
-import static java.nio.file.Paths.get;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import constants.SimulationStatuses;
-import static java.time.temporal.ChronoUnit.MINUTES;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 
 /**
  *
  * @author Administrator
  *
- * TODOGUINOW 
- * output list of files no * match=  * Status= "CANCELLED:" , put Sims in canceled folder simulationLog.txt gets
- * overwritten // check why and simulationStatus.txt does not list the various
- * simulation status one after another with date/time File LogFile = new
- * File(getSimulationLogPath()); // don't create a new log file at every
- * process, need to do 1 after the Simulation params have loaded; //meshcount()
- * Simulation name needs to be udated to latest sim file in folder tree.
+ * TODOGUINOW output list of files no * match= * Status= "CANCELLED:" , put Sims
+ * in canceled folder simulationLog.txt gets overwritten // check why and
+ * simulationStatus.txt does not list the various simulation status one after
+ * another with date/time //meshcount() Simulation name needs to be
+ * udated to latest sim file in folder tree.
  *
  * TODOLATER This code breaks if the simulation folder already exists. star-CCM+
  * version used to determine version used by customer to create the file needs
@@ -82,6 +76,8 @@ public class Simulation {
     LocalTime _startTime = null;
     LocalTime _startSimulationTime = null;
 
+    PrintStream _printStreamToLogFile = null;
+
     /**
      * @param _simulationNumber
      * @param _customerNumber
@@ -111,20 +107,22 @@ public class Simulation {
         _startTime = LocalTime.now();
         System.out.println("_simulation without final quote= " + _simulation);
         // for some reason, _simulation is missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
-        _simulation = _simulation.concat("""); 
+        //_simulation = _simulation.concat("\""); 
+        //_simulation = _simulation.concat("\u0022"); //doesn't help, maybe it's the "." in .sim that's causing the issue?
         _simulation = _simulation.replaceAll("\\s+", "");
         System.out.println("_simulation with final quote= " + _simulation);
 
         CreateSimulationRunFolder();
-        CreateLogAndStatusFiles();
-        writeLog(getSimulationLogPath(), "Starting processing time: " + _startTime);
-//        checkFiles(); Not working
+        redirectOutToLog();
+        CreateLogHeader();
+        _printStreamToLogFile.println("Starting processing time: " + _startTime);
+        checkFiles(); //Not working
         CopyCustomerSyncFolderIntoSimulationRunFolder();
         FindStarCCMPlusVersion();
         UseStarCCMPlusDefaultVersion(); //Not tested
-        RunSimulationAndUpdateStatus();
+        //RunSimulationAndUpdateStatus(); //doesn't close,  FIX
         //CopyResultsBackToSynchronised folder();
-        meshcount();
+        //meshcount(); // starts before sims finishes? FIX
         // check that the running simulation is “alive” in all processes.
         System.out.println("End");
     }
@@ -144,28 +142,22 @@ public class Simulation {
             new WebAppGate().updateSimulationStatus(this, SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
         }
     }
-    
-    private void CreateLogAndStatusFiles() throws IOException, InterruptedException {
 
-        String[] paths = {getSimulationLogPath(), getSimulationStatusPath()};
-        // create Log and Status files
-        for (String path : paths) {
-            writeLog(path, "");
-            writeLog(path, "simulationNumber = " + _simulationNumber + "\n");
-            writeLog(path, "customerNumber = " + _customerNumber + "\n");
-            writeLog(path, "submissionDate = " + _submissionDate + "\n");
-            writeLog(path, "maxSeconds = " + _maxSeconds + "\n");
-            writeLog(path, "Simulation = " + _simulation + "\n");
-            writeLog(path, "simulationRunningFolder = " + getSimulationRunningFolderPath() + "\n");
-            writeLog(path, "----------------------------------------------------------------------------------------------------------------\n");
-        }
+    private void redirectOutToLog() throws FileNotFoundException {
+        _printStreamToLogFile = new PrintStream(getSimulationLogPath());
+        System.setOut(_printStreamToLogFile);
+        //System.setErr(_printStreamToLogFile);
     }
-    
-    private void writeLog(String filename, String text) throws IOException {
-        try (FileWriter fw = new FileWriter(filename, true);
-                BufferedWriter writer = new BufferedWriter(fw);) {
-            writer.write(text + "\n");
-        }
+    private void CreateLogHeader() throws IOException, InterruptedException {
+
+        _printStreamToLogFile.println("HEADER START----------------------------------------------------------------------------------------------------------------");
+        _printStreamToLogFile.println("simulationNumber = " + _simulationNumber);
+        _printStreamToLogFile.println("customerNumber = " + _customerNumber);
+        _printStreamToLogFile.println("submissionDate = " + _submissionDate);
+        _printStreamToLogFile.println("maxSeconds = " + _maxSeconds);
+        _printStreamToLogFile.println("Simulation = " + _simulation);
+        _printStreamToLogFile.println("simulationRunningFolder = " + getSimulationRunningFolderPath());
+        _printStreamToLogFile.println("HEADER END-------------------------------------------------------------------------------------------------------------------");
     }
 
     public void checkFiles() throws Exception { // test the sim exits is file count and file name is wrong
@@ -179,14 +171,14 @@ public class Simulation {
             System.out.println("Actual file count matches nominated file count !!!");
         }
 
-        // Check for .sim file
-        String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
-        if (!FileFunctions.fileIsAvailable(getSimulationSendingToTrampoFolderPath().resolve(sim))) {
-            System.out.println("Simulation file " + sim + " is NOT available");
-            throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
-        } else {
-            System.out.println("Simulation file " + sim + " is available");
-        }
+//        // Check for .sim file
+//        String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
+//        if (!FileFunctions.fileIsAvailable(getSimulationSendingToTrampoFolderPath().resolve(sim))) {
+//            System.out.println("Simulation file " + sim + " is NOT available");
+//            throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
+//        } else {
+//            System.out.println("Simulation file " + sim + " is available");
+//        }
     }
 
     private void CopyCustomerSyncFolderIntoSimulationRunFolder() throws IOException, InterruptedException {
@@ -277,13 +269,13 @@ public class Simulation {
         try {
             new WebAppGate().updateSimulationStatus(this, SimulationStatuses.RUNNING);
             _startSimulationTime = LocalTime.now();
-            writeLog(getSimulationLogPath(), "Starting simulation time: " + _startSimulationTime);
-            // _simulationProcess = pb.start(); //
-            writeLog(getSimulationLogPath(), "End simulation time: " + LocalTime.now());
-            writeLog(getSimulationLogPath(), "Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
+            _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
+            _simulationProcess = pb.start(); //
+            _printStreamToLogFile.println("End simulation time: " + LocalTime.now());
+            _printStreamToLogFile.println("Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
             new WebAppGate().updateSimulationActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
             new WebAppGate().updateSimulationStatus(this, SimulationStatuses.COMPLETED);
-            writeLog(getSimulationLogPath(), "Simulation complete...");
+            _printStreamToLogFile.println("Simulation complete...");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -385,13 +377,11 @@ public class Simulation {
     }
 
     private String getSimulationLogPath() {
-        return getSimulationRunningFolderPath() + "\\simulationLog.txt";
+        return getSimulationRunningFolderPath() + "\\simulation_" + _simulationNumber + "_Log.txt";
     }
 
     private String getSimulationStatusPath() {
-        return getSimulationRunningFolderPath() + "\\simulationStatus.txt";
+        return getSimulationRunningFolderPath() + "\\simulation_" + _simulationNumber + "_Status.txt";
     }
-
-    
 
 }
