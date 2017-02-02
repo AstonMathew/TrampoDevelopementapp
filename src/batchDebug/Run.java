@@ -16,21 +16,21 @@ import java.nio.file.Paths;
  */
 public class Run {
 
-    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
-            "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
-    static String RUNFOLDERROOT = "C:\\test\\clusterSetUp\\Run Partition"; // for
-    // testing
-    // only
-    static String STORAGEFOLDERROOT = "C:\\test\\clusterSetUp\\Storage Partition"; // for
-    // testing
-    // only
-
-    Integer _simulationNumber = 149; // = 65;
-    String _simulation = "Cube.sim";
-    String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
-    String _localHostNP = "localhost:" + _numberComputeCores;
-    String _PODkey = "5vq0W6k4A3CThu7rcwFeS23KtqY";
-    String _StarCcmPlusVersion = "11.04.012";
+//    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
+//            "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
+//    static String RUNFOLDERROOT = "C:\\test\\clusterSetUp\\Run Partition"; // for
+//    // testing
+//    // only
+//    static String STORAGEFOLDERROOT = "C:\\test\\clusterSetUp\\Storage Partition"; // for
+//    // testing
+//    // only
+//
+//    Integer _simulationNumber = 149; // = 65;
+//    String _simulation = "Cube.sim";
+//    String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
+//    String _localHostNP = "localhost:" + _numberComputeCores;
+//    String _PODkey = "5vq0W6k4A3CThu7rcwFeS23KtqY";
+//    String _StarCcmPlusVersion = "11.04.012";
     
 
     public void run() throws IOException, InterruptedException {
@@ -43,13 +43,13 @@ public class Run {
 //                _simulation); 
 
 // "-batch-report",
-        ProcessBuilder pb = new ProcessBuilder("C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-batch", "-batch-report", "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling//run.java", "-on", "localhost:7", "-np", "7", "-power", "-licpath", "1999@flex.cd-adapco.com", "-podkey", "5vq0W6k4A3CThu7rcwFeS23KtqY", "Cube.sim"); 
+        ProcessBuilder pb = new ProcessBuilder("C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-batch", "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling//run.java", "-on", "localhost:7", "-np", "7", "-power", "-licpath", "1999@flex.cd-adapco.com", "-podkey", "5vq0W6k4A3CThu7rcwFeS23KtqY", "Cube.sim"); 
         File pbWorkingDirectory = Paths.get("C:\\test\\clusterSetUp\\Run Partition\\customer_5543813196\\simulation_149").toFile();
 
         pb.directory(pbWorkingDirectory);
         Process p = pb.start();
-        p. waitFor();
-        p.destroyForcibly();
+        p.waitFor();
+        //p.destroyForcibly();
         System.out.println("finished run");
 
     }
