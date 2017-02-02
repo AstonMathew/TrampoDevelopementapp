@@ -263,7 +263,7 @@ public class Simulation {
 
     private void RunSimulationAndUpdateStatus() throws Exception {
         ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch", "-macro", //"-batch-report", 
+                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch", //"-batch-report", 
                 TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
                 _simulation); 
