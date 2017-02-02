@@ -31,6 +31,9 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
 
 /**
  *
@@ -39,8 +42,9 @@ import static java.nio.file.Paths.get;
  * TODOGUINOW output list of files no * match= * Status= "CANCELLED:" , put Sims
  * in canceled folder simulationLog.txt gets overwritten // check why and
  * simulationStatus.txt does not list the various simulation status one after
- * another with date/time //meshcount() Simulation name needs to be
- * udated to latest sim file in folder tree.
+ * another with date/time //meshcount() Simulation name needs to be udated to
+ * latest sim file in folder tree. test if Simulation File Name "Cube" without
+ * .sim works; If not might consider adding the .sim in the website or database.
  *
  * TODOLATER This code breaks if the simulation folder already exists. star-CCM+
  * version used to determine version used by customer to create the file needs
@@ -77,6 +81,7 @@ public class Simulation {
     LocalTime _startSimulationTime = null;
 
     PrintStream _printStreamToLogFile = null;
+    
 
     /**
      * @param _simulationNumber
@@ -105,22 +110,20 @@ public class Simulation {
     public void runSimulationWorkflow() throws Exception {
         // System.out.println("1+1=" + 1 + 1);
         _startTime = LocalTime.now();
-        System.out.println("_simulation without final quote= " + _simulation);
-        // for some reason, _simulation is missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
-        //_simulation = _simulation.concat("\""); 
-        //_simulation = _simulation.concat("\u0022"); //doesn't help, maybe it's the "." in .sim that's causing the issue?
-        _simulation = _simulation.replaceAll("\\s+", "");
-        System.out.println("_simulation with final quote= " + _simulation);
 
+        // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
+        //_simulation = _simulation.concat("\""); 
+        _simulation = _simulation.replaceAll("\\s+", "");
         CreateSimulationRunFolder();
-        redirectOutToLog();
+        redirectOutANDErrToLog();
+        File _logFile = new File(getSimulationLogPath());
         CreateLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
         checkFiles(); //Not working
         CopyCustomerSyncFolderIntoSimulationRunFolder();
         FindStarCCMPlusVersion();
         UseStarCCMPlusDefaultVersion(); //Not tested
-        //RunSimulationAndUpdateStatus(); //doesn't close,  FIX
+        RunSimulationAndUpdateStatus(); //doesn't close,  FIX
         //CopyResultsBackToSynchronised folder();
         //meshcount(); // starts before sims finishes? FIX
         // check that the running simulation is “alive” in all processes.
@@ -143,11 +146,13 @@ public class Simulation {
         }
     }
 
-    private void redirectOutToLog() throws FileNotFoundException {
+    private void redirectOutANDErrToLog() throws FileNotFoundException {
+
         _printStreamToLogFile = new PrintStream(getSimulationLogPath());
         System.setOut(_printStreamToLogFile);
-        //System.setErr(_printStreamToLogFile);
+        System.setErr(_printStreamToLogFile);
     }
+
     private void CreateLogHeader() throws IOException, InterruptedException {
 
         _printStreamToLogFile.println("HEADER START----------------------------------------------------------------------------------------------------------------");
@@ -204,17 +209,22 @@ public class Simulation {
                 TRAMPOCLUSTERUTILFOLDERPATH + "//ccmPlusVersion.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
                 _simulation);
-        File LogFile = new File(getSimulationLogPath());
-        //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
-        //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
+
         File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
 
-        pb.redirectOutput(LogFile);
-        pb.redirectError(LogFile);
-
+        //pb.redirectOutputStream(_printStreamToLogFile);
+//        redirectOutput(ProcessBuilder.Redirect );
+//        pb.redirectError(_logFile);
+        pb.inheritIO();
+//        pb.redirectOutput(Redirect.INHERIT);
+//        pb.redirectError(Redirect.INHERIT);
+        //pb.redirectError(Redirect.appendTo(_logFile));
         pb.directory(pbWorkingDirectory);
+        
         System.out.println("" + pb.directory());
         Process p = pb.start();
+        //p.getErrorStream(_printStreamToLogFile);
+
         p.waitFor();
 
         String StarCcmPlusVersion = new String(
@@ -253,18 +263,12 @@ public class Simulation {
 
     private void RunSimulationAndUpdateStatus() throws Exception {
         ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-macro",
+                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch", "-macro", //"-batch-report", 
                 TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
-                _simulation);
+                _simulation); 
 
-        File LogFile = new File(getSimulationLogPath());
-        //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
-        //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
         File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
-
-        pb.redirectOutput(LogFile);
-        pb.redirectError(LogFile);
         pb.directory(pbWorkingDirectory);
         try {
             new WebAppGate().updateSimulationStatus(this, SimulationStatuses.RUNNING);
@@ -291,13 +295,9 @@ public class Simulation {
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
                 _simulation);
 
-        File LogFile = new File(getSimulationLogPath());
         //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
         //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
         File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
-
-        pb.redirectOutput(LogFile);
-        pb.redirectError(LogFile);
         pb.directory(pbWorkingDirectory);
         Process p = pb.start();
         if (p.isAlive() == true) {
