@@ -31,23 +31,26 @@ public class Run {
     String _localHostNP = "localhost:" + _numberComputeCores;
     String _PODkey = "5vq0W6k4A3CThu7rcwFeS23KtqY";
     String _StarCcmPlusVersion = "11.04.012";
-    Process _simulationProcess = null;
+    
 
     public void run() throws IOException, InterruptedException {
         System.out.println("started run"); //"-batch", "-batch-report", 
-        ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", 
-                "-macro", 
-                TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
-                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
-                _simulation); 
+//        ProcessBuilder pb = new ProcessBuilder(
+//                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", 
+//                "-macro", 
+//                TRAMPOCLUSTERUTILFOLDERPATH + "//run.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
+//                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
+//                _simulation); 
+
+// "-batch-report",
+        ProcessBuilder pb = new ProcessBuilder("C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-batch", "-batch-report", "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling//run.java", "-on", "localhost:7", "-np", "7", "-power", "-licpath", "1999@flex.cd-adapco.com", "-podkey", "5vq0W6k4A3CThu7rcwFeS23KtqY", "Cube.sim"); 
         File pbWorkingDirectory = Paths.get("C:\\test\\clusterSetUp\\Run Partition\\customer_5543813196\\simulation_149").toFile();
 
         pb.directory(pbWorkingDirectory);
-        _simulationProcess = pb.start();
         Process p = pb.start();
-        p.waitFor();
-        System.out.println("funished run");
+        p. waitFor();
+        p.destroyForcibly();
+        System.out.println("finished run");
 
     }
 }
