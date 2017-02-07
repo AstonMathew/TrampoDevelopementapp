@@ -27,13 +27,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import constants.SimulationStatuses;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
+import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 
 /**
  *
@@ -61,6 +65,7 @@ public class Simulation {
     static String STORAGEFOLDERROOT = "C:\\test\\clusterSetUp\\Storage Partition"; // for
     // testing
     // only
+    static Path OUTPUTWINDOWLOGTOFILELOCATION = Paths.get("C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ 11.04.012\\var\\log\\messages.log");
 
     Integer _simulationNumber = 1; // = 65;
     String _customerNumber = "5543813196";
@@ -81,7 +86,6 @@ public class Simulation {
     LocalTime _startSimulationTime = null;
 
     PrintStream _printStreamToLogFile = null;
-    
 
     /**
      * @param _simulationNumber
@@ -119,11 +123,13 @@ public class Simulation {
         File _logFile = new File(getSimulationLogPath());
         CreateLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
-        checkFiles(); //Not working
+        checkFiles(); //Not working // need to check only allowed files are copied over and block any illegal files.
         CopyCustomerSyncFolderIntoSimulationRunFolder();
-        FindStarCCMPlusVersion();
+        getStarCCMPlusVersion();
         UseStarCCMPlusDefaultVersion(); //Not tested
-        RunSimulationAndUpdateStatus(); //doesn't close,  FIX
+        RunSimulationAndUpdateStatus(); //only closes with System.exit(0) at the end of SmartSimulationHandling.java
+        copyLogOutputWindowToFile(); //not sending data after sovers initialised
+        //move all logs into log folder
         //CopyResultsBackToSynchronised folder();
         //meshcount(); // starts before sims finishes? FIX
         // check that the running simulation is “alive” in all processes.
@@ -149,8 +155,8 @@ public class Simulation {
     private void redirectOutANDErrToLog() throws FileNotFoundException {
 
         _printStreamToLogFile = new PrintStream(getSimulationLogPath());
-        System.setOut(_printStreamToLogFile);
-        System.setErr(_printStreamToLogFile);
+//        System.setOut(_printStreamToLogFile);
+//        System.setErr(_printStreamToLogFile);
     }
 
     private void CreateLogHeader() throws IOException, InterruptedException {
@@ -193,44 +199,44 @@ public class Simulation {
         Files.walkFileTree(getSimulationSendingToTrampoFolderPath(), visitor);
     }
 
-    private void FindStarCCMPlusVersion() throws IOException, InterruptedException {
-        // find sim file
-        File[] files = getSimulationRunningFolderPath().toFile().listFiles(new SimulationFileFilter());
-        for (File f : files) {
-            String simulationFilename = f.getName();
-            System.out.println("The simulation file name is: " + simulationFilename);
+    private void getStarCCMPlusVersion() throws IOException, InterruptedException {
+        //create the .bat
+        FileWriter writer = new FileWriter(getSimulationRunningFolderPath() + "\\version.bat");
+        writer.write("\"C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe\" -info Cube.sim > versionCommand.txt");
+        writer.close();
+
+        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "version.bat");
+        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile();
+        pb.directory(pbWorkingDirectory);
+        Process p = pb.start();
+        p.waitFor();
+        Thread.sleep(1000);
+
+        System.out.println("version.txt created");
+        String content = new String(Files.readAllBytes(Paths.get(getSimulationRunningFolderPath() + "\\versionCommand.txt")));
+        System.out.println("versionCommand.txt=" + content);
+
+        int index = content.lastIndexOf("STAR-CCM+");
+        System.out.println("index=" + index);
+        int startindex = index + 9;
+        System.out.println("versionsectionstartindex=" + startindex);
+        int stopindex = startindex + 9;
+        System.out.println("stopindex=" + stopindex);
+        String ccmplusversion = content.substring(startindex, stopindex);
+        System.out.println("CCM+ version = " + ccmplusversion);
+        String output2_path = getSimulationRunningFolderPath() + File.separator + "ccmplusversion.txt";
+        System.out.println("output_path = " + output2_path);
+        try {
+            PrintWriter out2 = new PrintWriter(output2_path);
+            out2.println(ccmplusversion);
+            out2.close();
+            Files.delete(Paths.get(getSimulationRunningFolderPath() + "\\version.bat"));
+            Files.delete(Paths.get(getSimulationRunningFolderPath() + "\\versionCommand.txt"));
+
+        } catch (Exception ex) {
+            System.out.println("Failed to Write Output File");
         }
 
-        System.out.println(TRAMPOCLUSTERUTILFOLDERPATH + "\\ccmPlusVersion.java");
-        System.out.println("_simulation: " + _simulation);
-
-        ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-macro",
-                TRAMPOCLUSTERUTILFOLDERPATH + "//ccmPlusVersion.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
-                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
-                _simulation);
-
-        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
-
-        //pb.redirectOutputStream(_printStreamToLogFile);
-//        redirectOutput(ProcessBuilder.Redirect );
-//        pb.redirectError(_logFile);
-        pb.inheritIO();
-//        pb.redirectOutput(Redirect.INHERIT);
-//        pb.redirectError(Redirect.INHERIT);
-        //pb.redirectError(Redirect.appendTo(_logFile));
-        pb.directory(pbWorkingDirectory);
-        
-        System.out.println("" + pb.directory());
-        Process p = pb.start();
-        //p.getErrorStream(_printStreamToLogFile);
-
-        p.waitFor();
-
-        String StarCcmPlusVersion = new String(
-                readAllBytes(get(getSimulationRunningFolderPath() + "//ccmplusversion.txt")));
-        StarCcmPlusVersion = StarCcmPlusVersion.replace(" ", "");
-        System.out.println("StarCcmPlusVersion=" + StarCcmPlusVersion);
     }
 
     private void UseStarCCMPlusDefaultVersion() throws IOException, InterruptedException {
@@ -263,10 +269,10 @@ public class Simulation {
 
     private void RunSimulationAndUpdateStatus() throws Exception {
         ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch", //"-batch-report", 
-                TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
+                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch",
+                TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
-                _simulation); 
+                _simulation);
 
         File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
         pb.directory(pbWorkingDirectory);
@@ -274,16 +280,45 @@ public class Simulation {
             new WebAppGate().updateSimulationStatus(this, SimulationStatuses.RUNNING);
             _startSimulationTime = LocalTime.now();
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
-            _simulationProcess = pb.start(); //
-            _printStreamToLogFile.println("End simulation time: " + LocalTime.now());
+            _simulationProcess = pb.start();
+            _simulationProcess.waitFor();
+
+            // All below 
+            _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
             _printStreamToLogFile.println("Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
             new WebAppGate().updateSimulationActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
             new WebAppGate().updateSimulationStatus(this, SimulationStatuses.COMPLETED);
             _printStreamToLogFile.println("Simulation complete...");
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+//    private void copyLogOutputWindowToFile() { //below not working replaced by .bat method
+//        
+//        try { 
+//            Files.copy(OUTPUTWINDOWLOGTOFILELOCATION, Paths.get(getSimulationRunningFolderPath().toString(),"outputWindowToFileSimulation_" + _simulationNumber + "_Log.txt"), COPY_ATTRIBUTES);
+//            System.out.println("OUTPUTWINDOWLOGTOFILELOCATION COPIED");
+//        } catch (IOException ex) {
+//            System.out.println("OUTPUTWINDOWLOGTOFILELOCATION NOT COPIED");
+//        }
+//    }
+
+    private void copyLogOutputWindowToFile() throws IOException, InterruptedException { 
+        FileWriter writer = new FileWriter(getSimulationRunningFolderPath() + "\\copyLog.bat");
+
+        writer.write("copy /y \"C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ 11.04.012\\var\\log\\messages.log\" OutputFileToLog.log");
+        writer.close();
+
+        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "copyLog.bat");
+        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile();
+        pb.directory(pbWorkingDirectory);
+        Process p = pb.start();
+        p.waitFor();
+        //Thread.sleep(1000);
+
+        Files.delete(Paths.get(getSimulationRunningFolderPath() + "\\copyLog.bat"));
     }
 
     private void meshcount() throws IOException, InterruptedException {
