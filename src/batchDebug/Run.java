@@ -5,9 +5,12 @@
  */
 package batchDebug;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,31 +40,17 @@ public class Run {
 //    String _localHostNP = "localhost:" + _numberComputeCores;
 //    String _PODkey = "5vq0W6k4A3CThu7rcwFeS23KtqY";
 //    String _StarCcmPlusVersion = "11.04.012";
-    public void run() throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder("C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-batch", "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling\\run.java", "-batch-report", "-on", "localhost:7", "-np", "7", "-power", "-licpath", "1999@flex.cd-adapco.com", "-podkey", "5vq0W6k4A3CThu7rcwFeS23KtqY", "Cube.sim");
-        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile();
-        pb.directory(pbWorkingDirectory);
-        Process p = pb.start();
-        Path SolvedSimulationPath = Paths.get(getSimulationRunningFolderPath() + "\\trampoSolved_Cube.sim");
-        System.out.println("SolvedSimulationPath = " + SolvedSimulationPath.toString());
-        File SolvedSimulationfile = SolvedSimulationPath.toFile();
-        
-        while (p.isAlive()) {
-            Boolean simulationIsSolved = SolvedSimulationfile.exists();
-            if (simulationIsSolved) {
-                System.out.println("simulation has ended");
-                Thread.sleep(4000);
-                p.destroy();
-                //p.destroyForcibly(); results in rogue processes andno -batch-report
-                System.out.println("p has been destroyed");
-            } else {
-                p.waitFor(1, TimeUnit.SECONDS);
-                System.out.println("waiting one second");
-            }
-        }
+//        writer.write("\"C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe\" -batch \"C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling\\SmartSimulationHandling.java\" -batch-report -on localhost:7 -np 7 -power -licpath 1999@flex.cd-adapco.com -podkey 5vq0W6k4A3CThu7rcwFeS23KtqY Cube.sim");
+    public void run() throws IOException {
+        Path logsPath = getSimulationRunningFolderPath().resolve("Logs");
+        Files.createDirectory(logsPath);
+        Path backUpPath = getSimulationRunningFolderPath().resolve("Backup");
+        Files.createDirectory(backUpPath);
+        Path toSyncPath = getSimulationRunningFolderPath().resolve("ToSync");
+        Files.createDirectory(toSyncPath);
     }
 
-private Path getSimulationRunningFolderPath() {
+    private Path getSimulationRunningFolderPath() {
         return Paths.get("C:\\test\\clusterSetUp\\Run Partition\\customer_5543813196\\test");// +File.separator+"temp"+File.separator+"nestedTemp");
     }
 }

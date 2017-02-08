@@ -30,6 +30,7 @@ import constants.SimulationStatuses;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +39,18 @@ import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
 
 /**
  *
@@ -46,14 +59,15 @@ import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
  * TODOGUINOW output list of files no * match= * Status= "CANCELLED:" , put Sims
  * in canceled folder simulationLog.txt gets overwritten // check why and
  * simulationStatus.txt does not list the various simulation status one after
- * another with date/time //meshcount() Simulation name needs to be udated to
- * latest sim file in folder tree. test if Simulation File Name "Cube" without
- * .sim works; If not might consider adding the .sim in the website or database.
+ * another with date/time //runDataExtraction() Simulation name needs to be
+ * udated to latest sim file in folder tree. test if Simulation File Name "Cube"
+ * without .sim works; If not might consider adding the .sim in the website or
+ * database.
  *
  * TODOLATER This code breaks if the simulation folder already exists. star-CCM+
  * version used to determine version used by customer to create the file needs
  * to be adjusted to default version. make CCM+ version a variable in all the pb
- * and use CCM+ default version to run versioncheck and meshcount
+ * and use CCM+ default version to run versioncheck and runDataExtraction
  */
 public class Simulation {
 
@@ -126,12 +140,12 @@ public class Simulation {
         checkFiles(); //Not working // need to check only allowed files are copied over and block any illegal files.
         CopyCustomerSyncFolderIntoSimulationRunFolder();
         getStarCCMPlusVersion();
-        UseStarCCMPlusDefaultVersion(); //Not tested
-        RunSimulationAndUpdateStatus(); //only closes with System.exit(0) at the end of SmartSimulationHandling.java
-        copyLogOutputWindowToFile(); //not sending data after sovers initialised
-        //move all logs into log folder
-        //CopyResultsBackToSynchronised folder();
-        //meshcount(); // starts before sims finishes? FIX
+        UseStarCCMPlusDefaultVersion(); //Not tested, need to read Star-CCM+ version himself. oldest install must be the default version
+        RunSimulation();
+        copyLogOutputWindowToFile(); //.bat method working, get java copy to work
+        Create_Log_backUp_toSync_folders();
+        Move_Log_BU_Tosync_foldersToStoragePartition();
+        //runDataExtraction; // 
         // check that the running simulation is “alive” in all processes.
         System.out.println("End");
     }
@@ -267,7 +281,7 @@ public class Simulation {
         System.out.println("StarCcmPlusVersion=" + _StarCcmPlusVersion);
     }
 
-    private void RunSimulationAndUpdateStatus() throws Exception {
+    private void RunSimulation() throws Exception {
         ProcessBuilder pb = new ProcessBuilder(
                 "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch",
                 TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
@@ -281,6 +295,12 @@ public class Simulation {
             _startSimulationTime = LocalTime.now();
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
             _simulationProcess = pb.start();
+            System.out.println("p started");
+            //Redirection of stream exteremely important; http://baxincc.cc/questions/216451/windows-process-execed-from-java-not-terminating
+            // if not redirected, Star-CCM+ processes hang and -batch*-report doesn't print
+            InputStream stdout = _simulationProcess.getInputStream();
+            while (stdout.read() >= 0) {;
+            }
             _simulationProcess.waitFor();
 
             // All below 
@@ -305,7 +325,7 @@ public class Simulation {
 //        }
 //    }
 
-    private void copyLogOutputWindowToFile() throws IOException, InterruptedException { 
+    private void copyLogOutputWindowToFile() throws IOException, InterruptedException {
         FileWriter writer = new FileWriter(getSimulationRunningFolderPath() + "\\copyLog.bat");
 
         writer.write("copy /y \"C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ 11.04.012\\var\\log\\messages.log\" OutputFileToLog.log");
@@ -321,26 +341,25 @@ public class Simulation {
         Files.delete(Paths.get(getSimulationRunningFolderPath() + "\\copyLog.bat"));
     }
 
-    private void meshcount() throws IOException, InterruptedException {
+    private void runDataExtraction() throws IOException, InterruptedException {
 
-        //Simulation name needs to be udated to latest sim file in folder.
-        ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-macro",
-                TRAMPOCLUSTERUTILFOLDERPATH + "//meshCount.java", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
-                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
-                _simulation);
+        //extract mesh count from Cells
+        //modules
+        //iterations, time step inner iterations etc... 
+        //Send all to database to be used by time estimator tool 
+    }
 
-        //File outputFile = new File(getSimulationRunningFolderPath() + "\\Z_outputFile.txt"); Do we need these for each pb?
-        //File errorFile = new File(getSimulationRunningFolderPath() + "\\Z_errorFile.txt");
-        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
-        pb.directory(pbWorkingDirectory);
-        Process p = pb.start();
-        if (p.isAlive() == true) {
-            p.waitFor(1, TimeUnit.MINUTES);
-        } else {
-            p.destroyForcibly();
-        }
+    private void Create_Log_backUp_toSync_folders() throws IOException {
+        Path logsPath = getSimulationRunningFolderPath().resolve("Logs");
+        Files.createDirectory(logsPath);
+        Path backUpPath = getSimulationRunningFolderPath().resolve("Backup");
+        Files.createDirectory(backUpPath);
+        Path toSyncPath = getSimulationRunningFolderPath().resolve("ToSync");
+        Files.createDirectory(toSyncPath);
+            
+    }
 
+    private void Move_Log_BU_Tosync_foldersToStoragePartition() {
     }
 
     public long currentRunTimeInSeconds() {
