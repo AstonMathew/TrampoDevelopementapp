@@ -27,28 +27,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import constants.SimulationStatuses;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 
@@ -56,8 +40,8 @@ import static java.nio.file.Paths.get;
  *
  * @author Administrator
  *
- * TODOGUINOW output list of files no * match= * Status= "CANCELLED:" , put Sims
- * in canceled folder simulationLog.txt gets overwritten // check why and
+ * TODOGUINOW version list of files no * match= * Status= "CANCELLED:" , put
+ * Sims in canceled folder simulationLog.txt gets overwritten // check why and
  * simulationStatus.txt does not list the various simulation status one after
  * another with date/time //runDataExtraction() Simulation name needs to be
  * udated to latest sim file in folder tree. test if Simulation File Name "Cube"
@@ -71,35 +55,32 @@ import static java.nio.file.Paths.get;
  */
 public class Simulation {
 
-    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
-            "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
-    static String RUNFOLDERROOT = "C:\\test\\clusterSetUp\\Run Partition"; // for
-    // testing
-    // only
-    static String STORAGEFOLDERROOT = "C:\\test\\clusterSetUp\\Storage Partition"; // for
-    // testing
-    // only
-    static Path OUTPUTWINDOWLOGTOFILELOCATION = Paths.get("C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ 11.04.012\\var\\log\\messages.log");
-
-    Integer _simulationNumber = 1; // = 65;
-    String _customerNumber = "5543813196";
-    String _submissionDate = "2016/12/01"; // UTC date
-    String _submissionTime = "17:05";// UTC Time
-    Integer _maxSeconds = 30;
+    // Simulation parameters from the website
+    Integer _simulationNumber = null; // = 65;
+    String _customerNumber = null;
+    String _submissionDate = null; // UTC date
+    String _submissionTime = null;// UTC Time
+    Integer _maxSeconds = null;
     String _simulation = null;
-    String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
-    String _localHostNP = "localhost:" + _numberComputeCores;
+    Integer _fileCount = null;
 
-    String _PODkey = "5vq0W6k4A3CThu7rcwFeS23KtqY";
-    Integer _fileCount;
-
-    String _simulationFilename;
-    String _StarCcmPlusVersion = "11.04.012";
+    //Instance variables
     Process _simulationProcess = null;
     LocalTime _startTime = null;
     LocalTime _startSimulationTime = null;
-
     PrintStream _printStreamToLogFile = null;
+    String _StarCcmPlusVersion = null;
+
+    // compute node and license parameter need to be changed for production
+    static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
+    static String _localHostNP = "localhost:" + _numberComputeCores;
+    static String PODKEY = "5vq0W6k4A3CThu7rcwFeS23KtqY"; //need to read the key from a text file that can be changed in the  middle of running
+    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
+            "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
+    static String RUNFOLDERROOT = "C:\\test\\clusterSetUp\\Run Partition"; // for testing only
+    static String STORAGEFOLDERROOT = "C:\\test\\clusterSetUp\\Storage Partition"; // for testing only
+    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
+    
 
     /**
      * @param _simulationNumber
@@ -131,18 +112,19 @@ public class Simulation {
 
         // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
         //_simulation = _simulation.concat("\""); 
-        _simulation = _simulation.replaceAll("\\s+", "");
-        CreateSimulationRunFolder();
-        redirectOutANDErrToLog();
-        File _logFile = new File(getSimulationLogPath());
+        _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
+        CreateSimulationFolders();
+        redirectOutANDErrToLog(); //remove the commeting out in production
         CreateLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
-        checkFiles(); //Not working // need to check only allowed files are copied over and block any illegal files.
+        checkSim_name_AndFiles_count_extension(); //Not working // need to check only allowed files are copied over and block any illegal files. 
+        // needs to move to next sims if files haven't downloaded yet, probably needs to go outside the queue?
+        //can we come back to this simulation later using current queue?
         CopyCustomerSyncFolderIntoSimulationRunFolder();
         getStarCCMPlusVersion();
-        UseStarCCMPlusDefaultVersion(); //Not tested, need to read Star-CCM+ version himself. oldest install must be the default version
+        UseStarCCMPlusDefaultVersion(); //Not tested, need to read Star-CCM+ installed on machine itself. oldest install must be the default version
         RunSimulation();
-        copyLogOutputWindowToFile(); //.bat method working, get java copy to work
+        copyLogOutputWindowToFile();
         Create_Log_backUp_toSync_folders();
         Move_Log_BU_Tosync_foldersToStoragePartition();
         //runDataExtraction; // 
@@ -150,7 +132,7 @@ public class Simulation {
         System.out.println("End");
     }
 
-    private void CreateSimulationRunFolder() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
+    private void CreateSimulationFolders() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
 //Files.createDirectory(getSimulationRunningFolderPath());
 // Files.createTempFile(simulationSendingToTrampoFolderPath,
         // "tmp",".txt");
@@ -185,9 +167,10 @@ public class Simulation {
         _printStreamToLogFile.println("HEADER END-------------------------------------------------------------------------------------------------------------------");
     }
 
-    public void checkFiles() throws Exception { // test the sim exits is file count and file name is wrong
-        // Check file count
+    public void checkSim_name_AndFiles_count_extension() throws Exception { // test the sim exits is file count and file name is wrong
+//check file extensions.
 
+// Check files count
         if (FileFunctions.countFiles(getSimulationSendingToTrampoFolderPath()) != _fileCount) {
             System.out.println("!!! Actual file count does not match nominated file count !!!");
             new WebAppGate().updateSimulationStatus(this, SimulationStatuses.CANCELLED_NOFILEUPLOADED);
@@ -214,21 +197,17 @@ public class Simulation {
     }
 
     private void getStarCCMPlusVersion() throws IOException, InterruptedException {
-        //create the .bat
-        FileWriter writer = new FileWriter(getSimulationRunningFolderPath() + "\\version.bat");
-        writer.write("\"C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe\" -info Cube.sim > versionCommand.txt");
-        writer.close();
-
-        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "version.bat");
-        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile();
+        Path versionLogPath = getSimulationRunningFolderPath().resolve("version.log");
+        Files.createFile(versionLogPath);
+        ProcessBuilder pb = new ProcessBuilder("C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-info", "Cube.sim");
+        pb.redirectOutput(versionLogPath.toFile());
+        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
         pb.directory(pbWorkingDirectory);
         Process p = pb.start();
         p.waitFor();
-        Thread.sleep(1000);
-
-        System.out.println("version.txt created");
-        String content = new String(Files.readAllBytes(Paths.get(getSimulationRunningFolderPath() + "\\versionCommand.txt")));
-        System.out.println("versionCommand.txt=" + content);
+        System.out.println("version.log created");
+        String content = new String(Files.readAllBytes(versionLogPath));
+        System.out.println("version.log=" + content);
 
         int index = content.lastIndexOf("STAR-CCM+");
         System.out.println("index=" + index);
@@ -238,17 +217,10 @@ public class Simulation {
         System.out.println("stopindex=" + stopindex);
         String ccmplusversion = content.substring(startindex, stopindex);
         System.out.println("CCM+ version = " + ccmplusversion);
-        String output2_path = getSimulationRunningFolderPath() + File.separator + "ccmplusversion.txt";
-        System.out.println("output_path = " + output2_path);
-        try {
-            PrintWriter out2 = new PrintWriter(output2_path);
-            out2.println(ccmplusversion);
-            out2.close();
-            Files.delete(Paths.get(getSimulationRunningFolderPath() + "\\version.bat"));
-            Files.delete(Paths.get(getSimulationRunningFolderPath() + "\\versionCommand.txt"));
+        _StarCcmPlusVersion = ccmplusversion.replace(" ", "");
 
-        } catch (Exception ex) {
-            System.out.println("Failed to Write Output File");
+        try (PrintWriter out2 = new PrintWriter(versionLogPath.toString())) {
+            out2.println(ccmplusversion);
         }
 
     }
@@ -285,7 +257,7 @@ public class Simulation {
         ProcessBuilder pb = new ProcessBuilder(
                 "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch",
                 TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
-                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", _PODkey,
+                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", PODKEY,
                 _simulation);
 
         File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
@@ -315,30 +287,10 @@ public class Simulation {
             e.printStackTrace();
         }
     }
-//    private void copyLogOutputWindowToFile() { //below not working replaced by .bat method
-//        
-//        try { 
-//            Files.copy(OUTPUTWINDOWLOGTOFILELOCATION, Paths.get(getSimulationRunningFolderPath().toString(),"outputWindowToFileSimulation_" + _simulationNumber + "_Log.txt"), COPY_ATTRIBUTES);
-//            System.out.println("OUTPUTWINDOWLOGTOFILELOCATION COPIED");
-//        } catch (IOException ex) {
-//            System.out.println("OUTPUTWINDOWLOGTOFILELOCATION NOT COPIED");
-//        }
-//    }
 
     private void copyLogOutputWindowToFile() throws IOException, InterruptedException {
-        FileWriter writer = new FileWriter(getSimulationRunningFolderPath() + "\\copyLog.bat");
-
-        writer.write("copy /y \"C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ 11.04.012\\var\\log\\messages.log\" OutputFileToLog.log");
-        writer.close();
-
-        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "copyLog.bat");
-        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile();
-        pb.directory(pbWorkingDirectory);
-        Process p = pb.start();
-        p.waitFor();
-        //Thread.sleep(1000);
-
-        Files.delete(Paths.get(getSimulationRunningFolderPath() + "\\copyLog.bat"));
+        Files.copy(getOutputWindowLogToFile(), getSimulationRunningFolderPath().resolve("outputWindowToFileSimulation_" + _simulationNumber + ".log"), COPY_ATTRIBUTES);
+        System.out.println("OUTPUTWINDOWLOGTOFILELOCATION COPIED");
     }
 
     private void runDataExtraction() throws IOException, InterruptedException {
@@ -347,6 +299,86 @@ public class Simulation {
         //modules
         //iterations, time step inner iterations etc... 
         //Send all to database to be used by time estimator tool 
+//        Started version file C:\Users\Administrator\AppData\Local\CD-adapco\STAR-CCM+ 11.04.012\var\log\output1486524196689.log.
+//Starting local server: starccm+ -server -power -collab -np 7 -on localhost:7 -cpubind -podkey 5vq0W6k4A3CThu7rcwFeS23KtqY -licpath 1999@flex.cd-adapco.com -rsh ssh "Rotate Blind GJ1 Mini.sim"
+//mpirun: Drive is not a network mapped - using local drive.
+//WARNING: No cached password or password provided.
+//         use '-pass' or '-cache' to provide password
+//MPI Distribution : Platform Computing MPI-9.1.4.0
+//Host 0 -- WIN-DF270PLD9CO -- Ranks 0-6
+//Process rank 0 WIN-DF270PLD9CO 6152
+//Total number of processes : 7
+//
+//STAR-CCM+ 11.04.012 (win64/intel15.0)
+//License build date: 10 February 2015
+//This version of the code requires license version 2016.06 or greater.
+//Checking license file: 1999@flex.cd-adapco.com
+//Checking license file: 1999@81.134.157.100
+//1 copy of ccmppower checked out from 1999@flex.cd-adapco.com
+//Feature ccmppower expires in 145 days
+//Wed Feb 08 14:23:29 2017
+//
+//Server::start -host WIN-DF270PLD9CO:47827
+//Loading object database: Rotate Blind GJ1 Mini.sim
+//Loading module: StarMeshing
+//Loading module: MeshingSurfaceRepair
+//Loading module: StarResurfacer
+//Loading module: StarTrimmer
+//Loading module: SegregatedFlowModel
+//Loading module: SegregatedEnergyModel
+//Loading module: KeTurbModel
+//Loading module: RadiationCommon
+//Loading module: RadiationS2sModel
+//Loading module: ViewFactorsModel
+//Loading module: VofModel
+//Loading module: SynTurbModel
+//Loading module: KwTurbModel
+//Loading module: SaTurbModel
+//Loading module: CaeImport
+//Simulation database saved by:
+//  STAR-CCM+ 7.04.004 (win64/intel11.1) Fri May 11 13:34:38 UTC 2012 Serial 
+//Loading into:
+//  STAR-CCM+ 11.04.012 (win64/intel15.0) Tue Jul 12 21:40:30 UTC 2016 Np=7
+//Started Parasolid modeler version 28.01.177
+//Object database load completed.
+//Initializing meshing pipeline...
+//  All Geometry up to date.
+//No parts-based mesh operations to execute
+//Executing region-based surface meshers...
+//   No region-based surface meshers selected.
+//All region-based volume meshers up to date, skipping...
+//No parts-based volume mesh operations to execute
+//Volume Meshing Pipeline Completed: CPU Time: 0.00, Wall Time: 0.00, Memory: 176.88 MB
+//Loading/configuring connectivity (old|new partitions: 1|7)
+//  2 AIR OUTER (index 4): 7040 cells, 17362 faces, 10920 verts.
+//  0 INSULATOR (index 5): 7810 cells, 19273 faces, 12096 verts.
+//  0 INSULATOR 1 (index 17): 7810 cells, 19273 faces, 12096 verts.
+//  3 11 RUBBER STOPPER [0] (index 24): 635 cells, 1202 faces, 1412 verts.
+//  3 8 PC32 [0] (index 26): 3300 cells, 6485 faces, 6832 verts.
+//  3 4 PC25 [0] (index 28): 3080 cells, 6049 faces, 6384 verts.
+//  3 7 ALUMINIUM 2 [0] (index 29): 3300 cells, 6485 faces, 6832 verts.
+//  3 5 ALUMINIUM 1 [0] (index 30): 3080 cells, 6049 faces, 6384 verts.
+//  3 9 ALUMINIUM 3 [0] (index 31): 3300 cells, 6485 faces, 6832 verts.
+//  3 1 VIP [0] (index 32): 12760 cells, 34638 faces, 16520 verts.
+//  3 2 TIMBER 1 [0] (index 33): 220 cells, 381 faces, 560 verts.
+//  5 GLAZING INNER 0 (index 3): 44 cells, 73 faces, 120 verts.
+//  1 GLAZING OUTER 0 (index 9): 44 cells, 73 faces, 120 verts.
+//  1 GLAZING OUTER 1 (index 11): 44 cells, 73 faces, 120 verts.
+//  5 GLAZING INNER 1 (index 18): 44 cells, 73 faces, 120 verts.
+//  4 AIR INNER (index 0): 2805 cells, 7264 faces, 4032 verts.
+//  3 2 TIMBER 2 [0] (index 27): 275 cells, 490 faces, 672 verts.
+//  3 0 AIR VIP [0] (index 10): 58780 cells, 171857 faces, 70973 verts.
+//  3 10 AIR PCM [0] (index 20): 48800 cells, 142413 faces, 61039 verts.
+//  AIR INDOOR (index 23): 51072 cells, 147832 faces, 56595 verts.
+//  ALUMINIUM FRAME Y- (index 21): 1036 cells, 2007 faces, 2204 verts.
+//  ALUMINIUM FRAME Y+ (index 22): 1036 cells, 2007 faces, 2204 verts.
+//  ENDCAP Y- [0] (index 25): 77 cells, 124 faces, 220 verts.
+//  3 3 ALUMINIUM 0 [0] (index 34): 2112 cells, 4112 faces, 4450 verts.
+//  ENDCAP Y+ [0] (index 35): 79 cells, 127 faces, 226 verts.
+//  3 6 PC29 [0] (index 36): 2112 cells, 4112 faces, 4450 verts.
+//Configuring finished
+//Reading material property database "C:\Program Files\CD-adapco\STAR-CCM+11.04.012\star\props.mdb"...
+//	Cells: 220695	Faces: 606319	Vertices: 294413
     }
 
     private void Create_Log_backUp_toSync_folders() throws IOException {
@@ -356,7 +388,7 @@ public class Simulation {
         Files.createDirectory(backUpPath);
         Path toSyncPath = getSimulationRunningFolderPath().resolve("ToSync");
         Files.createDirectory(toSyncPath);
-            
+
     }
 
     private void Move_Log_BU_Tosync_foldersToStoragePartition() {
@@ -398,44 +430,24 @@ public class Simulation {
         return "customer_" + _customerNumber.trim();
     }
 
-    private Path getSimulationSendingToTrampoFolderPath() {
-        return Paths.get(STORAGEFOLDERROOT,
-                getCustomerFolderRelativePath(),
-                "Synchronised folder", "1_SendingToTrampo");// +File.separator+"temp"+File.separator+"nestedTemp");
-        // //the
-        // synchronised
-        // copy
-        // of
-        // the
-        // folder
-        // in
-        // which
-        // the
-        // customer
-        // pastes
-        // his
-        // files
-        // to
-        // send
-        // to
-        // Trampo
+    private Path getSimulationSendingToTrampoFolderPath() { // the synchronised copy of the folder in which the customer pastes his files to send to Trampo
+        return Paths.get(STORAGEFOLDERROOT, getCustomerFolderRelativePath(), "Synchronised folder", "1_SendingToTrampo");
     }
 
-    private Path getSimulationRunningFolderPath() {
-        return Paths.get(RUNFOLDERROOT,
-                getCustomerFolderRelativePath(),
-                "simulation_" + _simulationNumber);// the
-        // simulation
-        // running
-        // folder
+    private Path getSimulationRunningFolderPath() {// the simulation running folder
+        return Paths.get(RUNFOLDERROOT, getCustomerFolderRelativePath(), "simulation_" + _simulationNumber);
     }
 
     private String getSimulationLogPath() {
-        return getSimulationRunningFolderPath() + "\\simulation_" + _simulationNumber + "_Log.txt";
+        return getSimulationRunningFolderPath() + "\\simulation_" + _simulationNumber + ".log";
     }
 
     private String getSimulationStatusPath() {
         return getSimulationRunningFolderPath() + "\\simulation_" + _simulationNumber + "_Status.txt";
+    }
+
+    private Path getOutputWindowLogToFile() {
+        return Paths.get("C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ " + _StarCcmPlusVersion + "\\var\\log\\messages.log");
     }
 
 }
