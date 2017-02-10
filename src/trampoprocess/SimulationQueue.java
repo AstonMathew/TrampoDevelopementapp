@@ -64,11 +64,13 @@ public class SimulationQueue {
 	Thread _currentSimulationThread = null;
 	SimulationHandler _currentSimulation = null;
 	Queue<Simulation> _simulations = null;
+	LocalTime _timeLastRunTimeUpdate = null;
 
 	public SimulationQueue() {
 		_simulations = new LinkedList<Simulation>();
 		_currentSimulation = null;
 		_currentSimulationThread = null;
+		_timeLastRunTimeUpdate = null;
 	}
 
 	public void addSimulation(Simulation sim) throws Exception {
@@ -83,6 +85,14 @@ public class SimulationQueue {
 																					// running
 			Simulation cSim = _currentSimulation.getSimulation();
 			long rt = cSim.currentRunTimeInSeconds();
+
+			// Update runtime simulation every 60 seconds
+			if (ChronoUnit.SECONDS.between(_timeLastRunTimeUpdate, LocalTime.now()) >= 60) {
+				cSim.updateSimulationActualRuntime();
+				_timeLastRunTimeUpdate = LocalTime.now();
+				cSim.updateMaximumClocktimeInSecondsFromWebApp();
+			}
+
 			if (new WebAppGate().isSimulationCanceled(cSim)) { // Check if the
 																// user has
 																// canceled the
@@ -105,9 +115,11 @@ public class SimulationQueue {
 				cSim.abortNow();
 				_currentSimulationThread.interrupt();
 			}
+
 		} else if (_currentSimulation != null) { // Current simulation no longer
 													// running, but not cleared
 			_currentSimulation = null;
+			_timeLastRunTimeUpdate = null;
 
 		} else if (!_simulations.isEmpty()) { // No simulation running and not
 												// empty queue
@@ -116,11 +128,13 @@ public class SimulationQueue {
 				System.out.println("Start new simulation " + _currentSimulation._sim._simulationNumber);
 				_currentSimulationThread = new Thread(_currentSimulation);
 				_currentSimulationThread.start();
+			        _timeLastRunTimeUpdate = LocalTime.now();
 				_currentSimulationThread.join(1000); // Wait for 1 seconds to
 														// allow for the
 														// simulation to start
 			} else {
 				_currentSimulation = null; // If simulation is cancelled reset it.
+			        _timeLastRunTimeUpdate = null;
 			}
 		}
 	}
