@@ -1,6 +1,8 @@
 package trampoprocess;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
@@ -74,15 +76,22 @@ public class SimulationQueue {
 	}
 
 	public void addSimulation(Simulation sim) throws Exception {
-		System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._simulationNumber + " with file " + sim._simulation);
-		_simulations.add(sim);
-		new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+		try {
+			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._simulationNumber + " with file " + sim._simulation);
+			sim.checkSim_name_AndFiles_count_extension();
+			_simulations.add(sim);
+			new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+		} catch (Exception e) {
+			System.out.println("Error when adding simulation " + sim._simulationNumber + " with error " + e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			System.out.println(sw.toString());
+		}
 	}
 
 	public void trigger() throws Exception {
-		if ((_currentSimulation != null) && (_currentSimulationThread.isAlive())) { // Current
-																					// simulation
-																					// running
+		if ((_currentSimulation != null) && (_currentSimulationThread.isAlive())) { 
+			// Current simulation running
 			Simulation cSim = _currentSimulation.getSimulation();
 			long rt = cSim.currentRunTimeInSeconds();
 
