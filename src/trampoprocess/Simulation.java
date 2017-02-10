@@ -106,6 +106,11 @@ public class Simulation {
         return _maxSeconds;
     }
 
+    public void updateSimulationStatus(String newStatus) throws Exception {
+         new WebAppGate().updateSimulationStatus(this, newStatus);
+         if (_printStreamToLogFile != null) {_printStreamToLogFile.println(LocalTime.now() + ": Simulation status updated to " + newStatus);}
+    }
+    
     public void runSimulationWorkflow() throws Exception {
         // System.out.println("1+1=" + 1 + 1);
         _startTime = LocalTime.now();
@@ -143,7 +148,8 @@ public class Simulation {
             System.err.println(
                     "ERROR: SIMULATIONRUNNINGFOLDER EXISTING !!! with Path: " + getSimulationRunningFolderPath());
             // this needs to make the simulation exist the queue as it indicates a major problem
-            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
+            updateSimulationStatus(SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
+            throw new Exception("ERROR: SIMULATIONRUNNINGFOLDER EXISTING !!! with Path: " + getSimulationRunningFolderPath());
         }
     }
 
@@ -172,7 +178,7 @@ public class Simulation {
 // Check files count
         if (FileFunctions.countFiles(getSimulationSendingToTrampoFolderPath()) != _fileCount) {
             System.out.println("!!! Actual file count does not match nominated file count !!!");
-            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.CANCELLED_NOFILEUPLOADED);
+            updateSimulationStatus(SimulationStatuses.CANCELLED_NOFILEUPLOADED);
             throw new Exception("Simulation " + _simulationNumber + "!!! Actual file count does not match nominated file count !!!");
         } else {
             System.out.println("Actual file count matches nominated file count !!!");
@@ -262,7 +268,7 @@ public class Simulation {
         File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
         pb.directory(pbWorkingDirectory);
         try {
-            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.RUNNING);
+            updateSimulationStatus(SimulationStatuses.RUNNING);
             _startSimulationTime = LocalTime.now();
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
             _simulationProcess = pb.start();
@@ -278,7 +284,7 @@ public class Simulation {
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
             _printStreamToLogFile.println("Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
             new WebAppGate().updateSimulationActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
-            new WebAppGate().updateSimulationStatus(this, SimulationStatuses.COMPLETED);
+            updateSimulationStatus(SimulationStatuses.COMPLETED);
             _printStreamToLogFile.println("Simulation complete...");
 
         } catch (IOException e) {
