@@ -27,6 +27,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import constants.SimulationStatuses;
+import constants.ValidExtensions;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -188,10 +190,27 @@ public class Simulation {
         _printStreamToLogFile.println("HEADER END-------------------------------------------------------------------------------------------------------------------");
     }
 
-    public void checkSim_name_AndFiles_count_extension() throws Exception { // test the sim exits is file count and file name is wrong
-//check file extensions.
+    public void checkSim_name_AndFiles_count_extension() throws Exception { 
+    	// test the sim exits is file count and file name is wrong
+    	
+    	// check file extensions.
+    	File dir = getSimulationSendingToTrampoFolderPath().toFile();
+    	File[] directoryListing = dir.listFiles();
+    	if (directoryListing != null) {
+    	    for (File child : directoryListing) {
+    	      boolean res = false;
+    	      for (int i = 0; i < ValidExtensions.EXTENSIONS.length; i++) {
+    	    	  if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[i])) { res = true; }
+    	      }
+    	      if (res == false) {
+    	    	  System.out.println("File " + child.getName() + " extension is not supported");
+    	    	  updateSimulationStatus(SimulationStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
+    	    	  throw new Exception("File " + child.getName() + " extension is not supported");
+    	      }
+    	    }
+    	}
 
-// Check files count
+    	// Check files count
         if (FileFunctions.countFiles(getSimulationSendingToTrampoFolderPath()) != _fileCount) {
             System.out.println("!!! Actual file count does not match nominated file count !!!");
             updateSimulationStatus(SimulationStatuses.CANCELLED_NOFILEUPLOADED);
