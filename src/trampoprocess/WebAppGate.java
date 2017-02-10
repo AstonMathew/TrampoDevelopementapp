@@ -26,12 +26,12 @@ public class WebAppGate {
 			if (conn == null) {
 				throw new Exception("No connection made");
 			}
-			PreparedStatement pstmt = conn.prepareStatement("SELECT canceled_by_user FROM simulation WHERE customer_id=? AND no=?;");
+			PreparedStatement pstmt = conn.prepareStatement("SELECT " + Database.CANCELED_BY_USER + " FROM simulation WHERE customer_id=? AND no=?;");
 			pstmt.setString(1, sim._customerNumber);
 			pstmt.setInt(2, sim._simulationNumber);
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
-				return (rs.getInt("canceled_by_user") == 1);
+				return (rs.getInt(Database.CANCELED_BY_USER) == 1);
 			} else {
 				Logger.getLogger("Database no longer has information on simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.SEVERE, "");
 			}
