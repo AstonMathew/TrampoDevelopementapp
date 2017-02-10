@@ -43,6 +43,29 @@ public class WebAppGate {
 		return false;
 	}
 
+	public Integer getSimulationMaxRuntime(Simulation sim) throws Exception {
+		try {
+			Connection conn = getConnection();
+			if (conn == null) {
+				throw new Exception("No connection made");
+			}
+			PreparedStatement pstmt = conn.prepareStatement("SELECT " + Database.MAX_RUNTIME + " FROM simulation WHERE customer_id=? AND no=?;");
+			pstmt.setString(1, sim._customerNumber);
+			pstmt.setInt(2, sim._simulationNumber);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(Database.MAX_RUNTIME);
+			} else {
+				Logger.getLogger("Database no longer has information on simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.SEVERE, "");
+			}
+			pstmt.close();
+			conn.close();
+		} catch (SQLException e) {
+			Logger.getLogger("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.WARNING, null, e);
+		}
+		return null;
+	}
+
 	public LinkedList<Simulation> getSimulations() throws Exception {
 		return getSimulations(SimulationStatuses.SUBMITED);
 		/**

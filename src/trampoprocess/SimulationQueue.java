@@ -93,13 +93,12 @@ public class SimulationQueue {
 				cSim.updateMaximumClocktimeInSecondsFromWebApp();
 			}
 
-			if (new WebAppGate().isSimulationCanceled(cSim)) { // Check if the
-																// user has
-																// canceled the
-																// simulation
-				cSim.abortNow();
-				_currentSimulationThread.interrupt();
-			} else if (rt < cSim.maximumClocktimeInSeconds()) {
+			if (new WebAppGate().isSimulationCanceled(cSim)) { 
+				// Check if the user has canceled the simulation. If it has canceled mark the simulation as canceled
+				cSim.markAsCanceled();
+			}
+			
+			if (rt < cSim.maximumClocktimeInSeconds()) {
                             System.out.println("cSim.maximumClocktimeInSeconds()= "+cSim.maximumClocktimeInSeconds());
                             System.out.println("cSim._maxSeconds= "+cSim._maxSeconds);
 				_currentSimulationThread.join(1000); // Wait another 1 seconds

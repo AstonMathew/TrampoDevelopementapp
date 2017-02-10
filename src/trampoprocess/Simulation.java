@@ -106,8 +106,16 @@ public class Simulation {
     	return _customerNumber;
     }
 
+    public void markAsCanceled() {
+    	_maxSeconds = ((_startSimulationTime == null) ? 0 : (int) timeInSeconds(_startSimulationTime));
+    }
+    
     public void updateMaximumClocktimeInSecondsFromWebApp() {
-	// TODO: _maxSeconds = new WebAppGate().getMaximumClocktimeInSeconds(this);
+	     try {
+			_maxSeconds = new WebAppGate().getSimulationMaxRuntime(this);
+		} catch (Exception e) {
+			// Can't update from the webapp, best to play it safe and keep the max seconds as is
+		}
     }
 
     public long maximumClocktimeInSeconds() {
