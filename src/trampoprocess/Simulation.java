@@ -118,8 +118,7 @@ public class Simulation {
         CreateLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
         checkSim_name_AndFiles_count_extension(); //Not working // need to check only allowed files are copied over and block any illegal files. 
-        // needs to move to next sims if files haven't downloaded yet, probably needs to go outside the queue?
-        //can we come back to this simulation later using current queue?
+        //probably needs to go outside the queue, as file transfer will not happen instantly. Needs to be able to handle manual file input as well, delayed by half a day.
         CopyCustomerSyncFolderIntoSimulationRunFolder();
         getStarCCMPlusVersion();
         UseStarCCMPlusDefaultVersion(); //Not tested, need to read Star-CCM+ installed on machine itself. oldest install must be the default version
