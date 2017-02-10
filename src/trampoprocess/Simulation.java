@@ -101,6 +101,14 @@ public class Simulation {
         _simulationProcess = null;
         _startTime = null;
     }
+    
+    public String getCustomerNumber() {
+    	return _customerNumber;
+    }
+
+    public void updateMaximumClocktimeInSecondsFromWebApp() {
+	// TODO: _maxSeconds = new WebAppGate().getMaximumClocktimeInSeconds(this);
+    }
 
     public long maximumClocktimeInSeconds() {
         return _maxSeconds;
@@ -283,7 +291,7 @@ public class Simulation {
             // All below 
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
             _printStreamToLogFile.println("Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
-            new WebAppGate().updateSimulationActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
+            updateSimulationActualRuntime();
             updateSimulationStatus(SimulationStatuses.COMPLETED);
             _printStreamToLogFile.println("Simulation complete...");
 
@@ -291,6 +299,10 @@ public class Simulation {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public void updateSimulationActualRuntime() throws Exception {
+        new WebAppGate().updateSimulationActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
     }
 
     private void copyLogOutputWindowToFile() throws IOException, InterruptedException {
