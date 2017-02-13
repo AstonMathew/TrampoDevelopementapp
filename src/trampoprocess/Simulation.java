@@ -35,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
 
 /**
  *
@@ -70,6 +72,11 @@ public class Simulation {
     LocalTime _startSimulationTime = null;
     PrintStream _printStreamToLogFile = null;
     String _StarCcmPlusVersion = null;
+    String _StarCcmPlusVersionPath = null;
+    String _StarCcmPlusDefaultVersion = null;
+    String _StarCcmPlusDefaultVersionPath = null;
+
+    
 
     // compute node and license parameter need to be changed for production
     static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
@@ -80,7 +87,7 @@ public class Simulation {
     static String RUNFOLDERROOT = "C:\\test\\clusterSetUp\\Run Partition"; // for testing only
     static String STORAGEFOLDERROOT = "C:\\test\\clusterSetUp\\Storage Partition"; // for testing only
     static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
-    
+    static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
 
     /**
      * @param _simulationNumber
@@ -101,13 +108,13 @@ public class Simulation {
         _simulationProcess = null;
         _startTime = null;
     }
-    
+
     public String getCustomerNumber() {
-    	return _customerNumber;
+        return _customerNumber;
     }
 
     public void updateMaximumClocktimeInSecondsFromWebApp() {
-	// TODO: _maxSeconds = new WebAppGate().getMaximumClocktimeInSeconds(this);
+        // TODO: _maxSeconds = new WebAppGate().getMaximumClocktimeInSeconds(this);
     }
 
     public long maximumClocktimeInSeconds() {
@@ -115,10 +122,12 @@ public class Simulation {
     }
 
     public void updateSimulationStatus(String newStatus) throws Exception {
-         new WebAppGate().updateSimulationStatus(this, newStatus);
-         if (_printStreamToLogFile != null) {_printStreamToLogFile.println(LocalTime.now() + ": Simulation status updated to " + newStatus);}
+        new WebAppGate().updateSimulationStatus(this, newStatus);
+        if (_printStreamToLogFile != null) {
+            _printStreamToLogFile.println(LocalTime.now() + ": Simulation status updated to " + newStatus);
+        }
     }
-    
+
     public void runSimulationWorkflow() throws Exception {
         // System.out.println("1+1=" + 1 + 1);
         _startTime = LocalTime.now();
@@ -133,8 +142,8 @@ public class Simulation {
         checkSim_name_AndFiles_count_extension(); //Not working // need to check only allowed files are copied over and block any illegal files. 
         //probably needs to go outside the queue, as file transfer will not happen instantly. Needs to be able to handle manual file input as well, delayed by half a day.
         CopyCustomerSyncFolderIntoSimulationRunFolder();
-        getStarCCMPlusVersion();
-        UseStarCCMPlusDefaultVersion(); //Not tested, need to read Star-CCM+ installed on machine itself. oldest install must be the default version
+        getCustomerStarCCMPlusVersion();
+        selectStarCCMPlusRunVersion(); //LATER: need to read Star-CCM+ installed on machine itself. Adress issue of latest CCM+ version not loaded on Trampo yet.
         RunSimulation();
         copyLogOutputWindowToFile();
         Create_Log_backUp_toSync_folders();
@@ -192,14 +201,14 @@ public class Simulation {
             System.out.println("Actual file count matches nominated file count !!!");
         }
 
-//        // Check for .sim file
-//        String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
-//        if (!FileFunctions.fileIsAvailable(getSimulationSendingToTrampoFolderPath().resolve(sim))) {
-//            System.out.println("Simulation file " + sim + " is NOT available");
-//            throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
-//        } else {
-//            System.out.println("Simulation file " + sim + " is available");
-//        }
+        // Check for .sim file
+        String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
+        if (!FileFunctions.fileIsAvailable(getSimulationSendingToTrampoFolderPath().resolve(sim))) {
+            System.out.println("Simulation file " + sim + " is NOT available");
+            throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
+        } else {
+            System.out.println("Simulation file " + sim + " is available");
+        }
     }
 
     private void CopyCustomerSyncFolderIntoSimulationRunFolder() throws IOException, InterruptedException {
@@ -209,10 +218,10 @@ public class Simulation {
         Files.walkFileTree(getSimulationSendingToTrampoFolderPath(), visitor);
     }
 
-    private void getStarCCMPlusVersion() throws IOException, InterruptedException {
+    private void getCustomerStarCCMPlusVersion() throws IOException, InterruptedException {
         Path versionLogPath = getSimulationRunningFolderPath().resolve("version.log");
         Files.createFile(versionLogPath);
-        ProcessBuilder pb = new ProcessBuilder("C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe", "-info", "Cube.sim");
+        ProcessBuilder pb = new ProcessBuilder(CCMPLUSVERSIONFORINFOFLAGRUNPATH, "-info", "Cube.sim");
         pb.redirectOutput(versionLogPath.toFile());
         File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
         pb.directory(pbWorkingDirectory);
@@ -232,44 +241,52 @@ public class Simulation {
         System.out.println("CCM+ version = " + ccmplusversion);
         _StarCcmPlusVersion = ccmplusversion.replace(" ", "");
 
-        try (PrintWriter out2 = new PrintWriter(versionLogPath.toString())) {
-            out2.println(ccmplusversion);
-        }
-
+//        try (PrintWriter out2 = new PrintWriter(versionLogPath.toString())) {
+//            out2.println(_StarCcmPlusVersion);
+//        }
     }
 
-    private void UseStarCCMPlusDefaultVersion() throws IOException, InterruptedException {
-        // Check that this version of Star-CCM+ is installed on computer.
-        String InstalledStarCcmPlusVersionsString = new String(
-                readAllBytes(get(TRAMPOCLUSTERUTILFOLDERPATH + "//InstalledCCMPlusVersions.txt")));
-        List<String> InstalledStarCcmPlusVersionsArrayList = Arrays
-                .asList(InstalledStarCcmPlusVersionsString.split("\\s*,\\s*"));
-        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.04.012\")"
-                + InstalledStarCcmPlusVersionsArrayList.contains("11.04.012"));
-        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.06.10\")"
-                + InstalledStarCcmPlusVersionsArrayList.contains("11.06.10"));
-        System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(\"11.06.11\")"
-                + InstalledStarCcmPlusVersionsArrayList.contains("11.06.11"));
-        int i = 0;
-        for (String version : InstalledStarCcmPlusVersionsArrayList) {
-            InstalledStarCcmPlusVersionsArrayList.set(i, version.replace(" ", ""));
-            System.out.println(version);
-            i++;
+    private void selectStarCCMPlusRunVersion() throws IOException, InterruptedException { //oldest install is the default version
+        String[][] array = Files.lines(CCMPLUSINSTALLEDVERSIONS)
+                .map(s -> s.split("\\s+", 2))
+                .map(a -> new String[]{a[0], a[1]})
+                .toArray(String[][]::new);
+
+        System.out.println(Arrays.deepToString(array));
+        String version = array[0][0];
+        System.out.println("version is = " + version.replace(",", ""));
+        version = array[1][0];
+        System.out.println("version is = " + version.replace(",", ""));
+
+        _StarCcmPlusVersion = "11.00.011"; // caught by getStarCCMPlusVersion()
+        System.out.println("simulationCcmPlusVersion= " + _StarCcmPlusVersion);
+        for (int i = 0; i < array.length; i++) {
+            _StarCcmPlusDefaultVersion = array[0][0].replace(",", "");
+            _StarCcmPlusDefaultVersionPath = array[0][1].replace(",", "");
+
+            if (array[i][0].replace(",", "").equals(_StarCcmPlusVersion)) {
+                _StarCcmPlusVersionPath = array[i][1].replace(",", "");
+                System.out.println("simulationCcmPlusVersionPath= " + array[i][1]);
+            }
+        }
+        if (_StarCcmPlusVersionPath == null) {
+            System.out.println("simulationCcmPlusVersion is NOT installed on compute node");
+            System.out.println("using DEFAULT VERSION");
+            _StarCcmPlusVersion = _StarCcmPlusDefaultVersion;
+            System.out.println("_StarCcmPlusDefaultVersion= " + _StarCcmPlusDefaultVersion);
+            _StarCcmPlusVersionPath = _StarCcmPlusDefaultVersionPath;
+            System.out.println("_StarCcmPlusDefaultVersionPath= " + _StarCcmPlusDefaultVersionPath);
+        } else {
+            System.out.println("simulationCcmPlusVersion is installed on compute node");
+
         }
 
-        if (!InstalledStarCcmPlusVersionsArrayList.contains(_StarCcmPlusVersion)) {
-            _StarCcmPlusVersion = InstalledStarCcmPlusVersionsArrayList
-                    .get(InstalledStarCcmPlusVersionsArrayList.size() - 1);
-        } else {
-            System.out.println("InstalledStarCcmPlusVersionsArrayList.contains(StarCcmPlusVersion)");
-        }
-        System.out.println("StarCcmPlusVersion=" + _StarCcmPlusVersion);
     }
 
     private void RunSimulation() throws Exception {
         ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch",
-                TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
+                _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
+                "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", PODKEY,
                 _simulation);
 
