@@ -46,8 +46,10 @@ public class Run {
     LocalTime _startSimulationTime = null;
     PrintStream _printStreamToLogFile = null;
     String _StarCcmPlusVersion = null;
-
     Path _StarCcmPlusVersionPath = null;
+    String _StarCcmPlusDefaultVersion = null;
+    Path _StarCcmPlusDefaultVersionPath = null;
+
     static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
 
     public void run() throws IOException {
@@ -62,18 +64,27 @@ public class Run {
         version = array[1][0];
         System.out.println("version is = " + version.replace(",", ""));
 
-        _StarCcmPlusVersion = "11.06.011";
+        _StarCcmPlusVersion = "11.00.011"; // caught by getStarCCMPlusVersion()
         System.out.println("simulationCcmPlusVersion= " + _StarCcmPlusVersion);
-        for (String[] array1 : array) {
-            if (array1[0].replace(",", "").equals(_StarCcmPlusVersion)) {
-                _StarCcmPlusVersionPath = Paths.get(array1[1]);
-                System.out.println("simulationCcmPlusVersionPath= " + array1[1]);
+        for (int i = 0; i < array.length; i++) {
+            _StarCcmPlusDefaultVersion = array[0][0].replace(",", "");
+            _StarCcmPlusDefaultVersionPath= Paths.get(array[0][1].replace(",", ""));
+            
+            if (array[i][0].replace(",", "").equals(_StarCcmPlusVersion)) {
+                _StarCcmPlusVersionPath = Paths.get(array[i][1].replace(",", ""));
+                System.out.println("simulationCcmPlusVersionPath= " + array[i][1]);
             }
         }
         if (_StarCcmPlusVersionPath == null) {
             System.out.println("simulationCcmPlusVersion is NOT installed on compute node");
+            System.out.println("using DEFAULT VERSION");
+            _StarCcmPlusVersion = _StarCcmPlusDefaultVersion;
+            System.out.println("_StarCcmPlusDefaultVersion= "+_StarCcmPlusDefaultVersion);
+            _StarCcmPlusVersionPath = _StarCcmPlusDefaultVersionPath;
+            System.out.println("_StarCcmPlusDefaultVersionPath= "+_StarCcmPlusDefaultVersionPath);
         } else {
             System.out.println("simulationCcmPlusVersion is installed on compute node");
+
         }
 
     }

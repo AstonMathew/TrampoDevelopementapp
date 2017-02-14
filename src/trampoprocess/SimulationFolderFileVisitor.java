@@ -24,12 +24,12 @@ import java.util.regex.Matcher;
 //                    http://codingjunkie.net/java-7-copy-move/  
 //                    https://dzone.com/articles/what%E2%80%99s-new-java-7-copy-and 
 //                    http://stackoverflow.com/questions/3008043/list-all-files-from-directories-and-subdirectories-in-java  
-public class MyFileVisitor extends SimpleFileVisitor<Path> {
+public class SimulationFolderFileVisitor extends SimpleFileVisitor<Path> {
 
     Path src;
     Path dest;
 
-    MyFileVisitor(Path src, Path dest) {
+    SimulationFolderFileVisitor(Path src, Path dest) {
         this.src = src;
         this.dest = dest;
     }
@@ -44,17 +44,17 @@ public class MyFileVisitor extends SimpleFileVisitor<Path> {
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 
-        Path target = dest.resolve(src.relativize(dir));
-        try {
-            Files.copy(dir, target);
-
-        } catch (FileAlreadyExistsException e) {
-            if (!Files.isDirectory(target)) {
-                throw e;
-            }
-        }
-
-        System.out.println("Directory copied: " + dir.toString().replaceAll(Matcher.quoteReplacement(src.toString()), ""));
+//        Path target = dest.resolve(src.relativize(dir));
+//        try {
+//            Files.copy(dir, target);
+//
+//        } catch (FileAlreadyExistsException e) {
+//            if (!Files.isDirectory(target)) {
+//                throw e;
+//            }
+//        }
+//
+//        System.out.println("Directory copied: " + dir.toString().replaceAll(Matcher.quoteReplacement(src.toString()), ""));
         return FileVisitResult.CONTINUE;
     }
 

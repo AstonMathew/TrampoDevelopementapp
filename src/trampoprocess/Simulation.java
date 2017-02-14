@@ -39,6 +39,19 @@ import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
 import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import static java.nio.file.Paths.get;
+import java.util.Objects;
 
 /**
  *
@@ -78,18 +91,16 @@ public class Simulation {
     String _StarCcmPlusDefaultVersion = null;
     String _StarCcmPlusDefaultVersionPath = null;
 
-    
-
     // compute node and license parameter need to be changed for production
     static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
     static String _localHostNP = "localhost:" + _numberComputeCores;
     static String PODKEY = "5vq0W6k4A3CThu7rcwFeS23KtqY"; //need to read the key from a text file that can be changed in the  middle of running
     static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
             "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
-    static String RUNFOLDERROOT = "C:\\test\\clusterSetUp\\Run Partition"; // for testing only
-    static String STORAGEFOLDERROOT = "C:\\test\\clusterSetUp\\Storage Partition"; // for testing only
+    static String DATAROOT = "C:\\data\\";
     static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
+    static int TOBACKUPCOPYWAITINGTIME = 1000; //1000 MILLIsecond for testing, 300000 MILLIsecond =5 minutes for production
 
     /**
      * @param _simulationNumber
@@ -111,32 +122,53 @@ public class Simulation {
         _startTime = null;
     }
 
-    public String getCustomerNumber() {
-        return _customerNumber;
-    }
+    public void checkSim_name_AndFiles_count_extension() throws Exception { //used in simulation queue/add simulation()
+        // test the sim exits is file count and file name is wrong
+        // _simulation = _simulation.concat("\"");
+        _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
+        if (_simulation.isEmpty()){ // redundant with simulation file name a required field
+        updateSimulationStatus(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
+        System.out.println(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
+        }
+        else {
+        // Check for .sim file
+        String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
+        if (!FileFunctions.fileIsAvailable(getCustomerSynchronisedFolder().resolve(sim))) {
+            System.out.println("Simulation file " + sim + " is NOT available");
+            throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
+        } else {
+            System.out.println("Simulation file " + sim + " is available");
+        }
 
-    public void markAsCanceled() {
-    	_maxSeconds = ((_startSimulationTime == null) ? 0 : (int) timeInSeconds(_startSimulationTime));
-    }
-    
-    public void updateMaximumClocktimeInSecondsFromWebApp() {
+        // check file extensions.
+        File dir = getCustomerSynchronisedFolder().toFile();
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                if (child.isFile()) { //we're not copying directories, just files
+                    boolean res = false;
+                    for (int i = 0; i < ValidExtensions.EXTENSIONS.length; i++) {
+                        if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[i])) {
+                            res = true;
+                        }
+                    }
+                    if (res == false) {
+                        System.out.println("File " + child.getName() + " extension is not supported");
+                        updateSimulationStatus(SimulationStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
+                        throw new Exception("File " + child.getName() + " extension is not supported");
+                    }
+                }
+            }
+        }
 
-	     try {
-			_maxSeconds = new WebAppGate().getSimulationMaxRuntime(this);
-		} catch (Exception e) {
-			// Can't update from the webapp, best to play it safe and keep the max seconds as is
-		}
-
-    }
-
-    public long maximumClocktimeInSeconds() {
-        return _maxSeconds;
-    }
-
-    public void updateSimulationStatus(String newStatus) throws Exception {
-        new WebAppGate().updateSimulationStatus(this, newStatus);
-        if (_printStreamToLogFile != null) {
-            _printStreamToLogFile.println(LocalTime.now() + ": Simulation status updated to " + newStatus);
+        // Check files count
+        if (FileFunctions.countFiles(getCustomerSynchronisedFolder()) != _fileCount) {
+            System.out.println("!!! Actual file count does not match nominated file count !!!");
+            updateSimulationStatus(SimulationStatuses.CANCELLED_NOFILEUPLOADED);
+            throw new Exception("Simulation " + _simulationNumber + "!!! Actual file count does not match nominated file count !!!");
+        } else {
+            System.out.println("Actual file count matches nominated file count !!!");
+        }
         }
     }
 
@@ -145,21 +177,15 @@ public class Simulation {
         _startTime = LocalTime.now();
 
         // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
-        //_simulation = _simulation.concat("\""); 
-        _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         CreateSimulationFolders();
         redirectOutANDErrToLog(); //remove the commeting out in production
         CreateLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
-        checkSim_name_AndFiles_count_extension(); //Not working // need to check only allowed files are copied over and block any illegal files. 
-        //probably needs to go outside the queue, as file transfer will not happen instantly. Needs to be able to handle manual file input as well, delayed by half a day.
         CopyCustomerSyncFolderIntoSimulationRunFolder();
         getCustomerStarCCMPlusVersion();
         selectStarCCMPlusRunVersion(); //LATER: need to read Star-CCM+ installed on machine itself. Adress issue of latest CCM+ version not loaded on Trampo yet.
         RunSimulation();
         copyLogOutputWindowToFile();
-        Create_Log_backUp_toSync_folders();
-        Move_Log_BU_Tosync_foldersToStoragePartition();
         //runDataExtraction; // 
         // check that the running simulation is “alive” in all processes.
         System.out.println("End");
@@ -183,8 +209,17 @@ public class Simulation {
     }
 
     private void redirectOutANDErrToLog() throws FileNotFoundException {
+File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber + ".log").toFile();
 
-        _printStreamToLogFile = new PrintStream(getSimulationLogPath());
+        try {
+            //Create the file
+            log.createNewFile();
+            System.out.println("simulation_" + _simulationNumber + ".log File is created!");
+        } catch (IOException ex) {
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("simulation_" + _simulationNumber + ".log : File already exists or the operation failed for some reason");
+        }
+        _printStreamToLogFile = new PrintStream(log);
 //        System.setOut(_printStreamToLogFile);
 //        System.setErr(_printStreamToLogFile);
     }
@@ -201,50 +236,12 @@ public class Simulation {
         _printStreamToLogFile.println("HEADER END-------------------------------------------------------------------------------------------------------------------");
     }
 
-    public void checkSim_name_AndFiles_count_extension() throws Exception { 
-    	// test the sim exits is file count and file name is wrong
-    	
-    	// check file extensions.
-    	File dir = getSimulationSendingToTrampoFolderPath().toFile();
-    	File[] directoryListing = dir.listFiles();
-    	if (directoryListing != null) {
-    	    for (File child : directoryListing) {
-    	      boolean res = false;
-    	      for (int i = 0; i < ValidExtensions.EXTENSIONS.length; i++) {
-    	    	  if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[i])) { res = true; }
-    	      }
-    	      if (res == false) {
-    	    	  System.out.println("File " + child.getName() + " extension is not supported");
-    	    	  updateSimulationStatus(SimulationStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
-    	    	  throw new Exception("File " + child.getName() + " extension is not supported");
-    	      }
-    	    }
-    	}
-
-    	// Check files count
-        if (FileFunctions.countFiles(getSimulationSendingToTrampoFolderPath()) != _fileCount) {
-            System.out.println("!!! Actual file count does not match nominated file count !!!");
-            updateSimulationStatus(SimulationStatuses.CANCELLED_NOFILEUPLOADED);
-            throw new Exception("Simulation " + _simulationNumber + "!!! Actual file count does not match nominated file count !!!");
-        } else {
-            System.out.println("Actual file count matches nominated file count !!!");
-        }
-
-        // Check for .sim file
-        String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
-        if (!FileFunctions.fileIsAvailable(getSimulationSendingToTrampoFolderPath().resolve(sim))) {
-            System.out.println("Simulation file " + sim + " is NOT available");
-            throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
-        } else {
-            System.out.println("Simulation file " + sim + " is available");
-        }
-    }
-
     private void CopyCustomerSyncFolderIntoSimulationRunFolder() throws IOException, InterruptedException {
-
-        MyFileVisitor visitor = new MyFileVisitor(getSimulationSendingToTrampoFolderPath(),
+        System.out.println("starting CopyCustomerSyncFolderIntoSimulationRunFolder()");
+        SimulationFolderFileVisitor visitor = new SimulationFolderFileVisitor(getCustomerSynchronisedFolder(),
                 getSimulationRunningFolderPath());
-        Files.walkFileTree(getSimulationSendingToTrampoFolderPath(), visitor);
+        Files.walkFileTree(getCustomerSynchronisedFolder(), visitor);
+        System.out.println("finished CopyCustomerSyncFolderIntoSimulationRunFolder()");
     }
 
     private void getCustomerStarCCMPlusVersion() throws IOException, InterruptedException {
@@ -269,6 +266,8 @@ public class Simulation {
         String ccmplusversion = content.substring(startindex, stopindex);
         System.out.println("CCM+ version = " + ccmplusversion);
         _StarCcmPlusVersion = ccmplusversion.replace(" ", "");
+        Files.copy(versionLogPath, getSimulationLogsPath().resolve("version.log"), COPY_ATTRIBUTES);
+        Files.delete(versionLogPath);
 
 //        try (PrintWriter out2 = new PrintWriter(versionLogPath.toString())) {
 //            out2.println(_StarCcmPlusVersion);
@@ -327,10 +326,14 @@ public class Simulation {
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
             _simulationProcess = pb.start();
             System.out.println("p started");
-            //Redirection of stream exteremely important; http://baxincc.cc/questions/216451/windows-process-execed-from-java-not-terminating
+            //Redirection of stream and loop extremely important; http://baxincc.cc/questions/216451/windows-process-execed-from-java-not-terminating
             // if not redirected, Star-CCM+ processes hang and -batch*-report doesn't print
             InputStream stdout = _simulationProcess.getInputStream();
-            while (stdout.read() >= 0) {;
+            while (stdout.read() >= 0) {
+                BackupFolderFileVisitor visitor = new BackupFolderFileVisitor(
+                        getSimulationRunningFolderPath(), Paths.get(getSimulationBackupPath()));
+                Files.walkFileTree(getSimulationRunningFolderPath(), visitor);
+                Thread.sleep(TOBACKUPCOPYWAITINGTIME);
             }
             _simulationProcess.waitFor();
 
@@ -352,7 +355,7 @@ public class Simulation {
     }
 
     private void copyLogOutputWindowToFile() throws IOException, InterruptedException {
-        Files.copy(getOutputWindowLogToFile(), getSimulationRunningFolderPath().resolve("outputWindowToFileSimulation_" + _simulationNumber + ".log"), COPY_ATTRIBUTES);
+        Files.copy(getOutputWindowLogToFile(), getSimulationLogsPath().resolve("outputWindowToFileSimulation_" + _simulationNumber + ".log"), COPY_ATTRIBUTES);
         System.out.println("OUTPUTWINDOWLOGTOFILELOCATION COPIED");
     }
 
@@ -444,19 +447,6 @@ public class Simulation {
 //	Cells: 220695	Faces: 606319	Vertices: 294413
     }
 
-    private void Create_Log_backUp_toSync_folders() throws IOException {
-        Path logsPath = getSimulationRunningFolderPath().resolve("Logs");
-        Files.createDirectory(logsPath);
-        Path backUpPath = getSimulationRunningFolderPath().resolve("Backup");
-        Files.createDirectory(backUpPath);
-        Path toSyncPath = getSimulationRunningFolderPath().resolve("ToSync");
-        Files.createDirectory(toSyncPath);
-
-    }
-
-    private void Move_Log_BU_Tosync_foldersToStoragePartition() {
-    }
-
     public long currentRunTimeInSeconds() {
         return timeInSeconds(_startTime);
     }
@@ -493,24 +483,58 @@ public class Simulation {
         return "customer_" + _customerNumber.trim();
     }
 
-    private Path getSimulationSendingToTrampoFolderPath() { // the synchronised copy of the folder in which the customer pastes his files to send to Trampo
-        return Paths.get(STORAGEFOLDERROOT, getCustomerFolderRelativePath(), "Synchronised folder", "1_SendingToTrampo");
+    private Path getCustomerSynchronisedFolder() { // the synchronised copy of the folder in which the customer pastes his files to send to Trampo
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder");
     }
 
     private Path getSimulationRunningFolderPath() {// the simulation running folder
-        return Paths.get(RUNFOLDERROOT, getCustomerFolderRelativePath(), "simulation_" + _simulationNumber);
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder", "simulation_" + _simulationNumber);
     }
 
-    private String getSimulationLogPath() {
-        return getSimulationRunningFolderPath() + "\\simulation_" + _simulationNumber + ".log";
+    private Path getSimulationLogsPath() {
+        return Paths.get(DATAROOT,getCustomerFolderRelativePath(),"\\simulation_" + _simulationNumber,"\\logs");
+    }
+
+    private String getSimulationBackupPath() {
+        return DATAROOT + getCustomerFolderRelativePath() + "\\simulation_" + _simulationNumber + "\\backup";
     }
 
     private String getSimulationStatusPath() {
         return getSimulationRunningFolderPath() + "\\simulation_" + _simulationNumber + "_Status.txt";
     }
 
-    private Path getOutputWindowLogToFile() {
+    private Path getOutputWindowLogToFile() { // might need update to work for all versions
         return Paths.get("C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ " + _StarCcmPlusVersion + "\\var\\log\\messages.log");
+    }
+
+    public String getCustomerNumber() {
+        return _customerNumber;
+    }
+
+    public void markAsCanceled() {
+        _maxSeconds = ((_startSimulationTime == null) ? 0 : (int) timeInSeconds(_startSimulationTime));
+    }
+
+    public void updateMaximumClocktimeInSecondsFromWebApp() {
+
+        try {
+            _maxSeconds = new WebAppGate().getSimulationMaxRuntime(this);
+        } catch (Exception e) {
+            // Can't update from the webapp, best to play it safe and keep the max seconds as is
+        }
+
+    }
+
+    public long maximumClocktimeInSeconds() {
+        return _maxSeconds;
+    }
+
+    public void updateSimulationStatus(String newStatus) throws Exception {
+        new WebAppGate().updateSimulationStatus(this, newStatus);
+        if (_printStreamToLogFile != null) {
+            _printStreamToLogFile.println(LocalTime.now() + ": Simulation status updated to " + newStatus);
+        }
+        System.out.println("Simulation status updated to " + newStatus);
     }
 
 }
