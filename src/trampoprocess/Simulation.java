@@ -1,6 +1,4 @@
-/*
- * TODOLATER match # of files between app and sync folder
- */
+
 package trampoprocess;
 
 /**
@@ -21,8 +19,6 @@ import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.List;
-import static java.nio.file.Files.readAllBytes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,43 +28,19 @@ import constants.ValidExtensions;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import static java.nio.file.Paths.get;
-import java.util.Objects;
+import java.nio.file.StandardCopyOption;
 
 /**
  *
  * @author Administrator
  *
- * TODOGUINOW version list of files no * match= * Status= "CANCELLED:" , put
- * Sims in canceled folder simulationLog.txt gets overwritten // check why and
- * simulationStatus.txt does not list the various simulation status one after
- * another with date/time //runDataExtraction() Simulation name needs to be
- * udated to latest sim file in folder tree. test if Simulation File Name "Cube"
- * without .sim works; If not might consider adding the .sim in the website or
- * database.
+ * TODOGUINOW 
  *
- * TODOLATER This code breaks if the simulation folder already exists. star-CCM+
- * version used to determine version used by customer to create the file needs
- * to be adjusted to default version. make CCM+ version a variable in all the pb
- * and use CCM+ default version to run versioncheck and runDataExtraction
+ * TODOLATER This code breaks if the simulation folder already exists. 
+ * //runDataExtraction() Simulation name needs to be updated to latest sim file in folder tree.
+ * move InstalledVersions.txt into the code.
  */
 public class Simulation {
 
@@ -126,49 +98,48 @@ public class Simulation {
         // test the sim exits is file count and file name is wrong
         // _simulation = _simulation.concat("\"");
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
-        if (_simulation.isEmpty()){ // redundant with simulation file name a required field
-        updateSimulationStatus(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
-        System.out.println(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
-        }
-        else {
-        // Check for .sim file
-        String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
-        if (!FileFunctions.fileIsAvailable(getCustomerSynchronisedFolder().resolve(sim))) {
-            System.out.println("Simulation file " + sim + " is NOT available");
-            throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
+        if (_simulation.isEmpty()) { // redundant with simulation file name a required field
+            updateSimulationStatus(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
+            System.out.println(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
         } else {
-            System.out.println("Simulation file " + sim + " is available");
-        }
+            // Check for .sim file
+            String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
+            if (!FileFunctions.fileIsAvailable(getCustomerSynchronisedFolder().resolve(sim))) {
+                System.out.println("Simulation file " + sim + " is NOT available");
+                throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
+            } else {
+                System.out.println("Simulation file " + sim + " is available");
+            }
 
-        // check file extensions.
-        File dir = getCustomerSynchronisedFolder().toFile();
-        File[] directoryListing = dir.listFiles();
-        if (directoryListing != null) {
-            for (File child : directoryListing) {
-                if (child.isFile()) { //we're not copying directories, just files
-                    boolean res = false;
-                    for (int i = 0; i < ValidExtensions.EXTENSIONS.length; i++) {
-                        if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[i])) {
-                            res = true;
+            // check file extensions.
+            File dir = getCustomerSynchronisedFolder().toFile();
+            File[] directoryListing = dir.listFiles();
+            if (directoryListing != null) {
+                for (File child : directoryListing) {
+                    if (child.isFile()) { //we're not copying directories, just files
+                        boolean res = false;
+                        for (int i = 0; i < ValidExtensions.EXTENSIONS.length; i++) {
+                            if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[i])) {
+                                res = true;
+                            }
                         }
-                    }
-                    if (res == false) {
-                        System.out.println("File " + child.getName() + " extension is not supported");
-                        updateSimulationStatus(SimulationStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
-                        throw new Exception("File " + child.getName() + " extension is not supported");
+                        if (res == false) {
+                            System.out.println("File " + child.getName() + " extension is not supported");
+                            updateSimulationStatus(SimulationStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
+                            throw new Exception("File " + child.getName() + " extension is not supported");
+                        }
                     }
                 }
             }
-        }
 
-        // Check files count
-        if (FileFunctions.countFiles(getCustomerSynchronisedFolder()) != _fileCount) {
-            System.out.println("!!! Actual file count does not match nominated file count !!!");
-            updateSimulationStatus(SimulationStatuses.CANCELLED_NOFILEUPLOADED);
-            throw new Exception("Simulation " + _simulationNumber + "!!! Actual file count does not match nominated file count !!!");
-        } else {
-            System.out.println("Actual file count matches nominated file count !!!");
-        }
+            // Check files count
+            if (FileFunctions.countFiles(getCustomerSynchronisedFolder()) != _fileCount) {
+                System.out.println("!!! Actual file count does not match nominated file count !!!");
+                updateSimulationStatus(SimulationStatuses.CANCELLED_NOFILEUPLOADED);
+                throw new Exception("Simulation " + _simulationNumber + "!!! Actual file count does not match nominated file count !!!");
+            } else {
+                System.out.println("Actual file count matches nominated file count !!!");
+            }
         }
     }
 
@@ -178,7 +149,7 @@ public class Simulation {
 
         // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
         CreateSimulationFolders();
-        redirectOutANDErrToLog(); //remove the commeting out in production
+        createLogAndBackupDirectories(); //remove the commeting out in production
         CreateLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
         CopyCustomerSyncFolderIntoSimulationRunFolder();
@@ -208,12 +179,19 @@ public class Simulation {
         }
     }
 
-    private void redirectOutANDErrToLog() throws FileNotFoundException {
-File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber + ".log").toFile();
+    private void createLogAndBackupDirectories() throws FileNotFoundException, IOException {
+        Files.createDirectories(getSimulationLogsPath());
+        boolean SimulationLogs = Files.isDirectory(getSimulationLogsPath(), LinkOption.NOFOLLOW_LINKS);
+        System.out.println("SimulationLogs isDirectory " + SimulationLogs);
+        System.out.println(" getSimulationLogsPath Folder created " + getSimulationLogsPath());
+
+        Files.createDirectories(getSimulationBackupPath());
+        System.out.println(" getSimulationBackupPath Folder created " + getSimulationBackupPath());
+        File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber + ".log").toFile();
 
         try {
             //Create the file
-            log.createNewFile();
+            Files.createFile(log.toPath());
             System.out.println("simulation_" + _simulationNumber + ".log File is created!");
         } catch (IOException ex) {
             Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
@@ -238,23 +216,39 @@ File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber +
 
     private void CopyCustomerSyncFolderIntoSimulationRunFolder() throws IOException, InterruptedException {
         System.out.println("starting CopyCustomerSyncFolderIntoSimulationRunFolder()");
-        SimulationFolderFileVisitor visitor = new SimulationFolderFileVisitor(getCustomerSynchronisedFolder(),
-                getSimulationRunningFolderPath());
-        Files.walkFileTree(getCustomerSynchronisedFolder(), visitor);
+//        SimulationFolderFileVisitor visitor = new SimulationFolderFileVisitor(getCustomerSynchronisedFolder(),
+//                getSimulationRunningFolderPath());
+//        Files.walkFileTree(getCustomerSynchronisedFolder(), visitor);
+
+        File sourceDirectory = getCustomerSynchronisedFolder().toFile();
+        File destinationDirectory = getSimulationRunningFolderPath().toFile();
+        ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+//        File[] directoryListing = dir.listFiles();
+//        if (directoryListing != null) {
+//            for (File child : directoryListing) {
+//                if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)) { //we're not copying directories, just files
+//                    Files.move(child.toPath(), getSimulationRunningFolderPath().resolve(child.getName()), StandardCopyOption.REPLACE_EXISTING);
+//                    System.out.println("File Copied: " + child.toString());//.replaceAll(Matcher.quoteReplacement(src.toString()), ""));
+//                } else {
+//                    System.out.println("File NOT Copied: " + child.toString());
+//                }
+//            }
+//        }
+
         System.out.println("finished CopyCustomerSyncFolderIntoSimulationRunFolder()");
     }
 
     private void getCustomerStarCCMPlusVersion() throws IOException, InterruptedException {
-        Path versionLogPath = getSimulationRunningFolderPath().resolve("version.log");
-        Files.createFile(versionLogPath);
+        Path InitialVersionLogPath = getSimulationRunningFolderPath().resolve("version.log");
+        Files.createFile(InitialVersionLogPath);
         ProcessBuilder pb = new ProcessBuilder(CCMPLUSVERSIONFORINFOFLAGRUNPATH, "-info", "Cube.sim");
-        pb.redirectOutput(versionLogPath.toFile());
+        pb.redirectOutput(InitialVersionLogPath.toFile());
         File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
         pb.directory(pbWorkingDirectory);
         Process p = pb.start();
         p.waitFor();
         System.out.println("version.log created");
-        String content = new String(Files.readAllBytes(versionLogPath));
+        String content = new String(Files.readAllBytes(InitialVersionLogPath));
         System.out.println("version.log=" + content);
 
         int index = content.lastIndexOf("STAR-CCM+");
@@ -266,10 +260,13 @@ File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber +
         String ccmplusversion = content.substring(startindex, stopindex);
         System.out.println("CCM+ version = " + ccmplusversion);
         _StarCcmPlusVersion = ccmplusversion.replace(" ", "");
-        Files.copy(versionLogPath, getSimulationLogsPath().resolve("version.log"), COPY_ATTRIBUTES);
-        Files.delete(versionLogPath);
+        Path finalVersionLogPath = getSimulationLogsPath().resolve("version.log");
+        System.out.println("finalVersionLogPath = " + finalVersionLogPath.toString());
+        Files.createFile(finalVersionLogPath);
+        Files.move(InitialVersionLogPath, finalVersionLogPath, StandardCopyOption.REPLACE_EXISTING);
+        //Files.delete(InitialVersionLogPath);
 
-//        try (PrintWriter out2 = new PrintWriter(versionLogPath.toString())) {
+//        try (PrintWriter out2 = new PrintWriter(InitialVersionLogPath.toString())) {
 //            out2.println(_StarCcmPlusVersion);
 //        }
     }
@@ -329,13 +326,19 @@ File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber +
             //Redirection of stream and loop extremely important; http://baxincc.cc/questions/216451/windows-process-execed-from-java-not-terminating
             // if not redirected, Star-CCM+ processes hang and -batch*-report doesn't print
             InputStream stdout = _simulationProcess.getInputStream();
-            while (stdout.read() >= 0) {
-                BackupFolderFileVisitor visitor = new BackupFolderFileVisitor(
-                        getSimulationRunningFolderPath(), Paths.get(getSimulationBackupPath()));
-                Files.walkFileTree(getSimulationRunningFolderPath(), visitor);
-                Thread.sleep(TOBACKUPCOPYWAITINGTIME);
+            while (stdout.read() >= 0) {;
+//                BackupFolderFileVisitor visitor = new BackupFolderFileVisitor(
+//                        getSimulationRunningFolderPath(), getSimulationBackupPath());
+//                Files.walkFileTree(getSimulationRunningFolderPath(), visitor);
+          
+                //Thread.sleep(TOBACKUPCOPYWAITINGTIME);
             }
             _simulationProcess.waitFor();
+            File sourceDirectory = pbWorkingDirectory;
+                File destinationDirectory = getSimulationBackupPath().toFile();
+                ConditionalMoveFiles(sourceDirectory, destinationDirectory, "@");
+                destinationDirectory = getSimulationLogsPath().toFile();
+                ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
 
             // All below 
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
@@ -492,11 +495,11 @@ File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber +
     }
 
     private Path getSimulationLogsPath() {
-        return Paths.get(DATAROOT,getCustomerFolderRelativePath(),"\\simulation_" + _simulationNumber,"\\logs");
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\simulation_" + _simulationNumber, "\\logs");
     }
 
-    private String getSimulationBackupPath() {
-        return DATAROOT + getCustomerFolderRelativePath() + "\\simulation_" + _simulationNumber + "\\backup";
+    private Path getSimulationBackupPath() {
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\simulation_" + _simulationNumber + "\\backup");
     }
 
     private String getSimulationStatusPath() {
@@ -537,4 +540,22 @@ File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber +
         System.out.println("Simulation status updated to " + newStatus);
     }
 
+    /**
+     *
+     * moves all files containing the string from the source directory to the
+     * destination directory both directory need to exist!
+     */
+    public void ConditionalMoveFiles(File source, File destination, String string) throws IOException {
+        File[] directoryListing = source.listFiles();
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(string.toLowerCase())) {
+                    System.out.println("directoryListing child.getName = " + child.getName());
+                    Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
+                    System.out.println(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));
+
+                }
+            }
+        }
+    }
 }

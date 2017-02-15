@@ -65,8 +65,8 @@ public class BackupFolderFileVisitor extends SimpleFileVisitor<Path> {
             Boolean backupfile = file.getName().contains("@");
         if (attrs.isRegularFile() && backupfile) {
           
-            Files.move(path, dest.resolve(src.relativize(path)), StandardCopyOption.COPY_ATTRIBUTES);
-                        System.out.println("File Copied: " + path.toString().replaceAll(Matcher.quoteReplacement(src.toString()), ""));
+            Files.move(path, dest.resolve(src.relativize(path)), StandardCopyOption.REPLACE_EXISTING);
+                        System.out.println("File Moved: " + path.toString().replaceAll(Matcher.quoteReplacement(src.toString()), ""));
         }
 
         return FileVisitResult.CONTINUE;

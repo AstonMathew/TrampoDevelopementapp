@@ -36,7 +36,7 @@ public class SimulationFolderFileVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        //System.out.println("Just VisitedDir: " + dir.toString());
+        System.out.println("Just VisitedDir: " + dir.toString());
         //System.out.println("simulation folder copied");
         return FileVisitResult.CONTINUE;
     }
@@ -60,8 +60,8 @@ public class SimulationFolderFileVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        if (attrs.isRegularFile()) {
-            Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.COPY_ATTRIBUTES);
+        if (!Files.isRegularFile(file)) {
+            Files.move(file, dest.resolve(src.relativize(file)), StandardCopyOption.COPY_ATTRIBUTES);
             System.out.println("File Copied: " + file.toString().replaceAll(Matcher.quoteReplacement(src.toString()), ""));
         }
 
