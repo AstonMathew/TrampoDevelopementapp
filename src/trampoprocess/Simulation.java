@@ -460,21 +460,24 @@ public class Simulation {
         }
         return ChronoUnit.SECONDS.between(time, LocalTime.now());
     }
+    
+    private boolean _isAborting = false;
 
     public void abort() throws InterruptedException {
-        // To be implemented: soft abort with a grace period
-        File file = new File(getSimulationRunningFolderPath() + "\\ABORT.txt");
+    	if (! _isAborting) {
+          File file = new File(getSimulationRunningFolderPath() + "\\ABORT.txt");
 
-        try {
-            //Create the file
-            file.createNewFile();
-            System.out.println("ABORT.txt File is created!");
-        } catch (IOException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("ABORT.txt File already exists or the operation failed for some reason");
-        }
-        _simulationProcess.waitFor(2, TimeUnit.MINUTES);
-
+          try {
+              //Create the file
+              file.createNewFile();
+              System.out.println("ABORT.txt File is created!");
+          } catch (IOException ex) {
+              Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+              System.out.println("ABORT.txt File already exists or the operation failed for some reason");
+          }
+          _simulationProcess.waitFor(2, TimeUnit.MINUTES);
+          _isAborting = true;
+    	}
     }
 
     public void abortNow() {
