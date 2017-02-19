@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -75,6 +76,34 @@ public class SimulationQueue {
 		_timeLastRunTimeUpdate = null;
 	}
 
+	public boolean hasSimulationRunning() {
+		return _currentSimulation != null;
+	}
+	
+	public boolean hasSimulation() {
+		return (_simulations.size() > 0);
+	}
+	
+	public void purgeQueuingSimulations(String status) {
+		Iterator<Simulation> simIt = _simulations.iterator();
+		while (simIt.hasNext()) {
+			Simulation sim = simIt.next();
+			try {
+				new WebAppGate().updateSimulationStatus(sim, status);
+			} catch (Exception e) {
+				System.out.println("Error when updating status for simulation " + sim._simulationNumber + " with error " + e.getMessage());
+			}
+		}
+		_simulations.clear();
+	}
+	
+	public void stopCurrentSimulationNow() {
+		if (hasSimulationRunning()) {
+		  _currentSimulation.getSimulation().abortNow();
+		  _currentSimulationThread.interrupt();
+		}
+	}
+	
 	public void addSimulation(Simulation sim) throws Exception {
 		try {
 			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._simulationNumber + " with file " + sim._simulation);
