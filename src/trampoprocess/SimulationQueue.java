@@ -108,8 +108,11 @@ public class SimulationQueue {
 		try {
 			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._simulationNumber + " with file " + sim._simulation);
 			sim.checkSim_name_AndFiles_count_extension();
-			_simulations.add(sim);
-			new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+			String c = new WebAppGate().getSimulationStatus(sim); 
+			if ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE)) { 
+			  _simulations.add(sim);
+			  new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+			}
 		} catch (Exception e) {
 			System.out.println("Error when adding simulation " + sim._simulationNumber + " with error " + e.getMessage());
 			StringWriter sw = new StringWriter();
