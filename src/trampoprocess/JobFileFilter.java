@@ -12,7 +12,7 @@ import java.io.FileFilter;
  *
  * @author Administrator
  */
-public class SimulationFileFilter implements FileFilter{
+public class JobFileFilter implements FileFilter{
  private final String[] simFileExtensions = new String[] {"sim"}; // put aditional sim file extension in this array
 
   public boolean accept(File file)

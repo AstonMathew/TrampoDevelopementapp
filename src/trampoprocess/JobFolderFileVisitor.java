@@ -24,12 +24,12 @@ import java.util.regex.Matcher;
 //                    http://codingjunkie.net/java-7-copy-move/  
 //                    https://dzone.com/articles/what%E2%80%99s-new-java-7-copy-and 
 //                    http://stackoverflow.com/questions/3008043/list-all-files-from-directories-and-subdirectories-in-java  
-public class SimulationFolderFileVisitor extends SimpleFileVisitor<Path> {
+public class JobFolderFileVisitor extends SimpleFileVisitor<Path> {
 
     Path src;
     Path dest;
 
-    SimulationFolderFileVisitor(Path src, Path dest) {
+    JobFolderFileVisitor(Path src, Path dest) {
         this.src = src;
         this.dest = dest;
     }

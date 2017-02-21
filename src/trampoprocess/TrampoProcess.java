@@ -14,7 +14,7 @@ public class TrampoProcess {
 	private static String STOP_NOW = "stop_now.txt";
 
 	public static void main(String[] args) throws Exception {
-		SimulationQueue simulationQueue = new SimulationQueue();
+		JobQueue simulationQueue = new JobQueue();
 		Path currentPath = Paths.get(System.getProperty("user.dir"));
 		System.out.println("Start trampo process in directory " + currentPath);
 		System.out.println("Create file stop.txt in directory to stop trampo process, currently run simulaiton will finish");
@@ -22,7 +22,7 @@ public class TrampoProcess {
 		
 		// Retrieve paused simulations from webapp
 		{
-		Iterator<Simulation> simulation = new WebAppGate().getSimulations(SimulationStatuses.PAUSED_MAINTENANCE).iterator();
+		Iterator<Job> simulation = new WebAppGate().getSimulations(SimulationStatuses.PAUSED_MAINTENANCE).iterator();
 		while (simulation.hasNext()) {simulationQueue.addSimulation(simulation.next());}
 		}
 		
@@ -33,7 +33,7 @@ public class TrampoProcess {
 				simulationQueue.trigger(); // Process simulations in the queue
 				
 				// Add simulations from webapp
-				Iterator<Simulation> simulation = new WebAppGate().getSimulations().iterator();
+				Iterator<Job> simulation = new WebAppGate().getSimulations().iterator();
 				while (simulation.hasNext()) {simulationQueue.addSimulation(simulation.next());}
 				
 				TimeUnit.SECONDS.sleep(1); // Wait 1 second

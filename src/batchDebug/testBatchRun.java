@@ -15,14 +15,16 @@ import java.nio.file.Paths;
  * @author Administrator
  */
 public class testBatchRun {
-
+static File source = Paths.get("C:\\data\\customer_5543813196\\Synchronised folder\\simulation_218").toFile();
+static File destination= Paths.get("C:\\data\\customer_5543813196\\simulation_218\\logs").toFile();
+static String string = "log";
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // Prints "Hello, World" in the terminal window.
         System.out.println("Hello, World");
         Run r = new Run();
-        r.run();
+        r.ConditionalMoveFiles(source,destination,string);
     }
 
     

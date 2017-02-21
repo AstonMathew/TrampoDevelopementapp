@@ -11,26 +11,26 @@ import java.util.Queue;
 
 import constants.SimulationStatuses;
 
-public class SimulationQueue {
+public class JobQueue {
 
 	public class SimulationHandler implements Runnable {
-		Simulation _sim = null;
+		Job _sim = null;
 
-		public SimulationHandler(Simulation sim) {
+		public SimulationHandler(Job sim) {
 			_sim = sim;
 		}
 
 		public void run() {
 			System.out.println("Running in a thread");
 			 try {
-				_sim.runSimulationWorkflow();
+				_sim.runJobWorkflow();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 
-		Simulation getSimulation() {
+		Job getSimulation() {
 			return _sim;
 		}
 	}
@@ -48,7 +48,7 @@ public class SimulationQueue {
  
  public int maximumClocktimeInSeconds() { return 60; }
  
- public void runSimulationWorkflow() { _status = STARTED; System.out.println(
+ public void runJobWorkflow() { _status = STARTED; System.out.println(
  "Running simulation in a thread"); ProcessBuilder pb = new
  ProcessBuilder("c:\\Temp\\test.bat"); try { pb.start(); } catch
  (IOException e) { e.printStackTrace(); } finally { _status = COMPLETE; }
@@ -66,13 +66,13 @@ public class SimulationQueue {
 	// Store the list of simulation requests
 	Thread _currentSimulationThread = null;
 	SimulationHandler _currentSimulation = null;
-	Queue<Simulation> _simulations = null;
-	Queue<Simulation> _simulationsWaitingForFiles = null;
+	Queue<Job> _simulations = null;
+	Queue<Job> _simulationsWaitingForFiles = null;
 	LocalTime _timeLastRunTimeUpdate = null;
 
-	public SimulationQueue() {
-		_simulations = new LinkedList<Simulation>();
-		_simulationsWaitingForFiles = new LinkedList<Simulation>();
+	public JobQueue() {
+		_simulations = new LinkedList<Job>();
+		_simulationsWaitingForFiles = new LinkedList<Job>();
 		_currentSimulation = null;
 		_currentSimulationThread = null;
 		_timeLastRunTimeUpdate = null;
@@ -87,13 +87,13 @@ public class SimulationQueue {
 	}
 	
 	public void purgeQueuingSimulations(String status) {
-		Iterator<Simulation> simIt = _simulations.iterator();
+		Iterator<Job> simIt = _simulations.iterator();
 		while (simIt.hasNext()) {
-			Simulation sim = simIt.next();
+			Job sim = simIt.next();
 			try {
 				new WebAppGate().updateSimulationStatus(sim, status);
 			} catch (Exception e) {
-				System.out.println("Error when updating status for simulation " + sim._simulationNumber + " with error " + e.getMessage());
+				System.out.println("Error when updating status for simulation " + sim._jobNumber + " with error " + e.getMessage());
 			}
 		}
 		_simulations.clear();
@@ -106,7 +106,7 @@ public class SimulationQueue {
 		}
 	}
 	
-	public void addSimulation(Simulation sim) throws Exception {
+	public void addSimulation(Job sim) throws Exception {
 		if (sim.areFilesAvailable()) {
 			addSimulationToQueue(sim);
 		} else {
@@ -114,9 +114,9 @@ public class SimulationQueue {
 		}
 	}
 	
-	private boolean addSimulationToQueue(Simulation sim) throws Exception {
+	private boolean addSimulationToQueue(Job sim) throws Exception {
  		try {
-			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._simulationNumber + " with file " + sim._simulation);
+			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._jobNumber + " with file " + sim._simulation);
 			  sim.checkSim_name_AndFiles_count_extension();
 			  String c = new WebAppGate().getSimulationStatus(sim); 
 			  if ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE)) { 
@@ -125,7 +125,7 @@ public class SimulationQueue {
 			    return true;
 			  }
 		} catch (Exception e) {
-			System.out.println("Error when adding simulation " + sim._simulationNumber + " with error " + e.getMessage());
+			System.out.println("Error when adding simulation " + sim._jobNumber + " with error " + e.getMessage());
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 			System.out.println(sw.toString());
@@ -136,15 +136,15 @@ public class SimulationQueue {
 	public void trigger() throws Exception {
 		// Deal with simulations waiting for files
 		try {
-			Iterator<Simulation> simIt = _simulationsWaitingForFiles.iterator();
+			Iterator<Job> simIt = _simulationsWaitingForFiles.iterator();
 			while (simIt.hasNext()) {
-				Simulation sim = simIt.next();
+				Job sim = simIt.next();
 				if (sim.areFilesAvailable()) {
 					if (addSimulationToQueue(sim)) {
-						// Simulation has been added to queue. Remove from waiting for files
+						// Job has been added to queue. Remove from waiting for files
 						_simulationsWaitingForFiles.remove(sim);						
 					} else {
-						// Simulation has not been added. Check current status. If status changed, then remove as 
+						// Job has not been added. Check current status. If status changed, then remove as 
 						// Something is wrong with the setup.
 						String c = new WebAppGate().getSimulationStatus(sim);
 						if (! ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE))) {
@@ -164,12 +164,12 @@ public class SimulationQueue {
 		// Handle current process
 		if ((_currentSimulation != null) && (_currentSimulationThread.isAlive())) { 
 			// Current simulation running
-			Simulation cSim = _currentSimulation.getSimulation();
+			Job cSim = _currentSimulation.getSimulation();
 			long rt = cSim.currentRunTimeInSeconds();
 
 			// Update runtime simulation every 60 seconds
 			if (ChronoUnit.SECONDS.between(_timeLastRunTimeUpdate, LocalTime.now()) >= 60) {
-				cSim.updateSimulationActualRuntime();
+				cSim.updateJobActualRuntime();
 				_timeLastRunTimeUpdate = LocalTime.now();
 				cSim.updateMaximumClocktimeInSecondsFromWebApp();
 			}
@@ -205,7 +205,7 @@ public class SimulationQueue {
 												// empty queue
 			_currentSimulation = new SimulationHandler(_simulations.poll());
 			if (!new WebAppGate().isSimulationCanceled(_currentSimulation.getSimulation())) {
-				System.out.println("Start new simulation " + _currentSimulation._sim._simulationNumber);
+				System.out.println("Start new simulation " + _currentSimulation._sim._jobNumber);
 				_currentSimulationThread = new Thread(_currentSimulation);
 				_currentSimulationThread.start();
 			        _timeLastRunTimeUpdate = LocalTime.now();

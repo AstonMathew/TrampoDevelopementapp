@@ -35,17 +35,17 @@ import java.nio.file.StandardCopyOption;
 /**
  *
  * @author Administrator
- *
- * TODOGUINOW 
- *
- * TODOLATER This code breaks if the simulation folder already exists. 
- * //runDataExtraction() Simulation name needs to be updated to latest sim file in folder tree.
- * move InstalledVersions.txt into the code.
- */
-public class Simulation {
 
-    // Simulation parameters from the website
-    Integer _simulationNumber = null; // = 65;
+ TODOGUINOW 
+
+ TODOLATER This code breaks if the simulation folder already exists. 
+ //runDataExtraction() Job name needs to be updated to latest sim file in folder tree.
+ move InstalledVersions.txt into the code.
+ */
+public class Job {
+
+    // Job parameters from the website
+    Integer _jobNumber = null; // = 65;
     String _customerNumber = null;
     String _submissionDate = null; // UTC date
     String _submissionTime = null;// UTC Time
@@ -71,21 +71,22 @@ public class Simulation {
     static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
             "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
     static String DATAROOT = "C:\\data\\";
+    static String RUNROOT = "C:\\data\\";
     static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
     static int TOBACKUPCOPYWAITINGTIME = 1000; //1000 MILLIsecond for testing, 300000 MILLIsecond =5 minutes for production
 
     /**
-     * @param _simulationNumber
+     * @param _jobNumber
      * @param _customerNumber
      * @param _submissionDate
      * @param _maxSeconds
      * @param _Simulation
-     * @param _simulationRunningFolder
+     * 
      */
-    public Simulation(Integer simulationNumber, String customerNumber, String submissionDate, int maxSeconds,
+    public Job(Integer jobNumber, String customerNumber, String submissionDate, int maxSeconds,
             String simulation, int fileCount) {
-        _simulationNumber = simulationNumber;
+        _jobNumber = jobNumber;
         _customerNumber = customerNumber;
         _submissionDate = submissionDate;
         _maxSeconds = maxSeconds;
@@ -100,7 +101,7 @@ public class Simulation {
     	return _creationTime;
     }
 
-    public boolean areFilesAvailable() throws Exception { //used in simulation queue/add simulation()
+    public boolean areFilesAvailable() throws Exception { //used in Job queue/add job()
         // test the sim exits is file count and file name is wrong
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
@@ -113,14 +114,14 @@ public class Simulation {
         // _simulation = _simulation.concat("\"");
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         if (_simulation.isEmpty()) { // redundant with simulation file name a required field
-            updateSimulationStatus(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
+            updateJobStatus(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
             System.out.println(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
         } else {
             // Check for .sim file
             String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
             if (!FileFunctions.fileIsAvailable(getCustomerSynchronisedFolder().resolve(sim))) {
                 System.out.println("Simulation file " + sim + " is NOT available");
-                throw new Exception("Simulation " + _simulationNumber + " - Simulation file " + sim + " is NOT available");
+                throw new Exception("Simulation " + _jobNumber + " - Simulation file " + sim + " is NOT available");
             } else {
                 System.out.println("Simulation file " + sim + " is available");
             }
@@ -139,7 +140,7 @@ public class Simulation {
                         }
                         if (res == false) {
                             System.out.println("File " + child.getName() + " extension is not supported");
-                            updateSimulationStatus(SimulationStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
+                            updateJobStatus(SimulationStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
                             throw new Exception("File " + child.getName() + " extension is not supported");
                         }
                     }
@@ -147,69 +148,74 @@ public class Simulation {
             }
 
             // Check files count
+            System.out.println("FileFunctions.countFiles(getCustomerSynchronisedFolder()) = "+FileFunctions.countFiles(getCustomerSynchronisedFolder()));
+            System.out.println("_fileCount = "+_fileCount);
+            //_fileCount = 1;
+            
             if (FileFunctions.countFiles(getCustomerSynchronisedFolder()) != _fileCount) {
+                
                 System.out.println("!!! Actual file count does not match nominated file count !!!");
-                updateSimulationStatus(SimulationStatuses.CANCELLED_NOFILEUPLOADED);
-                throw new Exception("Simulation " + _simulationNumber + "!!! Actual file count does not match nominated file count !!!");
+                updateJobStatus(SimulationStatuses.CANCELLED_NOFILEUPLOADED);
+                throw new Exception("Simulation " + _jobNumber + "!!! Actual file count does not match nominated file count !!!");
             } else {
                 System.out.println("Actual file count matches nominated file count !!!");
             }
         }
     }
 
-    public void runSimulationWorkflow() throws Exception {
+    public void runJobWorkflow() throws Exception {
         // System.out.println("1+1=" + 1 + 1);
         _startTime = LocalTime.now();
 
         // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
-        CreateSimulationFolders();
+        createJobFolders();
         createLogAndBackupDirectories(); //remove the commeting out in production
         CreateLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
-        CopyCustomerSyncFolderIntoSimulationRunFolder();
+        CopyCustomerSyncFolderIntoJobRunFolder();
         getCustomerStarCCMPlusVersion();
         selectStarCCMPlusRunVersion(); //LATER: need to read Star-CCM+ installed on machine itself. Adress issue of latest CCM+ version not loaded on Trampo yet.
-        RunSimulation();
+        RunJob();
         copyLogOutputWindowToFile();
         //runDataExtraction; // 
-        // check that the running simulation is “alive” in all processes.
+        // check that the running Job is “alive” in all processes.
         System.out.println("End");
     }
 
-    private void CreateSimulationFolders() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
-//Files.createDirectory(getSimulationRunningFolderPath());
+    private void createJobFolders() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
+//Files.createDirectory(getJobRunningFolderPath());
 // Files.createTempFile(simulationSendingToTrampoFolderPath,
         // "tmp",".txt");
-        if (Files.isDirectory(getSimulationRunningFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
-            Files.createDirectories(getSimulationRunningFolderPath());
-            System.out.println("simulationRunningFolder created " + getSimulationRunningFolderPath());
+        if (Files.isDirectory(getJobRunningFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getJobRunningFolderPath());
+            System.out.println("JobRunningFolder created " + getJobRunningFolderPath());
             //System.out.println("src folder will show below as Directory copied");
         } else {
             System.err.println(
-                    "ERROR: SIMULATIONRUNNINGFOLDER EXISTING !!! with Path: " + getSimulationRunningFolderPath());
+                    "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
             // this needs to make the simulation exist the queue as it indicates a major problem
-            updateSimulationStatus(SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
-            throw new Exception("ERROR: SIMULATIONRUNNINGFOLDER EXISTING !!! with Path: " + getSimulationRunningFolderPath());
+            updateJobStatus(SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
+            throw new Exception("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
         }
     }
 
     private void createLogAndBackupDirectories() throws FileNotFoundException, IOException {
-        Files.createDirectories(getSimulationLogsPath());
-        boolean SimulationLogs = Files.isDirectory(getSimulationLogsPath(), LinkOption.NOFOLLOW_LINKS);
-        System.out.println("SimulationLogs isDirectory " + SimulationLogs);
-        System.out.println(" getSimulationLogsPath Folder created " + getSimulationLogsPath());
+        Files.createDirectories(getJobLogsPath());
+        boolean JobLogs = Files.isDirectory(getJobLogsPath(), LinkOption.NOFOLLOW_LINKS);
+        System.out.println("JobLogs isDirectory " + JobLogs);
+        System.out.println(" getJobLogsPath Folder created " + getJobLogsPath());
 
-        Files.createDirectories(getSimulationBackupPath());
-        System.out.println(" getSimulationBackupPath Folder created " + getSimulationBackupPath());
-        File log = getSimulationLogsPath().resolve("\\simulation_" + _simulationNumber + ".log").toFile();
-
+        Files.createDirectories(getJobBackupPath());
+        System.out.println(" getJobBackupPath Folder created " + getJobBackupPath());
+        
+        File log = getJobLogsPath().resolve("\\job_" + _jobNumber + ".log").toFile();
         try {
             //Create the file
             Files.createFile(log.toPath());
-            System.out.println("simulation_" + _simulationNumber + ".log File is created!");
+            System.out.println("job_" + _jobNumber + ".log File is created!");
         } catch (IOException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("simulation_" + _simulationNumber + ".log : File already exists or the operation failed for some reason");
+            Logger.getLogger(Job.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
         }
         _printStreamToLogFile = new PrintStream(log);
 //        System.setOut(_printStreamToLogFile);
@@ -219,29 +225,29 @@ public class Simulation {
     private void CreateLogHeader() throws IOException, InterruptedException {
 
         _printStreamToLogFile.println("HEADER START----------------------------------------------------------------------------------------------------------------");
-        _printStreamToLogFile.println("simulationNumber = " + _simulationNumber);
+        _printStreamToLogFile.println("simulationNumber = " + _jobNumber);
         _printStreamToLogFile.println("customerNumber = " + _customerNumber);
         _printStreamToLogFile.println("submissionDate = " + _submissionDate);
         _printStreamToLogFile.println("maxSeconds = " + _maxSeconds);
         _printStreamToLogFile.println("Simulation = " + _simulation);
-        _printStreamToLogFile.println("simulationRunningFolder = " + getSimulationRunningFolderPath());
+        _printStreamToLogFile.println("simulationRunningFolder = " + getJobRunningFolderPath());
         _printStreamToLogFile.println("HEADER END-------------------------------------------------------------------------------------------------------------------");
     }
 
-    private void CopyCustomerSyncFolderIntoSimulationRunFolder() throws IOException, InterruptedException {
-        System.out.println("starting CopyCustomerSyncFolderIntoSimulationRunFolder()");
+    private void CopyCustomerSyncFolderIntoJobRunFolder() throws IOException, InterruptedException {
+        System.out.println("starting CopyCustomerSyncFolderIntoJobRunFolder()");
 //        SimulationFolderFileVisitor visitor = new SimulationFolderFileVisitor(getCustomerSynchronisedFolder(),
-//                getSimulationRunningFolderPath());
+//                getJobRunningFolderPath());
 //        Files.walkFileTree(getCustomerSynchronisedFolder(), visitor);
 
         File sourceDirectory = getCustomerSynchronisedFolder().toFile();
-        File destinationDirectory = getSimulationRunningFolderPath().toFile();
+        File destinationDirectory = getJobRunningFolderPath().toFile();
         ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
 //        File[] directoryListing = dir.listFiles();
 //        if (directoryListing != null) {
 //            for (File child : directoryListing) {
 //                if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)) { //we're not copying directories, just files
-//                    Files.move(child.toPath(), getSimulationRunningFolderPath().resolve(child.getName()), StandardCopyOption.REPLACE_EXISTING);
+//                    Files.move(child.toPath(), getJobRunningFolderPath().resolve(child.getName()), StandardCopyOption.REPLACE_EXISTING);
 //                    System.out.println("File Copied: " + child.toString());//.replaceAll(Matcher.quoteReplacement(src.toString()), ""));
 //                } else {
 //                    System.out.println("File NOT Copied: " + child.toString());
@@ -249,15 +255,15 @@ public class Simulation {
 //            }
 //        }
 
-        System.out.println("finished CopyCustomerSyncFolderIntoSimulationRunFolder()");
+        System.out.println("finished CopyCustomerSyncFolderIntoJobRunFolder()");
     }
 
     private void getCustomerStarCCMPlusVersion() throws IOException, InterruptedException {
-        Path InitialVersionLogPath = getSimulationRunningFolderPath().resolve("version.log");
+        Path InitialVersionLogPath = getJobRunningFolderPath().resolve("version.log");
         Files.createFile(InitialVersionLogPath);
         ProcessBuilder pb = new ProcessBuilder(CCMPLUSVERSIONFORINFOFLAGRUNPATH, "-info", "Cube.sim");
         pb.redirectOutput(InitialVersionLogPath.toFile());
-        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
+        File pbWorkingDirectory = getJobRunningFolderPath().toFile(); //(new File)?
         pb.directory(pbWorkingDirectory);
         Process p = pb.start();
         p.waitFor();
@@ -274,7 +280,7 @@ public class Simulation {
         String ccmplusversion = content.substring(startindex, stopindex);
         System.out.println("CCM+ version = " + ccmplusversion);
         _StarCcmPlusVersion = ccmplusversion.replace(" ", "");
-        Path finalVersionLogPath = getSimulationLogsPath().resolve("version.log");
+        Path finalVersionLogPath = getJobLogsPath().resolve("version.log");
         System.out.println("finalVersionLogPath = " + finalVersionLogPath.toString());
         Files.createFile(finalVersionLogPath);
         Files.move(InitialVersionLogPath, finalVersionLogPath, StandardCopyOption.REPLACE_EXISTING);
@@ -322,17 +328,17 @@ public class Simulation {
 
     }
 
-    private void RunSimulation() throws Exception {
+    private void RunJob() throws Exception {
         ProcessBuilder pb = new ProcessBuilder(
                 _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
                 "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", PODKEY,
                 _simulation);
 
-        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
+        File pbWorkingDirectory = getJobRunningFolderPath().toFile(); //(new File)?
         pb.directory(pbWorkingDirectory);
         try {
-            updateSimulationStatus(SimulationStatuses.RUNNING);
+            updateJobStatus(SimulationStatuses.RUNNING);
             _startSimulationTime = LocalTime.now();
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
             _simulationProcess = pb.start();
@@ -342,23 +348,23 @@ public class Simulation {
             InputStream stdout = _simulationProcess.getInputStream();
             while (stdout.read() >= 0) {;
 //                BackupFolderFileVisitor visitor = new BackupFolderFileVisitor(
-//                        getSimulationRunningFolderPath(), getSimulationBackupPath());
-//                Files.walkFileTree(getSimulationRunningFolderPath(), visitor);
+//                        getJobRunningFolderPath(), getJobBackupPath());
+//                Files.walkFileTree(getJobRunningFolderPath(), visitor);
           
                 //Thread.sleep(TOBACKUPCOPYWAITINGTIME);
             }
             _simulationProcess.waitFor();
             File sourceDirectory = pbWorkingDirectory;
-                File destinationDirectory = getSimulationBackupPath().toFile();
+                File destinationDirectory = getJobBackupPath().toFile();
                 ConditionalMoveFiles(sourceDirectory, destinationDirectory, "@");
-                destinationDirectory = getSimulationLogsPath().toFile();
+                destinationDirectory = getJobLogsPath().toFile();
                 ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
 
             // All below 
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
             _printStreamToLogFile.println("Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
-            updateSimulationActualRuntime();
-            updateSimulationStatus(SimulationStatuses.COMPLETED);
+            updateJobActualRuntime();
+            updateJobStatus(SimulationStatuses.COMPLETED);
             _printStreamToLogFile.println("Simulation complete...");
 
         } catch (IOException e) {
@@ -367,12 +373,12 @@ public class Simulation {
         }
     }
 
-    public void updateSimulationActualRuntime() throws Exception {
-        new WebAppGate().updateSimulationActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
+    public void updateJobActualRuntime() throws Exception {
+        new WebAppGate().updateJobActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
     }
 
     private void copyLogOutputWindowToFile() throws IOException, InterruptedException {
-        Files.copy(getOutputWindowLogToFile(), getSimulationLogsPath().resolve("outputWindowToFileSimulation_" + _simulationNumber + ".log"), COPY_ATTRIBUTES);
+        Files.copy(getOutputWindowLogToFile(), getJobLogsPath().resolve("outputWindowToFileJob_" + _jobNumber + ".log"), COPY_ATTRIBUTES);
         System.out.println("OUTPUTWINDOWLOGTOFILELOCATION COPIED");
     }
 
@@ -479,14 +485,14 @@ public class Simulation {
 
     public void abort() throws InterruptedException {
     	if (! _isAborting) {
-          File file = new File(getSimulationRunningFolderPath() + "\\ABORT.txt");
+          File file = new File(getJobRunningFolderPath() + "\\ABORT.txt");
 
           try {
               //Create the file
               file.createNewFile();
               System.out.println("ABORT.txt File is created!");
           } catch (IOException ex) {
-              Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+              Logger.getLogger(Job.class.getName()).log(Level.SEVERE, null, ex);
               System.out.println("ABORT.txt File already exists or the operation failed for some reason");
           }
           _simulationProcess.waitFor(2, TimeUnit.MINUTES);
@@ -507,20 +513,20 @@ public class Simulation {
         return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder");
     }
 
-    private Path getSimulationRunningFolderPath() {// the simulation running folder
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder", "simulation_" + _simulationNumber);
+    private Path getJobRunningFolderPath() {// the Job running folder
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder", "Job_" + _jobNumber);
     }
 
-    private Path getSimulationLogsPath() {
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\simulation_" + _simulationNumber, "\\logs");
+    private Path getJobLogsPath() {
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\Job_" + _jobNumber, "\\logs");
     }
 
-    private Path getSimulationBackupPath() {
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\simulation_" + _simulationNumber + "\\backup");
+    private Path getJobBackupPath() {
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\Job_" + _jobNumber + "\\backup");
     }
 
-    private String getSimulationStatusPath() {
-        return getSimulationRunningFolderPath() + "\\simulation_" + _simulationNumber + "_Status.txt";
+    private String getJobStatusPath() {
+        return getJobRunningFolderPath() + "\\Job_" + _jobNumber + "_Status.txt";
     }
 
     private Path getOutputWindowLogToFile() { // might need update to work for all versions
@@ -538,7 +544,7 @@ public class Simulation {
     public void updateMaximumClocktimeInSecondsFromWebApp() {
 
         try {
-            _maxSeconds = new WebAppGate().getSimulationMaxRuntime(this);
+            _maxSeconds = new WebAppGate().getJobMaxRuntime(this);
         } catch (Exception e) {
             // Can't update from the webapp, best to play it safe and keep the max seconds as is
         }
@@ -549,12 +555,12 @@ public class Simulation {
         return _maxSeconds;
     }
 
-    public void updateSimulationStatus(String newStatus) throws Exception {
+    public void updateJobStatus(String newStatus) throws Exception {
         new WebAppGate().updateSimulationStatus(this, newStatus);
         if (_printStreamToLogFile != null) {
-            _printStreamToLogFile.println(LocalTime.now() + ": Simulation status updated to " + newStatus);
+            _printStreamToLogFile.println(LocalTime.now() + ": Job status updated to " + newStatus);
         }
-        System.out.println("Simulation status updated to " + newStatus);
+        System.out.println("Job status updated to " + newStatus);
     }
 
     /**

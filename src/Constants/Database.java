@@ -1,6 +1,6 @@
 package constants;
 
-import trampoprocess.Simulation;
+import trampoprocess.Job;
 
 public class Database {
   public static String URL = "jdbc:postgresql://ec2-54-163-240-7.compute-1.amazonaws.com:5432/d96mtni1684ujv?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory";

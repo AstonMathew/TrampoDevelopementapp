@@ -19,101 +19,24 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import trampoprocess.WebAppGate;
 
+
+public class Run {
 /**
  *
- * @author Administrator
+ * moves all files containing the string from the source directory to the destination directory
+ * both directory need to exist!
  */
-public class Run {
+    public void ConditionalMoveFiles(File source, File destination, String string) throws IOException {
+        File[] directoryListing = source.listFiles();
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                if (child.isFile() && child.getName().toLowerCase().contains(string.toLowerCase())) {
+                    System.out.println("directoryListing child.getName = " + child.getName());
+                    Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
+                    System.out.println(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));
 
-    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
-            "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
-    static String RUNFOLDERROOT = "C:\\test\\clusterSetUp\\Run Partition"; // for
-    // testing
-    // only
-    static String STORAGEFOLDERROOT = "C:\\test\\clusterSetUp\\Storage Partition"; // for
-    // testing
-    // only
-
-    //Integer _simulationNumber = 149; // = 65;
-    String _simulation = "Cube.sim";
-    String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
-    String _localHostNP = "localhost:" + _numberComputeCores;
-    String PODKEY = "5vq0W6k4A3CThu7rcwFeS23KtqY";
-
-    //Instance variables
-    Process _simulationProcess = null;
-    LocalTime _startTime = null;
-    LocalTime _startSimulationTime = null;
-    PrintStream _printStreamToLogFile = null;
-    String _StarCcmPlusVersion = null;
-    Path _StarCcmPlusVersionPath = null;
-    String _StarCcmPlusDefaultVersion = null;
-    Path _StarCcmPlusDefaultVersionPath = null;
-
-    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\BackEnd\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
-
-    public void run() throws IOException {
-        String[][] array = Files.lines(CCMPLUSINSTALLEDVERSIONS)
-                .map(s -> s.split("\\s+", 2))
-                .map(a -> new String[]{a[0], a[1]})
-                .toArray(String[][]::new);
-
-        System.out.println(Arrays.deepToString(array));
-        String version = array[0][0];
-        System.out.println("version is = " + version.replace(",", ""));
-        version = array[1][0];
-        System.out.println("version is = " + version.replace(",", ""));
-
-        _StarCcmPlusVersion = "11.00.011"; // caught by getStarCCMPlusVersion()
-        System.out.println("simulationCcmPlusVersion= " + _StarCcmPlusVersion);
-        for (int i = 0; i < array.length; i++) {
-            _StarCcmPlusDefaultVersion = array[0][0].replace(",", "");
-            _StarCcmPlusDefaultVersionPath= Paths.get(array[0][1].replace(",", ""));
-            
-            if (array[i][0].replace(",", "").equals(_StarCcmPlusVersion)) {
-                _StarCcmPlusVersionPath = Paths.get(array[i][1].replace(",", ""));
-                System.out.println("simulationCcmPlusVersionPath= " + array[i][1]);
+                }
             }
         }
-        if (_StarCcmPlusVersionPath == null) {
-            System.out.println("simulationCcmPlusVersion is NOT installed on compute node");
-            System.out.println("using DEFAULT VERSION");
-            _StarCcmPlusVersion = _StarCcmPlusDefaultVersion;
-            System.out.println("_StarCcmPlusDefaultVersion= "+_StarCcmPlusDefaultVersion);
-            _StarCcmPlusVersionPath = _StarCcmPlusDefaultVersionPath;
-            System.out.println("_StarCcmPlusDefaultVersionPath= "+_StarCcmPlusDefaultVersionPath);
-        } else {
-            System.out.println("simulationCcmPlusVersion is installed on compute node");
-
-        }
-
-    }
-
-    private void RunSimulation() throws Exception {
-        ProcessBuilder pb = new ProcessBuilder(
-                "C:\\Program Files\\CD-adapco\\STAR-CCM+" + _StarCcmPlusVersion + "\\star\\bin\\starccm+.exe", "-batch",
-                TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
-                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", PODKEY,
-                _simulation);
-
-        File pbWorkingDirectory = getSimulationRunningFolderPath().toFile(); //(new File)?
-        pb.directory(pbWorkingDirectory);
-        try {
-
-            _simulationProcess = pb.start();
-            System.out.println("p started");
-            InputStream stdout = _simulationProcess.getInputStream();
-            while (stdout.read() >= 0) {;
-            }
-            _simulationProcess.waitFor();
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    private Path getSimulationRunningFolderPath() {
-        return Paths.get("C:\\test\\clusterSetUp\\Run Partition\\customer_5543813196\\test");// +File.separator+"temp"+File.separator+"nestedTemp");
     }
 }
