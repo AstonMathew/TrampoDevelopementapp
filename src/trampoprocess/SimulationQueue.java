@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -66,30 +67,101 @@ public class SimulationQueue {
 	Thread _currentSimulationThread = null;
 	SimulationHandler _currentSimulation = null;
 	Queue<Simulation> _simulations = null;
+	Queue<Simulation> _simulationsWaitingForFiles = null;
 	LocalTime _timeLastRunTimeUpdate = null;
 
 	public SimulationQueue() {
 		_simulations = new LinkedList<Simulation>();
+		_simulationsWaitingForFiles = new LinkedList<Simulation>();
 		_currentSimulation = null;
 		_currentSimulationThread = null;
 		_timeLastRunTimeUpdate = null;
 	}
 
+	public boolean hasSimulationRunning() {
+		return _currentSimulation != null;
+	}
+	
+	public boolean hasSimulation() {
+		return (_simulations.size() > 0);
+	}
+	
+	public void purgeQueuingSimulations(String status) {
+		Iterator<Simulation> simIt = _simulations.iterator();
+		while (simIt.hasNext()) {
+			Simulation sim = simIt.next();
+			try {
+				new WebAppGate().updateSimulationStatus(sim, status);
+			} catch (Exception e) {
+				System.out.println("Error when updating status for simulation " + sim._simulationNumber + " with error " + e.getMessage());
+			}
+		}
+		_simulations.clear();
+	}
+	
+	public void stopCurrentSimulationNow() {
+		if (hasSimulationRunning()) {
+		  _currentSimulation.getSimulation().abortNow();
+		  _currentSimulationThread.interrupt();
+		}
+	}
+	
 	public void addSimulation(Simulation sim) throws Exception {
-		try {
+		if (sim.areFilesAvailable()) {
+			addSimulationToQueue(sim);
+		} else {
+			_simulationsWaitingForFiles.add(sim);
+		}
+	}
+	
+	private boolean addSimulationToQueue(Simulation sim) throws Exception {
+ 		try {
 			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._simulationNumber + " with file " + sim._simulation);
-			sim.checkSim_name_AndFiles_count_extension();
-			_simulations.add(sim);
-			new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+			  sim.checkSim_name_AndFiles_count_extension();
+			  String c = new WebAppGate().getSimulationStatus(sim); 
+			  if ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE)) { 
+			    _simulations.add(sim);
+			    new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+			    return true;
+			  }
 		} catch (Exception e) {
 			System.out.println("Error when adding simulation " + sim._simulationNumber + " with error " + e.getMessage());
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 			System.out.println(sw.toString());
 		}
+		return false;
 	}
 
 	public void trigger() throws Exception {
+		// Deal with simulations waiting for files
+		try {
+			Iterator<Simulation> simIt = _simulationsWaitingForFiles.iterator();
+			while (simIt.hasNext()) {
+				Simulation sim = simIt.next();
+				if (sim.areFilesAvailable()) {
+					if (addSimulationToQueue(sim)) {
+						// Simulation has been added to queue. Remove from waiting for files
+						_simulationsWaitingForFiles.remove(sim);						
+					} else {
+						// Simulation has not been added. Check current status. If status changed, then remove as 
+						// Something is wrong with the setup.
+						String c = new WebAppGate().getSimulationStatus(sim);
+						if (! ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE))) {
+							_simulationsWaitingForFiles.remove(sim);
+						}
+					}
+				} else if (ChronoUnit.HOURS.between(sim.getCreationTime(), LocalTime.now()) >= 3*24) {
+					// Files are not available after 3 days. Let stuff happen
+					_simulationsWaitingForFiles.remove(sim);
+					addSimulationToQueue(sim);					
+				}
+			}
+	   } catch (Exception e) {
+		  System.out.println("Error with error " + e.getMessage());
+	   }
+		
+		// Handle current process
 		if ((_currentSimulation != null) && (_currentSimulationThread.isAlive())) { 
 			// Current simulation running
 			Simulation cSim = _currentSimulation.getSimulation();

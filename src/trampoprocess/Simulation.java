@@ -55,6 +55,7 @@ public class Simulation {
 
     //Instance variables
     Process _simulationProcess = null;
+    LocalTime _creationTime = null;
     LocalTime _startTime = null;
     LocalTime _startSimulationTime = null;
     PrintStream _printStreamToLogFile = null;
@@ -92,6 +93,19 @@ public class Simulation {
         _fileCount = fileCount;
         _simulationProcess = null;
         _startTime = null;
+        _creationTime = LocalTime.now();
+    }
+    
+    public LocalTime getCreationTime() {
+    	return _creationTime;
+    }
+
+    public boolean areFilesAvailable() throws Exception { //used in simulation queue/add simulation()
+        // test the sim exits is file count and file name is wrong
+        _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
+        String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
+        if (!FileFunctions.fileIsAvailable(getCustomerSynchronisedFolder().resolve(sim))) { return false; }
+        return (FileFunctions.countFiles(getCustomerSynchronisedFolder()) >= _fileCount);
     }
 
     public void checkSim_name_AndFiles_count_extension() throws Exception { //used in simulation queue/add simulation()
@@ -460,21 +474,24 @@ public class Simulation {
         }
         return ChronoUnit.SECONDS.between(time, LocalTime.now());
     }
+    
+    private boolean _isAborting = false;
 
     public void abort() throws InterruptedException {
-        // To be implemented: soft abort with a grace period
-        File file = new File(getSimulationRunningFolderPath() + "\\ABORT.txt");
+    	if (! _isAborting) {
+          File file = new File(getSimulationRunningFolderPath() + "\\ABORT.txt");
 
-        try {
-            //Create the file
-            file.createNewFile();
-            System.out.println("ABORT.txt File is created!");
-        } catch (IOException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("ABORT.txt File already exists or the operation failed for some reason");
-        }
-        _simulationProcess.waitFor(2, TimeUnit.MINUTES);
-
+          try {
+              //Create the file
+              file.createNewFile();
+              System.out.println("ABORT.txt File is created!");
+          } catch (IOException ex) {
+              Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+              System.out.println("ABORT.txt File already exists or the operation failed for some reason");
+          }
+          _simulationProcess.waitFor(2, TimeUnit.MINUTES);
+          _isAborting = true;
+    	}
     }
 
     public void abortNow() {

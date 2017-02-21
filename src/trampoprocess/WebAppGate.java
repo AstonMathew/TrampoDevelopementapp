@@ -20,6 +20,33 @@ import constants.SimulationStatuses;
  *
  */
 public class WebAppGate {
+	private static final Logger LOGGER = Logger.getLogger(WebAppGate.class.getName() );
+	
+	public String getSimulationStatus(Simulation sim) throws Exception {
+		try {
+			Connection conn = getConnection();
+			if (conn == null) {
+				throw new Exception("No connection made");
+			}
+			PreparedStatement pstmt = conn.prepareStatement("SELECT " + Database.STATUS + " FROM simulation WHERE customer_id=? AND no=?;");
+			pstmt.setString(1, sim._customerNumber);
+			pstmt.setInt(2, sim._simulationNumber);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				return rs.getString(Database.STATUS);
+			} else {
+				LOGGER.info("Database no longer has information on simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+				LOGGER.log(Level.SEVERE, "");
+			}
+			pstmt.close();
+			conn.close();
+		} catch (SQLException e) {
+			LOGGER.info("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+			LOGGER.log(Level.WARNING, null, e);
+		}
+		return "";
+	}
+
 	public boolean isSimulationCanceled(Simulation sim) throws Exception {
 		try {
 			Connection conn = getConnection();
@@ -33,12 +60,14 @@ public class WebAppGate {
 			if (rs.next()) {
 				return (rs.getInt(Database.CANCELED_BY_USER) == 1);
 			} else {
-				Logger.getLogger("Database no longer has information on simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.SEVERE, "");
+				LOGGER.info("Database no longer has information on simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+				LOGGER.log(Level.SEVERE, "");
 			}
 			pstmt.close();
 			conn.close();
 		} catch (SQLException e) {
-			Logger.getLogger("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.WARNING, null, e);
+			LOGGER.info("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+			LOGGER.log(Level.WARNING, null, e);
 		}
 		return false;
 	}
@@ -56,44 +85,20 @@ public class WebAppGate {
 			if (rs.next()) {
 				return rs.getInt(Database.MAX_RUNTIME);
 			} else {
-				Logger.getLogger("Database no longer has information on simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.SEVERE, "");
+				LOGGER.info("Database no longer has information on simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+				LOGGER.log(Level.SEVERE, "");
 			}
 			pstmt.close();
 			conn.close();
 		} catch (SQLException e) {
-			Logger.getLogger("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.WARNING, null, e);
+			LOGGER.info("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+			LOGGER.log(Level.WARNING, null, e);
 		}
 		return null;
 	}
 
 	public LinkedList<Simulation> getSimulations() throws Exception {
 		return getSimulations(SimulationStatuses.SUBMITED);
-		/**
-		LinkedList<Simulation> simulations = new LinkedList<Simulation>();
-		try {
-			Connection conn = getConnection();
-			if (conn == null) {
-				throw new Exception("No connection made");
-			}
-			PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM simulation WHERE status=? ORDER BY sub_date asc, sub_time asc;");
-			pstmt.setString(1, SimulationStatuses.SUBMITED);
-			ResultSet rs = pstmt.executeQuery();
-			while (rs.next()) {
-				rs.getMetaData();
-				simulations.add(new Simulation(rs.getInt(Database.SIMULATION_NO),
-						rs.getString(Database.CUSTOMER_ID),
-						rs.getString(Database.SUBMISSION_DATE),
-						rs.getInt(Database.MAX_RUNTIME),
-						rs.getString(Database.FILE_NAME),
-						rs.getInt(Database.FILE_COUNT)));				
-			}
-			rs.close();
-			pstmt.close();
-			conn.close();
-		} catch (SQLException ex) {
-			Logger.getLogger("Unable to connect to database to query new simulation").log(Level.SEVERE, null, ex);
-		}
-		return simulations; */
 	}
 
 	public LinkedList<Simulation> getSimulations(String status) throws Exception {
@@ -119,11 +124,17 @@ public class WebAppGate {
 			pstmt.close();
 			conn.close();
 		} catch (SQLException ex) {
-			Logger.getLogger("Unable to connect to database to query new simulation").log(Level.SEVERE, null, ex);
+			LOGGER.info("Unable to connect to database to query new simulation");
+			LOGGER.log(Level.SEVERE, null, ex);
 		}
 		return simulations;
 	}
 
+	public LinkedList<String> getCustomerList() throws Exception {
+		LinkedList<String> customerList = new LinkedList<String>();
+		return customerList;
+	}
+	
 	public void updateSimulationActualRuntime(Simulation sim, Integer actualRuntime) throws Exception {
 		try {
 			System.out.println("Update simulation run time for simulation " + sim._simulationNumber);
@@ -139,7 +150,8 @@ public class WebAppGate {
 			pstmt.close();
 			conn.close();
 		} catch (SQLException e) {
-			Logger.getLogger("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.WARNING, null, e);
+			LOGGER.info("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+			LOGGER.log(Level.WARNING, null, e);
 		}
 	}
 
@@ -158,7 +170,8 @@ public class WebAppGate {
 			pstmt.close();
 			conn.close();
 		} catch (SQLException e) {
-			Logger.getLogger("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running").log(Level.WARNING, null, e);
+			LOGGER.info("Unable to connect to database to check if simulation " + sim._simulationNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+			LOGGER.log(Level.WARNING, null, e);
 		}
 	}
 
@@ -171,6 +184,7 @@ public class WebAppGate {
 					Database.PASSWORD);
 		} catch (Exception e) {
 			e.printStackTrace();
+			LOGGER.log(Level.SEVERE,null,e);
 		}
 		return conn;
 	}
