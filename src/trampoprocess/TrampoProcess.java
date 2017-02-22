@@ -55,6 +55,7 @@ public class TrampoProcess {
 				TimeUnit.SECONDS.sleep(1);;
 			}			
 			Files.delete(Paths.get(currentPath.toString(), STOP));
+			new SendEmail().send(SendEmail.TO, "TrampoProcess stopped", "TrampoProcess has now stopped...");
 
 		} else if (Files.exists(Paths.get(currentPath.toString(), STOP_NOW))) {
 			// Stop now...
@@ -63,6 +64,7 @@ public class TrampoProcess {
 			System.out.println("Stopping currently running simulation NOW...");
 			simulationQueue.stopCurrentSimulationNow();
 			Files.delete(Paths.get(currentPath.toString(), STOP_NOW));
+			new SendEmail().send(SendEmail.TO, "TrampoProcess stopped", "TrampoProcess has been forcefully stopped...");
 				
 		} else {
 			throw new Exception("Trampo process should either be stopped or stopped now. Not sure what is going on...");
