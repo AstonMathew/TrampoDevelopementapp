@@ -36,7 +36,7 @@ import java.nio.file.StandardCopyOption;
  *
  * @author Administrator
 
- TODOGUINOW 
+ TODOGUINOW remove all lines with //TESTING ONLY
 
  TODOLATER This code breaks if the simulation folder already exists. 
  //runDataExtraction() Job name needs to be updated to latest sim file in folder tree.
@@ -102,6 +102,9 @@ public class Job {
     }
 
     public boolean areFilesAvailable() throws Exception { //used in Job queue/add job()
+        
+        _fileCount = 1; //TESTING ONLY
+        
         // test the sim exits is file count and file name is wrong
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
@@ -112,6 +115,9 @@ public class Job {
     public void checkSim_name_AndFiles_count_extension() throws Exception { //used in simulation queue/add simulation()
         // test the sim exits is file count and file name is wrong
         // _simulation = _simulation.concat("\"");
+        
+        _fileCount = 1; //TESTING ONLY
+        
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         if (_simulation.isEmpty()) { // redundant with simulation file name a required field
             updateJobStatus(SimulationStatuses.CANCELLED_NULL_SIMULATION_NAME);
@@ -146,11 +152,11 @@ public class Job {
                     }
                 }
             }
-
+            
             // Check files count
             System.out.println("FileFunctions.countFiles(getCustomerSynchronisedFolder()) = "+FileFunctions.countFiles(getCustomerSynchronisedFolder()));
             System.out.println("_fileCount = "+_fileCount);
-            //_fileCount = 1;
+            
             
             if (FileFunctions.countFiles(getCustomerSynchronisedFolder()) != _fileCount) {
                 
@@ -165,6 +171,7 @@ public class Job {
 
     public void runJobWorkflow() throws Exception {
         // System.out.println("1+1=" + 1 + 1);
+        _fileCount = 1; //TESTING ONLY
         _startTime = LocalTime.now();
 
         // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
