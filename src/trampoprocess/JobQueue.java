@@ -119,7 +119,7 @@ public class JobQueue {
 			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._jobNumber + " with file " + sim._simulation);
 			  sim.checkSim_name_AndFiles_count_extension();
 			  String c = new WebAppGate().getSimulationStatus(sim); 
-			  if ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE)) { 
+			  if ((c.equals(SimulationStatuses.SUBMITED)) || (c.equals(SimulationStatuses.PAUSED_MAINTENANCE))) { 
 			    _simulations.add(sim);
 			    new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
 			    return true;
