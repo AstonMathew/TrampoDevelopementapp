@@ -13,7 +13,7 @@ import javax.mail.internet.MimeMessage;
 public class SendEmail {
 	/** Note: Only work if the setting "Access for less secure apps" is ON in gmail 
 	 * Access at https://myaccount.google.com/security */
-	public final String TO = "gui@trampocfd.com";
+	public static final String TO = "gui@trampocfd.com";
         private final String _username = "trampointernalnotifications@gmail.com";
         private final String _password = "N{08M]-i=K%^";
 	
