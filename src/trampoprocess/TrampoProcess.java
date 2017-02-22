@@ -10,10 +10,14 @@ import constants.SimulationStatuses;
 
 public class TrampoProcess {
 	
+	private static final Logger LOGGER = Logger.getLogger(TrampoProcess.class.getName() );
+	
 	private static String STOP = "stop.txt";
 	private static String STOP_NOW = "stop_now.txt";
 
 	public static void main(String[] args) throws Exception {
+		LOGGER.getParent().addHandler(new StreamHandler(System.out, new SimpleFormatter())); // Redirect logger to console
+		
 		JobQueue simulationQueue = new JobQueue();
 		Path currentPath = Paths.get(System.getProperty("user.dir"));
 		System.out.println("Start trampo process in directory " + currentPath);
