@@ -74,7 +74,7 @@ public class JobTest {
     static String RUNROOT = "C:\\run\\";
     static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
-    static int TOBACKUPCOPYWAITINGTIME = 1000; //1000 MILLIsecond for testing, 300000 MILLIsecond =5 minutes for production
+    static int RUNTOSYNCCOPYWAITINGTIME = 10000; //1000 MILLIsecond for testing, 300000 MILLIsecond =5 minutes for production
 
     /**
      * @param _jobNumber
@@ -108,7 +108,7 @@ public class JobTest {
         _startTime = LocalTime.now();
 
         // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
-        createJobFolders();
+        createJobRunAndSyncFolders();
         createLogAndBackupDirectories(); //remove the commeting out in production
         CreateLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
@@ -122,7 +122,7 @@ public class JobTest {
         System.out.println("End");
     }
 
-    private void createJobFolders() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
+    private void createJobRunAndSyncFolders() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
 //Files.createDirectory(getJobRunningFolderPath());
 // Files.createTempFile(simulationSendingToTrampoFolderPath,
         // "tmp",".txt");
@@ -134,9 +134,21 @@ public class JobTest {
             System.err.println(
                     "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
             // this needs to make the simulation exist the queue as it indicates a major problem
-            updateJobStatus(SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
+            updateJobStatus(SimulationStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
             throw new Exception("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
         }
+        if (Files.isDirectory(getJobSynchronisedFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getJobSynchronisedFolderPath());
+            System.out.println("getJobSynchronisedFolderPath Folder created " + getJobSynchronisedFolderPath());
+            //System.out.println("src folder will show below as Directory copied");
+        } else {
+            System.err.println(
+                    "ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: " + getJobSynchronisedFolderPath());
+            // this needs to make the simulation exist the queue as it indicates a major problem
+            updateJobStatus(SimulationStatuses.CANCELLED_JOB_SYNC_FOLDER_PREEXISTING);
+            throw new Exception("ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: " + getJobSynchronisedFolderPath());
+        }
+        
     }
 
     private void createLogAndBackupDirectories() throws FileNotFoundException, IOException {
@@ -148,7 +160,7 @@ public class JobTest {
         Files.createDirectories(getJobBackupPath());
         System.out.println(" getJobBackupPath Folder created " + getJobBackupPath());
         
-        File log = getJobLogsPath().resolve("\\job_" + _jobNumber + ".log").toFile(); // this seems t save to the C:/drive for some reason
+        File log = getJobLogsPath().resolve("job_" + _jobNumber + ".log").toFile(); // this seems t save to the C:/drive for some reason
         System.out.println("HERE writing job_" + _jobNumber + ".log at path= "+ log.toString());
         try {
             //Create the file
@@ -269,7 +281,7 @@ public class JobTest {
 
     }
 
-    private void RunJob() throws Exception {
+    private void RunJob() throws Exception { //IF process desn't run while testing, i.e. no output a,d a single STAR-CCM+ process starts, make sure you have a sim file in the right folder to run!!!
         ProcessBuilder pb = new ProcessBuilder(
                 _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
                 "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
@@ -284,27 +296,39 @@ public class JobTest {
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
             _simulationProcess = pb.start();
             System.out.println("p started");
+            
             //Redirection of stream and loop extremely important; http://baxincc.cc/questions/216451/windows-process-execed-from-java-not-terminating
             // if not redirected, Star-CCM+ processes hang and -batch*-report doesn't print
             InputStream stdout = _simulationProcess.getInputStream();
-            while (stdout.read() >= 0) {;
-//                BackupFolderFileVisitor visitor = new BackupFolderFileVisitor(
-//                        getJobRunningFolderPath(), getJobBackupPath());
-//                Files.walkFileTree(getJobRunningFolderPath(), visitor);
-          
-                //Thread.sleep(TOBACKUPCOPYWAITINGTIME);
+            while (stdout.read() >= 0) {
+                //trying to move files to synchronised folder
+                
+//                Thread.sleep(RUNTOSYNCCOPYWAITINGTIME);
+//                File sourceDirectory = pbWorkingDirectory;
+                
+              
             }
             _simulationProcess.waitFor();
+            
+            //move backup and log files from run folder to their folders at end of the run
             File sourceDirectory = pbWorkingDirectory;
+            
                 File destinationDirectory = getJobBackupPath().toFile();
                 ConditionalMoveFiles(sourceDirectory, destinationDirectory, "@");
+                
                 destinationDirectory = getJobLogsPath().toFile();
                 ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
+                
+                // this needs to be done while running so that all mesh and postprocessing goes to the sync folder.
+                destinationDirectory = getJobSynchronisedFolderPath().toFile();
+                ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
+
+                
 
             // All below 
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
             _printStreamToLogFile.println("Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
-            //updateJobActualRuntime(); 
+            updateJobActualRuntime();
             updateJobStatus(SimulationStatuses.COMPLETED);
             _printStreamToLogFile.println("Simulation complete...");
 
@@ -457,17 +481,22 @@ public class JobTest {
     private Path getJobRunningFolderPath() {// the JobTest running folder
         return Paths.get(RUNROOT, getCustomerFolderRelativePath(), "Job_" + _jobNumber);
     }
+    
+        private Path getJobSynchronisedFolderPath() {// the Job synchronised folder where trampo send the results back live.
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder", "Job_" + _jobNumber);
+    }
+    
 
     private Path getJobLogsPath() {
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\Job_" + _jobNumber, "\\logs");
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Job_" + _jobNumber, "logs");
     }
 
     private Path getJobBackupPath() {
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\Job_" + _jobNumber + "\\backup");
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\Job_" + _jobNumber, "backup");
     }
 
     private String getJobStatusPath() {
-        return getJobRunningFolderPath() + "\\Job_" + _jobNumber + "_Status.txt";
+        return getJobRunningFolderPath() + "Job_" + _jobNumber + "_Status.txt";
     }
 
     private Path getOutputWindowLogToFile() { // might need update to work for all versions
