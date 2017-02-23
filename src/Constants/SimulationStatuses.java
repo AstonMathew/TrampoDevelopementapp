@@ -22,5 +22,7 @@ public class SimulationStatuses {
 	public static String COMPLETED = "COMPLETED";
 	public static String RESULTS_DOWNLOADED ="Results Downloaded";
 	public static String CANCELLED_BY_USER = "CANCELLED: by User";
-        public static String CANCELLED_SIMULATION_FOLDER_PREEXISTING = "CANCELLED: Simulation Folder Preexisting";
+        //public static String CANCELLED_SIMULATION_FOLDER_PREEXISTING = "CANCELLED: Simulation Folder Preexisting";
+    public static String CANCELLED_JOB_SYNC_FOLDER_PREEXISTING = "CANCELLED: Job Sync Folder Preexisting" ;
+    public static String CANCELLED_JOB_RUN_FOLDER_PREEXISTING = "CANCELLED: Job Run Folder Preexisting";
 }
