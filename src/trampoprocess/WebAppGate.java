@@ -24,6 +24,7 @@ public class WebAppGate {
 	
 	public String getSimulationStatus(Job sim) throws Exception {
 		try {
+			String result = null;
 			Connection conn = getConnection();
 			if (conn == null) {
 				throw new Exception("No connection made");
@@ -33,13 +34,14 @@ public class WebAppGate {
 			pstmt.setInt(2, sim._jobNumber);
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
-				return rs.getString(Database.STATUS);
+				result = rs.getString(Database.STATUS).trim();
 			} else {
 				LOGGER.info("Database no longer has information on simulation " + sim._jobNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
 				LOGGER.log(Level.SEVERE, "");
 			}
 			pstmt.close();
 			conn.close();
+			return result;
 		} catch (SQLException e) {
 			LOGGER.info("Unable to connect to database to check if simulation " + sim._jobNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
 			LOGGER.log(Level.WARNING, null, e);
