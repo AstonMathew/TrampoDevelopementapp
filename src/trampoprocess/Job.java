@@ -201,7 +201,7 @@ public class Job {
             System.err.println(
                     "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
             // this needs to make the simulation exist the queue as it indicates a major problem
-            updateJobStatus(SimulationStatuses.CANCELLED_SIMULATION_FOLDER_PREEXISTING);
+            updateJobStatus(SimulationStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
             throw new Exception("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
         }
     }

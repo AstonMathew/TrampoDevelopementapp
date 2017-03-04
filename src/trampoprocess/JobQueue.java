@@ -5,8 +5,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import constants.SimulationStatuses;
@@ -68,6 +70,7 @@ public class JobQueue {
 	SimulationHandler _currentSimulation = null;
 	Queue<Job> _simulations = null;
 	Queue<Job> _simulationsWaitingForFiles = null;
+	Map<Integer, Job> _jobProcessed = null;
 	LocalTime _timeLastRunTimeUpdate = null;
 
 	public JobQueue() {
@@ -76,6 +79,7 @@ public class JobQueue {
 		_currentSimulation = null;
 		_currentSimulationThread = null;
 		_timeLastRunTimeUpdate = null;
+		_jobProcessed = new HashMap<Integer, Job>();
 	}
 
 	public boolean hasSimulationRunning() {
@@ -107,10 +111,15 @@ public class JobQueue {
 	}
 	
 	public void addSimulation(Job sim) throws Exception {
-		if (sim.areFilesAvailable()) {
-			addSimulationToQueue(sim);
-		} else {
-			_simulationsWaitingForFiles.add(sim);
+		if (_jobProcessed.containsKey(sim._jobNumber) == false) {
+			System.out.println("Add simulation " + sim._jobNumber + " to queue");
+			_jobProcessed.put(sim._jobNumber, sim);
+			if (sim.areFilesAvailable()) {
+				System.out.println("Files for simulation " + sim._jobNumber + " are available, simulation will be processed");
+				addSimulationToQueue(sim);
+			} else {
+				_simulationsWaitingForFiles.add(sim);
+			}
 		}
 	}
 	

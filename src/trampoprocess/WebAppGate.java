@@ -1,11 +1,21 @@
 package trampoprocess;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -138,6 +148,26 @@ public class WebAppGate {
 	}
 	
 	public void updateJobActualRuntime(Job sim, Integer actualRuntime) throws Exception {
+		updateJobActualRuntime_http(sim, actualRuntime);
+	}
+
+	private void updateJobActualRuntime_http(Job sim, Integer actualRuntime) throws Exception {
+		try {
+			System.out.println("Update simulation run time for simulation " + sim._jobNumber);
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("method", "updateActualRuntime");
+			map.put("customer_id", sim._customerNumber);
+			map.put("sim_no", sim._jobNumber.toString());
+			map.put("actual_runtime", actualRuntime.toString());
+			String url = webAppBuildUrl(map);
+			webAppHttpRequest(url);
+		} catch (Exception e) {
+			LOGGER.info("Unable to connect to webApp to update runtime for simulation " + sim._jobNumber + " by " + sim._customerNumber + ". Keep simulation running");
+			LOGGER.log(Level.WARNING, null, e);			
+		}
+	}
+
+	private void updateJobActualRuntime_db(Job sim, Integer actualRuntime) throws Exception {
 		try {
 			System.out.println("Update simulation run time for simulation " + sim._jobNumber);
 			Connection conn = getConnection();
@@ -152,12 +182,48 @@ public class WebAppGate {
 			pstmt.close();
 			conn.close();
 		} catch (SQLException e) {
-			LOGGER.info("Unable to connect to database to check if simulation " + sim._jobNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+			LOGGER.info("Unable to connect to database for simulation " + sim._jobNumber + " by " + sim._customerNumber + " to update runtime. Keep simulation running");
 			LOGGER.log(Level.WARNING, null, e);
 		}
 	}
 
 	public void updateSimulationStatus(Job sim, String status) throws Exception {
+		updateSimulationStatus_http(sim, status);
+	}
+	
+	public void updateSimulationStatus_http(String customerNumber, Integer jobNumber, String status) throws Exception {
+		try {
+			System.out.println("Update simulation status for simulation " + jobNumber);
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("method", "updateJobStatus");
+			map.put("customer_id", customerNumber);
+			map.put("sim_no", jobNumber.toString());
+			map.put("update_job_status", status);
+			String url = webAppBuildUrl(map);
+			webAppHttpRequest(url);
+		} catch (Exception e) {
+			LOGGER.info("Unable to connect to webApp to update simulation status for simulation " + jobNumber + " by " + customerNumber + " has been canceled. Keep simulation running");
+			LOGGER.log(Level.WARNING, null, e);
+		}
+	}
+
+	private void updateSimulationStatus_http(Job sim, String status) throws Exception {
+		try {
+			System.out.println("Update simulation status for simulation " + sim._jobNumber);
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("method", "updateJobStatus");
+			map.put("customer_id", sim._customerNumber);
+			map.put("sim_no", sim._jobNumber.toString());
+			map.put("update_job_status", status);
+			String url = webAppBuildUrl(map);
+			webAppHttpRequest(url);
+		} catch (Exception e) {
+			LOGGER.info("Unable to connect to webApp to update simulation status for simulation " + sim._jobNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
+			LOGGER.log(Level.WARNING, null, e);
+		}
+	}
+
+	private void updateSimulationStatus_db(Job sim, String status) throws Exception {
 		try {
 			System.out.println("Update simulation status for simulation " + sim._jobNumber + " to " + status);
 			Connection conn = getConnection();
@@ -175,6 +241,42 @@ public class WebAppGate {
 			LOGGER.info("Unable to connect to database to check if simulation " + sim._jobNumber + " by " + sim._customerNumber + " has been canceled. Keep simulation running");
 			LOGGER.log(Level.WARNING, null, e);
 		}
+	}
+
+	private String webAppBuildUrl(Map<String, String> hash) throws UnsupportedEncodingException {
+	    String url = "https://trampo2app.herokuapp.com/a/trampo/simulations/?";
+	    Iterator<Entry<String, String>> hashIt = hash.entrySet().iterator();
+	    Boolean addAmpersend = false;
+	    while (hashIt.hasNext()) {
+	    	Entry<String, String> entry = hashIt.next();
+	    	if (addAmpersend) {url += "&";}
+	    	url += URLEncoder.encode(entry.getKey(), "UTF-8") + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+	    	addAmpersend = true;
+	    }
+	    return url;
+	}
+	
+	private String webAppHttpRequest(String url) throws Exception {
+		// send HTTP GET request
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+		// if responseCode = 200 is OK
+		int responseCode = con.getResponseCode();
+		System.out.println("\nSending 'GET' request to URL : " + url);
+		System.out.println("Response Code : " + responseCode);
+		if (responseCode != 200) {throw new Exception("Unable to connect to server");}
+
+		// Reading answer from Server if it need
+		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		StringBuffer response = new StringBuffer();
+		String inputLine;
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		System.out.println(response.toString());
+		in.close();
+		return response.toString();
 	}
 
 	private Connection getConnection() {
