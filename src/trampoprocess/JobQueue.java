@@ -95,7 +95,7 @@ public class JobQueue {
 		while (simIt.hasNext()) {
 			Job sim = simIt.next();
 			try {
-				new WebAppGate().updateSimulationStatus(sim, status);
+				WebAppGate.make().updateSimulationStatus(sim, status);
 			} catch (Exception e) {
 				System.out.println("Error when updating status for simulation " + sim._jobNumber + " with error " + e.getMessage());
 			}
@@ -127,10 +127,10 @@ public class JobQueue {
  		try {
 			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._jobNumber + " with file " + sim._simulation);
 			  sim.checkSim_name_AndFiles_count_extension();
-			  String c = new WebAppGate().getSimulationStatus(sim); 
+			  String c = WebAppGate.make().getSimulationStatus(sim); 
 			  if ((c.equals(SimulationStatuses.SUBMITED)) || (c.equals(SimulationStatuses.PAUSED_MAINTENANCE))) { 
 			    _simulations.add(sim);
-			    new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+			    WebAppGate.make().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
 			    return true;
 			  }
 		} catch (Exception e) {
@@ -155,7 +155,7 @@ public class JobQueue {
 					} else {
 						// Job has not been added. Check current status. If status changed, then remove as 
 						// Something is wrong with the setup.
-						String c = new WebAppGate().getSimulationStatus(sim);
+						String c = WebAppGate.make().getSimulationStatus(sim);
 						if (! ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE))) {
 							_simulationsWaitingForFiles.remove(sim);
 						}
@@ -183,7 +183,7 @@ public class JobQueue {
 				cSim.updateMaximumClocktimeInSecondsFromWebApp();
 			}
 
-			if (new WebAppGate().isSimulationCanceled(cSim)) { 
+			if (WebAppGate.make().isSimulationCanceled(cSim)) { 
 				// Check if the user has canceled the simulation. If it has canceled mark the simulation as canceled
 				cSim.markAsCanceled();
 			}
@@ -213,7 +213,7 @@ public class JobQueue {
 		} else if (!_simulations.isEmpty()) { // No simulation running and not
 												// empty queue
 			_currentSimulation = new SimulationHandler(_simulations.poll());
-			if (!new WebAppGate().isSimulationCanceled(_currentSimulation.getSimulation())) {
+			if (! WebAppGate.make().isSimulationCanceled(_currentSimulation.getSimulation())) {
 				System.out.println("Start new simulation " + _currentSimulation._sim._jobNumber);
 				_currentSimulationThread = new Thread(_currentSimulation);
 				_currentSimulationThread.start();

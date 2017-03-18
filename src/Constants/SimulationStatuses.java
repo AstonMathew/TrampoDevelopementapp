@@ -10,7 +10,7 @@ public class SimulationStatuses {
 	public static String SUBMITED = "Submited";
 	public static String FILESUPLOADED = "Files Uploaded";
 	public static String CANCELLED_NOFILEUPLOADED = "CANCELLED: # of files uploaded != # files in sync folder";
-        public static String CANCELLED_NULL_SIMULATION_NAME = "CANCELLED: Simulation name was not input";
+    public static String CANCELLED_NULL_SIMULATION_NAME = "CANCELLED: Simulation name was not input";
 	public static String SIMULATION_QUEUED = "Simulation Queued";
 	public static String SECURITY_SCANNED = "Security Scanned";
 	public static String CANCELLED_UNSAFE_FILES_EXTENSION = "CANCELLED: Unsafe uploaded files extension";

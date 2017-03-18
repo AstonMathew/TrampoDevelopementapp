@@ -381,7 +381,7 @@ public class Job {
     }
 
     public void updateJobActualRuntime() throws Exception {
-        new WebAppGate().updateJobActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
+        WebAppGate.make().updateJobActualRuntime(this, (int) timeInSeconds(_startSimulationTime));
     }
 
     private void copyLogOutputWindowToFile() throws IOException, InterruptedException {
@@ -551,7 +551,7 @@ public class Job {
     public void updateMaximumClocktimeInSecondsFromWebApp() {
 
         try {
-            _maxSeconds = new WebAppGate().getJobMaxRuntime(this);
+            _maxSeconds = WebAppGate.make().getJobMaxRuntime(this);
         } catch (Exception e) {
             // Can't update from the webapp, best to play it safe and keep the max seconds as is
         }
@@ -563,7 +563,7 @@ public class Job {
     }
 
     public void updateJobStatus(String newStatus) throws Exception {
-        new WebAppGate().updateSimulationStatus(this, newStatus);
+        WebAppGate.make().updateSimulationStatus(this, newStatus);
         if (_printStreamToLogFile != null) {
             _printStreamToLogFile.println(LocalTime.now() + ": Job status updated to " + newStatus);
         }
