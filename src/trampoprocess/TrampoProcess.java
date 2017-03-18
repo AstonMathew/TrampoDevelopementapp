@@ -1,5 +1,6 @@
 package trampoprocess;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,9 +53,11 @@ public class TrampoProcess {
 					LinkedList<String> customerIds = WebAppGate.make().getCustomerList();
 					Iterator<String> customerIdsIt = customerIds.iterator();
 					while (customerIdsIt.hasNext()) {
-						// Do stuff with customer Ids
 						String customerId = customerIdsIt.next();
-						System.out.println("Customer " + customerId);
+						System.out.println("Checking customer " + customerId);
+						// Check for directory and create if it does not exists
+						Path path = Paths.get(Job.DATAROOT, customerId);
+						if (Files.notExists(path)) {path.toFile().mkdirs();}
 					}
 				}
 				
