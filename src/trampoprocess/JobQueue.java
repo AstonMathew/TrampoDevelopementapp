@@ -5,8 +5,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import constants.SimulationStatuses;
@@ -68,6 +70,7 @@ public class JobQueue {
 	SimulationHandler _currentSimulation = null;
 	Queue<Job> _simulations = null;
 	Queue<Job> _simulationsWaitingForFiles = null;
+	Map<Integer, Job> _jobProcessed = null;
 	LocalTime _timeLastRunTimeUpdate = null;
 
 	public JobQueue() {
@@ -76,6 +79,7 @@ public class JobQueue {
 		_currentSimulation = null;
 		_currentSimulationThread = null;
 		_timeLastRunTimeUpdate = null;
+		_jobProcessed = new HashMap<Integer, Job>();
 	}
 
 	public boolean hasSimulationRunning() {
@@ -91,7 +95,7 @@ public class JobQueue {
 		while (simIt.hasNext()) {
 			Job sim = simIt.next();
 			try {
-				new WebAppGate().updateSimulationStatus(sim, status);
+				WebAppGate.make().updateSimulationStatus(sim, status);
 			} catch (Exception e) {
 				System.out.println("Error when updating status for simulation " + sim._jobNumber + " with error " + e.getMessage());
 			}
@@ -107,10 +111,15 @@ public class JobQueue {
 	}
 	
 	public void addSimulation(Job sim) throws Exception {
-		if (sim.areFilesAvailable()) {
-			addSimulationToQueue(sim);
-		} else {
-			_simulationsWaitingForFiles.add(sim);
+		if (_jobProcessed.containsKey(sim._jobNumber) == false) {
+			System.out.println("Add simulation " + sim._jobNumber + " to queue");
+			_jobProcessed.put(sim._jobNumber, sim);
+			if (sim.areFilesAvailable()) {
+				System.out.println("Files for simulation " + sim._jobNumber + " are available, simulation will be processed");
+				addSimulationToQueue(sim);
+			} else {
+				_simulationsWaitingForFiles.add(sim);
+			}
 		}
 	}
 	
@@ -118,10 +127,10 @@ public class JobQueue {
  		try {
 			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._jobNumber + " with file " + sim._simulation);
 			  sim.checkSim_name_AndFiles_count_extension();
-			  String c = new WebAppGate().getSimulationStatus(sim); 
+			  String c = WebAppGate.make().getSimulationStatus(sim); 
 			  if ((c.equals(SimulationStatuses.SUBMITED)) || (c.equals(SimulationStatuses.PAUSED_MAINTENANCE))) { 
 			    _simulations.add(sim);
-			    new WebAppGate().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+			    WebAppGate.make().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
 			    return true;
 			  }
 		} catch (Exception e) {
@@ -146,7 +155,7 @@ public class JobQueue {
 					} else {
 						// Job has not been added. Check current status. If status changed, then remove as 
 						// Something is wrong with the setup.
-						String c = new WebAppGate().getSimulationStatus(sim);
+						String c = WebAppGate.make().getSimulationStatus(sim);
 						if (! ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE))) {
 							_simulationsWaitingForFiles.remove(sim);
 						}
@@ -174,7 +183,7 @@ public class JobQueue {
 				cSim.updateMaximumClocktimeInSecondsFromWebApp();
 			}
 
-			if (new WebAppGate().isSimulationCanceled(cSim)) { 
+			if (WebAppGate.make().isSimulationCanceled(cSim)) { 
 				// Check if the user has canceled the simulation. If it has canceled mark the simulation as canceled
 				cSim.markAsCanceled();
 			}
@@ -204,7 +213,7 @@ public class JobQueue {
 		} else if (!_simulations.isEmpty()) { // No simulation running and not
 												// empty queue
 			_currentSimulation = new SimulationHandler(_simulations.poll());
-			if (!new WebAppGate().isSimulationCanceled(_currentSimulation.getSimulation())) {
+			if (! WebAppGate.make().isSimulationCanceled(_currentSimulation.getSimulation())) {
 				System.out.println("Start new simulation " + _currentSimulation._sim._jobNumber);
 				_currentSimulationThread = new Thread(_currentSimulation);
 				_currentSimulationThread.start();

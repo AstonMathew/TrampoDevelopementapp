@@ -1,10 +1,15 @@
 package trampoprocess;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 import constants.SimulationStatuses;
 
@@ -26,9 +31,11 @@ public class TrampoProcess {
 		
 		// Retrieve paused simulations from webapp
 		{
-		Iterator<Job> simulation = new WebAppGate().getSimulations(SimulationStatuses.PAUSED_MAINTENANCE).iterator();
+		Iterator<Job> simulation = WebAppGate.make().getSimulations(SimulationStatuses.PAUSED_MAINTENANCE).iterator();
 		while (simulation.hasNext()) {simulationQueue.addSimulation(simulation.next());}
 		}
+		
+		int counter = 0;
 		
 		// Main loop
 		while ((! Files.exists(Paths.get(currentPath.toString(), STOP))) && (! Files.exists(Paths.get(currentPath.toString(), STOP_NOW)))) {
@@ -37,10 +44,25 @@ public class TrampoProcess {
 				simulationQueue.trigger(); // Process simulations in the queue
 				
 				// Add simulations from webapp
-				Iterator<Job> simulation = new WebAppGate().getSimulations().iterator();
+				Iterator<Job> simulation = WebAppGate.make().getSimulations().iterator();
 				while (simulation.hasNext()) {simulationQueue.addSimulation(simulation.next());}
 				
+				// Check for new customer every 10 minutes or so
+				if ((counter % 600) == 0) {
+					System.out.println("Check customer list");
+					LinkedList<String> customerIds = WebAppGate.make().getCustomerList();
+					Iterator<String> customerIdsIt = customerIds.iterator();
+					while (customerIdsIt.hasNext()) {
+						String customerId = customerIdsIt.next();
+						System.out.println("Checking customer " + customerId);
+						// Check for directory and create if it does not exists
+						Path path = Paths.get(Job.DATAROOT, customerId);
+						if (Files.notExists(path)) {path.toFile().mkdirs();}
+					}
+				}
+				
 				TimeUnit.SECONDS.sleep(1); // Wait 1 second
+				counter += 1;
 
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
