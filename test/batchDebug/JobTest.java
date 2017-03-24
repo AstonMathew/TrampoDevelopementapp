@@ -318,29 +318,34 @@ public class JobTest {
             //need to constantly move the POSTprocessing stuff from RUn to SYNC
            
             File destinationDirectory = getJobBackupPath().toFile();
-            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "@");
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "TrampoBackup");
 
             destinationDirectory = getJobLogsPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
+            
+//            destinationDirectory = getScenesSyncFolderPath.toFile();
+//            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "image");
+           
 
             // this needs to be done while running so that all mesh and postprocessing goes to the sync folder.
             destinationDirectory = getJobSynchronisedFolderPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
 
+            //TO TURN BACk ON
             //delete anything left in the run directory. NEEDS TESTING!!! for symlink handling see http://stackoverflow.com/questions/779519/delete-directories-recursively-in-java/27917071#27917071
-            Files.walkFileTree(getJobRunningFolderPath(), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+//            Files.walkFileTree(getJobRunningFolderPath(), new SimpleFileVisitor<Path>() {
+//                @Override
+//                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+//                    Files.delete(file);
+//                    return FileVisitResult.CONTINUE;
+//                }
+//
+//                @Override
+//                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+//                    Files.delete(dir);
+//                    return FileVisitResult.CONTINUE;
+//                }
+//            });
 
             // All below 
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
