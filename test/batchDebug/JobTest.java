@@ -22,11 +22,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import constants.SimulationStatuses;
-import constants.ValidExtensions;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.SimpleFileVisitor;
 import java.util.concurrent.TimeUnit;
@@ -38,10 +40,9 @@ import java.nio.file.attribute.BasicFileAttributes;
  *
  * @author Administrator
  *
- * TODOGUINOW  *
- * TODOLATER This code breaks if the simulation folder already exists.
- * //runDataExtraction() JobTest name needs to be updated to latest sim file in
- * folder tree. move InstalledVersions.txt into the code.
+ * TODOGUINOW * TODOLATER This code breaks if the simulation folder already
+ * exists. //runDataExtraction() JobTest name needs to be updated to latest sim
+ * file in folder tree. move InstalledVersions.txt into the code.
  */
 public class JobTest {
 
@@ -64,6 +65,8 @@ public class JobTest {
     String _StarCcmPlusVersionPath = null;
     String _StarCcmPlusDefaultVersion = null;
     String _StarCcmPlusDefaultVersionPath = null;
+    MoveTask moveTaskScenes;
+    MoveTask moveTaskPlots;
 
     // compute node and license parameter need to be changed for production
     static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
@@ -283,6 +286,17 @@ public class JobTest {
     }
 
     private void RunJob() throws Exception { //IF process desn't run while testing, i.e. no output a,d a single STAR-CCM+ process starts, make sure you have a sim file in the right folder to run!!!
+        //move scenes           
+        //if (moveTask == null) {
+        moveTaskScenes = new MoveTask(getScenesRunFolderPath().toFile(), getScenesSyncFolderPath().toFile());
+        //}
+        moveTaskScenes.scheduleFileMove("Scene"); // non-blocking
+
+        //move plots
+        moveTaskPlots = new MoveTask(getPlotsRunFolderPath().toFile(), getPlotsSyncFolderPath().toFile());
+        //}
+        moveTaskPlots.scheduleFileMove("Plot"); // non-blocking
+
         ProcessBuilder pb = new ProcessBuilder(
                 _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
                 "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
@@ -307,45 +321,78 @@ public class JobTest {
 //                Thread.sleep(RUNTOSYNCCOPYWAITINGTIME);
 //                File sourceDirectory = pbWorkingDirectory;
             }
-            _simulationProcess.waitFor();
 
-            //move backup and log files from run folder to their folders at end of the run
+            _simulationProcess.waitFor();
+            //Stop the automatic move of Scenes and Plots from run folder to sync folder
+            moveTaskScenes.cancelPurgeTimer();
+            moveTaskPlots.cancelPurgeTimer();
+
+            //end of the run file move
             File sourceDirectory = pbWorkingDirectory;
-            
-            
-            //NEED TO REMOVE POD key FROM public LOG Julein trello card
-            
-            //need to constantly move the POSTprocessing stuff from RUn to SYNC
-           
+
             File destinationDirectory = getJobBackupPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "TrampoBackup");
 
             destinationDirectory = getJobLogsPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
-            
-//            destinationDirectory = getScenesSyncFolderPath.toFile();
-//            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "image");
-           
 
-            // this needs to be done while running so that all mesh and postprocessing goes to the sync folder.
             destinationDirectory = getJobSynchronisedFolderPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
 
-            //TO TURN BACk ON
-            //delete anything left in the run directory. NEEDS TESTING!!! for symlink handling see http://stackoverflow.com/questions/779519/delete-directories-recursively-in-java/27917071#27917071
-//            Files.walkFileTree(getJobRunningFolderPath(), new SimpleFileVisitor<Path>() {
-//                @Override
-//                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-//                    Files.delete(file);
-//                    return FileVisitResult.CONTINUE;
-//                }
-//
-//                @Override
-//                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-//                    Files.delete(dir);
-//                    return FileVisitResult.CONTINUE;
-//                }
-//            });
+            //REMOVE POD key FROM HTML report
+            File[] directoryListing = getJobSynchronisedFolderPath().toFile().listFiles();
+            if (directoryListing != null) {
+                for (File child : directoryListing) {
+                    if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(".html")) {
+                        System.out.println("HTML report file name = " + child.getName());
+                        String content = new String(Files.readAllBytes(child.toPath()), Charset.forName("UTF-8"));
+                        int index = content.indexOf("-podkey");
+                        System.out.println("indexOf -podkey in HTML report = " + index);
+                        System.out.println("OLD content.substring(index, index + 25) in HTML report = " + content.substring(index, index + 10));
+                        content = content.replace(content.substring(index, index + 25), "-podkey XXXXXXXXXXXXXXXXX");
+                        System.out.println("NEW content.substring(index, index + 25) in HTML report = " + content.substring(index, index + 10));
+                        try (PrintWriter out = new PrintWriter(new FileOutputStream(child.toPath().toString(), false))) {
+                            out.println(content);
+                        }
+                    }
+                }
+            }
+            sourceDirectory = getTablesRunFolderPath().toFile();
+            destinationDirectory = getTablesSyncFolderPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+
+            sourceDirectory = getStarViewRunFolderPath().toFile();
+            destinationDirectory = getStarViewSyncFolderPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+
+            sourceDirectory = getPowerPointRunFolderPath().toFile();
+            destinationDirectory = getPowerPointSyncFolderPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+
+            //delete anything left in the run/customer directory.  for symlink handling see http://stackoverflow.com/questions/779519/delete-directories-recursively-in-java/27917071#27917071
+            Files.walkFileTree(getJobRunningFolderPath(), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+
+            Files.walkFileTree(Paths.get(RUNROOT, getCustomerFolderRelativePath()), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    //Files.delete(Paths.get(RUNROOT, getCustomerFolderRelativePath()));
+                    return FileVisitResult.CONTINUE;
+                }
+            });
 
             // All below 
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
@@ -523,10 +570,10 @@ public class JobTest {
     private Path getOutputWindowLogToFile() { // might need update to work for all versions
         return Paths.get("C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ " + _StarCcmPlusVersion + "\\var\\log\\messages.log");
     }
-    
-        private void createPostprocessingRunFolders() throws IOException, Exception {
+
+    private void createPostprocessingRunFolders() throws IOException, Exception {
         //scenes
-        if (Files.isDirectory(getScenesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) { 
+        if (Files.isDirectory(getScenesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getScenesSyncFolderPath());
             System.out.println("getRunScenesFolderPath created " + getScenesSyncFolderPath());
             //System.out.println("src folder will show below as Directory copied");
@@ -536,7 +583,7 @@ public class JobTest {
             //throw new Exception("ERROR: getScenesSyncFolderPath EXISTING !!! with Path: " + getScenesSyncFolderPath());
         }
         //plots
-        if (Files.isDirectory(getPlotsSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) { 
+        if (Files.isDirectory(getPlotsSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getPlotsSyncFolderPath());
             System.out.println("getRunPlotsFolderPath created " + getPlotsSyncFolderPath());
             //System.out.println("src folder will show below as Directory copied");
@@ -547,7 +594,7 @@ public class JobTest {
         }
 
         //tables
-        if (Files.isDirectory(getTablesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) { 
+        if (Files.isDirectory(getTablesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getTablesSyncFolderPath());
             System.out.println("getRunTablesFolderPath created " + getTablesSyncFolderPath());
             //System.out.println("src folder will show below as Directory copied");
@@ -558,7 +605,7 @@ public class JobTest {
         }
 
         //Starview
-        if (Files.isDirectory(getStarViewSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {  
+        if (Files.isDirectory(getStarViewSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getStarViewSyncFolderPath());
             System.out.println("getRunStarViewFolderPath created " + getStarViewSyncFolderPath());
             //System.out.println("src folder will show below as Directory copied");
@@ -567,9 +614,9 @@ public class JobTest {
                     "ERROR: getRunStarViewFolderPath EXISTING !!! with Path: " + getStarViewSyncFolderPath());
             //throw new Exception("ERROR: getStarViewSyncFolderPath EXISTING !!! with Path: " + getStarViewSyncFolderPath());
         }
-        
+
         //PowerPoint
-        if (Files.isDirectory(getPowerPointSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) { 
+        if (Files.isDirectory(getPowerPointSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getPowerPointSyncFolderPath());
             System.out.println("getRunPowerPointFolderPath created " + getPowerPointSyncFolderPath());
             //System.out.println("src folder will show below as Directory copied");
@@ -581,26 +628,49 @@ public class JobTest {
     }
 
     private Path getScenesSyncFolderPath() {
-            return Paths.get(getJobSynchronisedFolderPath().toString(), "Scenes");
+        return Paths.get(getJobSynchronisedFolderPath().toString(), "Scenes");
+    }
+
+    private Path getScenesRunFolderPath() {
+        return Paths.get(getJobRunningFolderPath().toString(), "Scenes");
     }
 
     private Path getPlotsSyncFolderPath() {
-           return Paths.get(getJobSynchronisedFolderPath().toString(), "Plots");
+        return Paths.get(getJobSynchronisedFolderPath().toString(), "Plots");
+    }
+
+    private Path getPlotsRunFolderPath() {
+        return Paths.get(getJobRunningFolderPath().toString(), "Plots");
     }
 
     private Path getTablesSyncFolderPath() {
-     
+
         return Paths.get(getJobSynchronisedFolderPath().toString(), "Tables");
     }
 
+    private Path getTablesRunFolderPath() {
+
+        return Paths.get(getJobRunningFolderPath().toString(), "Tables");
+    }
+
     private Path getStarViewSyncFolderPath() {
-      
+
         return Paths.get(getJobSynchronisedFolderPath().toString(), "StarView");
     }
 
+    private Path getStarViewRunFolderPath() {
+
+        return Paths.get(getJobRunningFolderPath().toString(), "StarView");
+    }
+
     private Path getPowerPointSyncFolderPath() {
-      
+
         return Paths.get(getJobSynchronisedFolderPath().toString(), "PowerPoint");
+    }
+
+    private Path getPowerPointRunFolderPath() {
+
+        return Paths.get(getJobRunningFolderPath().toString(), "PowerPoint");
     }
 
     public String getCustomerNumber() {
@@ -646,7 +716,6 @@ public class JobTest {
                     System.out.println("directoryListing child.getName = " + child.getName());
                     Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
                     System.out.println(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));
-
                 }
             }
         }
