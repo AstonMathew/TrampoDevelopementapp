@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
-import constants.SimulationStatuses;
+import constants.JobStatuses;
 
 public class TrampoProcess {
 	
@@ -31,8 +31,8 @@ public class TrampoProcess {
 		
 		// Retrieve paused simulations from webapp
 		{
-		Iterator<Job> simulation = WebAppGate.make().getSimulations(SimulationStatuses.PAUSED_MAINTENANCE).iterator();
-		while (simulation.hasNext()) {simulationQueue.addSimulation(simulation.next());}
+		Iterator<Job> simulation = WebAppGate.make().getSimulations(JobStatuses.PAUSED_MAINTENANCE).iterator();
+		while (simulation.hasNext()) {simulationQueue.addJob(simulation.next());}
 		}
 		
 		int counter = 0;
@@ -45,24 +45,25 @@ public class TrampoProcess {
 				
 				// Add simulations from webapp
 				Iterator<Job> simulation = WebAppGate.make().getSimulations().iterator();
-				while (simulation.hasNext()) {simulationQueue.addSimulation(simulation.next());}
+				while (simulation.hasNext()) {simulationQueue.addJob(simulation.next());}
 				
-				// Check for new customer every 10 minutes or so
-				if ((counter % 600) == 0) {
-					System.out.println("Check customer list");
-					LinkedList<String> customerIds = WebAppGate.make().getCustomerList();
-					Iterator<String> customerIdsIt = customerIds.iterator();
-					while (customerIdsIt.hasNext()) {
-						String customerId = customerIdsIt.next();
-						System.out.println("Checking customer " + customerId);
-						// Check for directory and create if it does not exists
-						Path path = Paths.get(Job.DATAROOT, customerId);
-						if (Files.notExists(path)) {path.toFile().mkdirs();}
-					}
-				}
-				
-				TimeUnit.SECONDS.sleep(1); // Wait 1 second
-				counter += 1;
+				// Auto customer folder creation 
+                                //Check for new customer every 10 minutes NEEDS TO CREATE CUSTOMER FOLDER WITH SHOPIFY CUSTOMER NUMBER, in the synchronised folder location;
+//				if ((counter % 600) == 0) {
+//					System.out.println("Check customer list");
+//					LinkedList<String> customerIds = WebAppGate.make().getCustomerList();
+//					Iterator<String> customerIdsIt = customerIds.iterator();
+//					while (customerIdsIt.hasNext()) {
+//						String customerId = customerIdsIt.next();
+//						System.out.println("Checking customer " + customerId);
+//						// Check for directory and create if it does not exists
+//						Path path = Paths.get(Job.DATAROOT, customerId);
+//						if (Files.notExists(path)) {path.toFile().mkdirs();}
+//					}
+//				}
+//				
+//				TimeUnit.SECONDS.sleep(1); // Wait 1 second
+//				counter += 1;
 
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
@@ -74,9 +75,9 @@ public class TrampoProcess {
 		if (Files.exists(Paths.get(currentPath.toString(), STOP))) {
 			// Wait for simulation to complete and then stop
 			System.out.println("Stopping trampo process");
-			simulationQueue.purgeQueuingSimulations(SimulationStatuses.PAUSED_MAINTENANCE);
+			simulationQueue.purgeQueuingJobs(JobStatuses.PAUSED_MAINTENANCE);
 			System.out.println("Waiting for current simulation to stop. It could take hours...");
-			while (simulationQueue.hasSimulationRunning()) {
+			while (simulationQueue.hasJobRunning()) {
 				simulationQueue.trigger();
 				TimeUnit.SECONDS.sleep(1);;
 			}			
@@ -86,9 +87,9 @@ public class TrampoProcess {
 		} else if (Files.exists(Paths.get(currentPath.toString(), STOP_NOW))) {
 			// Stop now...
 			System.out.println("Stopping trampo process NOW");
-			simulationQueue.purgeQueuingSimulations(SimulationStatuses.PAUSED_MAINTENANCE);
+			simulationQueue.purgeQueuingJobs(JobStatuses.PAUSED_MAINTENANCE);
 			System.out.println("Stopping currently running simulation NOW...");
-			simulationQueue.stopCurrentSimulationNow();
+			simulationQueue.stopCurrentJobNow();
 			Files.delete(Paths.get(currentPath.toString(), STOP_NOW));
 			new SendEmail().send(SendEmail.TO, "TrampoProcess stopped", "TrampoProcess has been forcefully stopped...");
 				

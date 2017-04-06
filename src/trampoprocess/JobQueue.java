@@ -1,6 +1,5 @@
 package trampoprocess;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalTime;
@@ -11,130 +10,102 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import constants.SimulationStatuses;
+import constants.JobStatuses;
 
 public class JobQueue {
 
-	public class SimulationHandler implements Runnable {
-		Job _sim = null;
+	public class JobHandler implements Runnable {
+		Job _job = null;
 
-		public SimulationHandler(Job sim) {
-			_sim = sim;
+		public JobHandler(Job job) {
+			_job = job;
 		}
 
 		public void run() {
 			System.out.println("Running in a thread");
 			 try {
-				_sim.runJobWorkflow();
+				_job.runJobWorkflow();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 
-		Job getSimulation() {
-			return _sim;
+		Job getJob() {
+			return _job;
 		}
 	}
 
-	// This should probably be a recast of TrampoProcess. But the coding is a
-	// mess of
-	// static and not static functions and members
-	/**
-	 * public class SimulationRequest{ static final int DEFINED = 1; static
- final int STARTED = 2; static final int COMPLETE = 3;
- 
- Integer _status = null;
- 
- public SimulationRequest() { _status = DEFINED; }
- 
- public int maximumClocktimeInSeconds() { return 60; }
- 
- public void runJobWorkflow() { _status = STARTED; System.out.println(
- "Running simulation in a thread"); ProcessBuilder pb = new
- ProcessBuilder("c:\\Temp\\test.bat"); try { pb.start(); } catch
- (IOException e) { e.printStackTrace(); } finally { _status = COMPLETE; }
- }
- 
- public void abortSimulation() { System.out.println("Aborting simulation"
- ); _status = COMPLETE; }
- 
- public void abortNow() { System.out.println("Stop the simulation now..."
- ); _status = COMPLETE; }
- 
- public Integer getStatus() { return _status; } }
-	 */
-
 	// Store the list of simulation requests
-	Thread _currentSimulationThread = null;
-	SimulationHandler _currentSimulation = null;
-	Queue<Job> _simulations = null;
-	Queue<Job> _simulationsWaitingForFiles = null;
+	Thread _currentJobThread = null;
+	JobHandler _currentJob = null;
+	Queue<Job> _jobs = null;
+	Queue<Job> _jobsWaitingForFiles = null;
 	Map<Integer, Job> _jobProcessed = null;
 	LocalTime _timeLastRunTimeUpdate = null;
 
 	public JobQueue() {
-		_simulations = new LinkedList<Job>();
-		_simulationsWaitingForFiles = new LinkedList<Job>();
-		_currentSimulation = null;
-		_currentSimulationThread = null;
+		_jobs = new LinkedList<Job>();
+		_jobsWaitingForFiles = new LinkedList<Job>();
+		_currentJob = null;
+		_currentJobThread = null;
 		_timeLastRunTimeUpdate = null;
 		_jobProcessed = new HashMap<Integer, Job>();
 	}
 
-	public boolean hasSimulationRunning() {
-		return _currentSimulation != null;
+	public boolean hasJobRunning() {
+		return _currentJob != null;
 	}
 	
-	public boolean hasSimulation() {
-		return (_simulations.size() > 0);
+	public boolean hasJob() {
+		return (_jobs.size() > 0);
 	}
 	
-	public void purgeQueuingSimulations(String status) {
-		Iterator<Job> simIt = _simulations.iterator();
-		while (simIt.hasNext()) {
-			Job sim = simIt.next();
+	public void purgeQueuingJobs(String status) {
+		Iterator<Job> jobIt = _jobs.iterator();
+		while (jobIt.hasNext()) {
+			Job job = jobIt.next();
 			try {
-				WebAppGate.make().updateSimulationStatus(sim, status);
+				WebAppGate.make().updateJobStatus(job, status);
 			} catch (Exception e) {
-				System.out.println("Error when updating status for simulation " + sim._jobNumber + " with error " + e.getMessage());
+				System.out.println("Error when updating status for job " + job._jobNumber + " with error " + e.getMessage());
 			}
 		}
-		_simulations.clear();
+		_jobs.clear();
 	}
 	
-	public void stopCurrentSimulationNow() {
-		if (hasSimulationRunning()) {
-		  _currentSimulation.getSimulation().abortNow();
-		  _currentSimulationThread.interrupt();
+	public void stopCurrentJobNow() {
+		if (hasJobRunning()) {
+		  _currentJob.getJob().abortNow();
+		  _currentJobThread.interrupt();
 		}
 	}
 	
-	public void addSimulation(Job sim) throws Exception {
-		if (_jobProcessed.containsKey(sim._jobNumber) == false) {
-			System.out.println("Add simulation " + sim._jobNumber + " to queue");
-			_jobProcessed.put(sim._jobNumber, sim);
-			if (sim.areFilesAvailable()) {
-				System.out.println("Files for simulation " + sim._jobNumber + " are available, simulation will be processed");
-				addSimulationToQueue(sim);
+	public void addJob(Job job) throws Exception {
+		if (_jobProcessed.containsKey(job._jobNumber) == false) {
+			System.out.println("Add job " + job._jobNumber + " to queue");
+			_jobProcessed.put(job._jobNumber, job);
+			if (job.areFilesAvailable()) {
+				System.out.println("Files for job " + job._jobNumber + " are available, job will be processed");
+				addJobToQueue(job);
 			} else {
-				_simulationsWaitingForFiles.add(sim);
+				_jobsWaitingForFiles.add(job);
 			}
 		}
 	}
 	
-	private boolean addSimulationToQueue(Job sim) throws Exception {
+	private boolean addJobToQueue(Job job) throws Exception {
  		try {
-			System.out.println("Adding simulation from " + sim._customerNumber + " simulation id: " + sim._jobNumber + " with file " + sim._simulation);
-			  sim.checkSim_name_AndFiles_count_extension();
-			  String c = WebAppGate.make().getSimulationStatus(sim); 
-			  if ((c.equals(SimulationStatuses.SUBMITED)) || (c.equals(SimulationStatuses.PAUSED_MAINTENANCE))) { 
-			    _simulations.add(sim);
-			    WebAppGate.make().updateSimulationStatus(sim, SimulationStatuses.SIMULATION_QUEUED);
+			System.out.println("Adding job from " + job._customerNumber + " job id: " + job._jobNumber + " with file " + job._simulation);
+			  job.checkSim_name_AndFiles_count_extension();
+			  String c = WebAppGate.make().getJobStatus(job); 
+			  if ((c.equals(JobStatuses.SUBMITED)) || (c.equals(JobStatuses.PAUSED_MAINTENANCE))) { 
+			    _jobs.add(job);
+			    WebAppGate.make().updateJobStatus(job, JobStatuses.JOB_QUEUED);
 			    return true;
 			  }
 		} catch (Exception e) {
-			System.out.println("Error when adding simulation " + sim._jobNumber + " with error " + e.getMessage());
+			System.out.println("Error when adding job " + job._jobNumber + " with error " + e.getMessage());
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 			System.out.println(sw.toString());
@@ -143,27 +114,30 @@ public class JobQueue {
 	}
 
 	public void trigger() throws Exception {
-		// Deal with simulations waiting for files
+		// Deal with jobs waiting for files
 		try {
-			Iterator<Job> simIt = _simulationsWaitingForFiles.iterator();
+			Iterator<Job> simIt = _jobsWaitingForFiles.iterator();
 			while (simIt.hasNext()) {
-				Job sim = simIt.next();
-				if (sim.areFilesAvailable()) {
-					if (addSimulationToQueue(sim)) {
+				Job job = simIt.next();
+				if (job.areFilesAvailable()) {
+					if (addJobToQueue(job)) {
 						// Job has been added to queue. Remove from waiting for files
-						_simulationsWaitingForFiles.remove(sim);						
+						_jobsWaitingForFiles.remove(job);						
 					} else {
 						// Job has not been added. Check current status. If status changed, then remove as 
 						// Something is wrong with the setup.
-						String c = WebAppGate.make().getSimulationStatus(sim);
-						if (! ((c == SimulationStatuses.SUBMITED) || (c == SimulationStatuses.PAUSED_MAINTENANCE))) {
-							_simulationsWaitingForFiles.remove(sim);
+						String c = WebAppGate.make().getJobStatus(job);
+						if (! ((c == JobStatuses.SUBMITED) || (c == JobStatuses.PAUSED_MAINTENANCE))) {
+							_jobsWaitingForFiles.remove(job);
 						}
 					}
-				} else if (ChronoUnit.HOURS.between(sim.getCreationTime(), LocalTime.now()) >= 3*24) {
-					// Files are not available after 3 days. Let stuff happen
-					_simulationsWaitingForFiles.remove(sim);
-					addSimulationToQueue(sim);					
+				} else if (ChronoUnit.HOURS.between(job.getCreationTime(), LocalTime.now()) >= 3*24) {
+					// Files are not available after 3 days.
+					_jobsWaitingForFiles.remove(job);
+                                        System.out.println(" job " + job._jobNumber + " canceled: files took too long to upload ");
+                                        //update status: CANCELLED: still haven't uploaded in 3 days
+                                        WebAppGate.make().updateJobStatus(job, JobStatuses.CANCELLED_FILES_TOO_LONG_TO_UPLOAD); //NOT TESTED
+					//addJobToQueue(job);					
 				}
 			}
 	   } catch (Exception e) {
@@ -171,58 +145,56 @@ public class JobQueue {
 	   }
 		
 		// Handle current process
-		if ((_currentSimulation != null) && (_currentSimulationThread.isAlive())) { 
-			// Current simulation running
-			Job cSim = _currentSimulation.getSimulation();
-			long rt = cSim.currentRunTimeInSeconds();
+		if ((_currentJob != null) && (_currentJobThread.isAlive())) { 
+			// Current job running
+			Job cJob = _currentJob.getJob();
+			long rt = cJob.currentRunTimeInSeconds();
 
-			// Update runtime simulation every 60 seconds
+			// Update runtime job every 60 seconds
 			if (ChronoUnit.SECONDS.between(_timeLastRunTimeUpdate, LocalTime.now()) >= 60) {
-				cSim.updateJobActualRuntime();
+				cJob.updateJobActualRuntime();
 				_timeLastRunTimeUpdate = LocalTime.now();
-				cSim.updateMaximumClocktimeInSecondsFromWebApp();
+				cJob.updateMaximumClocktimeInSecondsFromWebApp();
 			}
 
-			if (WebAppGate.make().isSimulationCanceled(cSim)) { 
-				// Check if the user has canceled the simulation. If it has canceled mark the simulation as canceled
-				cSim.markAsCanceled();
+			if (WebAppGate.make().isJobCanceled(cJob)) { 
+				// Check if the user has canceled the job. If it has canceled mark the job as canceled
+				cJob.markAsCanceled();
 			}
 			
-			if (rt < cSim.maximumClocktimeInSeconds()) {
-                            System.out.println("cSim.maximumClocktimeInSeconds()= "+cSim.maximumClocktimeInSeconds());
-                            System.out.println("cSim._maxSeconds= "+cSim._maxSeconds);
-				_currentSimulationThread.join(1000); // Wait another 1 seconds
-														// before checking again
-			} else if (rt < cSim.maximumClocktimeInSeconds() + 120) {
-				// The simulation has expired his clocktime request allow 100
-				// seconds for graceful stop
-				cSim.abort();
-				_currentSimulationThread.join(1000); // Wait for 1 second
+			if (rt < cJob.maximumClocktimeInSeconds()) {
+                            System.out.println("cJob.maximumClocktimeInSeconds()= "+cJob.maximumClocktimeInSeconds());
+                            System.out.println("cJob._maxSeconds= "+cJob._maxSeconds);
+				_currentJobThread.join(60000); // 1000=1sec 60000=10min
+													
+			} else if (rt < cJob.maximumClocktimeInSeconds() + 120) {
+				// The job has expired his clocktime request allow 100 seconds for graceful stop
+				cJob.abort();
+				_currentJobThread.join(1000); // Wait for 1 second
 			} else {
-				// Past the 100 seconds grace period. Force the simulation to
-				// end
-				cSim.abortNow();
-				_currentSimulationThread.interrupt();
+				// Past the 100 seconds grace period. Force the job to end
+
+				cJob.abortNow();
+				_currentJobThread.interrupt();
 			}
 
-		} else if (_currentSimulation != null) { // Current simulation no longer
-													// running, but not cleared
-			_currentSimulation = null;
+		} else if (_currentJob != null) { // Current job no longer running, but not cleared
+													
+			_currentJob = null;
 			_timeLastRunTimeUpdate = null;
 
-		} else if (!_simulations.isEmpty()) { // No simulation running and not
-												// empty queue
-			_currentSimulation = new SimulationHandler(_simulations.poll());
-			if (! WebAppGate.make().isSimulationCanceled(_currentSimulation.getSimulation())) {
-				System.out.println("Start new simulation " + _currentSimulation._sim._jobNumber);
-				_currentSimulationThread = new Thread(_currentSimulation);
-				_currentSimulationThread.start();
+		} else if (!_jobs.isEmpty()) { // No job running and not empty queue
+												
+			_currentJob = new JobHandler(_jobs.poll());
+			if (! WebAppGate.make().isJobCanceled(_currentJob.getJob())) {
+				System.out.println("Start new job " + _currentJob._job._jobNumber);
+				_currentJobThread = new Thread(_currentJob);
+				_currentJobThread.start();
 			        _timeLastRunTimeUpdate = LocalTime.now();
-				_currentSimulationThread.join(1000); // Wait for 1 seconds to
-														// allow for the
-														// simulation to start
+				_currentJobThread.join(1000); // Wait for 1 seconds to allow for the job to start
+														
 			} else {
-				_currentSimulation = null; // If simulation is cancelled reset it.
+				_currentJob = null; // If job is cancelled reset it.
 			        _timeLastRunTimeUpdate = null;
 			}
 		}

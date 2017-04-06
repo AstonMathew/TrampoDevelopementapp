@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import constants.SimulationStatuses;
+import constants.JobStatuses;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -138,7 +138,7 @@ public class JobTest {
             System.err.println(
                     "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
             // this needs to make the simulation exist the queue as it indicates a major problem
-            updateJobStatus(SimulationStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
+            updateJobStatus(JobStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
             throw new Exception("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
         }
         if (Files.isDirectory(getJobSynchronisedFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
@@ -149,7 +149,7 @@ public class JobTest {
             System.err.println(
                     "ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: " + getJobSynchronisedFolderPath());
             // this needs to make the simulation exist the queue as it indicates a major problem
-            updateJobStatus(SimulationStatuses.CANCELLED_JOB_SYNC_FOLDER_PREEXISTING);
+            updateJobStatus(JobStatuses.CANCELLED_JOB_SYNC_FOLDER_PREEXISTING);
             throw new Exception("ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: " + getJobSynchronisedFolderPath());
         }
 
@@ -306,7 +306,7 @@ public class JobTest {
         File pbWorkingDirectory = getJobRunningFolderPath().toFile(); //(new File)?
         pb.directory(pbWorkingDirectory);
         try {
-            updateJobStatus(SimulationStatuses.RUNNING);
+            updateJobStatus(JobStatuses.RUNNING);
             _startSimulationTime = LocalTime.now();
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
             _simulationProcess = pb.start();
@@ -398,7 +398,7 @@ public class JobTest {
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
             _printStreamToLogFile.println("Simulation/Total processing time: " + (int) timeInSeconds(_startSimulationTime) + "s/" + (int) timeInSeconds(_startTime) + "s");
             updateJobActualRuntime();
-            updateJobStatus(SimulationStatuses.COMPLETED);
+            updateJobStatus(JobStatuses.COMPLETED);
             _printStreamToLogFile.println("Simulation complete...");
 
         } catch (IOException e) {

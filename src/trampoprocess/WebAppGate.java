@@ -20,7 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import constants.Database;
-import constants.SimulationStatuses;
+import constants.JobStatuses;
 
 /**
  * Interaction with the webapp to update simulation status, query simulations,
@@ -51,7 +51,7 @@ public class WebAppGate {
 		}
 		
 		public LinkedList<Job> getSimulations() throws Exception {
-			return getSimulations(SimulationStatuses.SUBMITED);
+			return getSimulations(JobStatuses.SUBMITED);
 		}
 
 		public LinkedList<Job> getSimulations(String status) throws Exception {
@@ -158,7 +158,7 @@ public class WebAppGate {
 	}
 	
 	public static class WebAppGateDatabase {
-		public String getSimulationStatus(Job sim) throws Exception {
+		public String getJobStatus(Job sim) throws Exception {
 			try {
 				String result = null;
 				Connection conn = getConnection();
@@ -188,7 +188,7 @@ public class WebAppGate {
 			return "";
 		}
 
-		public boolean isSimulationCanceled(Job sim) throws Exception {
+		public boolean isJobCanceled(Job sim) throws Exception {
 			try {
 				Connection conn = getConnection();
 				if (conn == null) {
@@ -245,7 +245,7 @@ public class WebAppGate {
 		}
 
 		public LinkedList<Job> getSimulations() throws Exception {
-			return getSimulations(SimulationStatuses.SUBMITED);
+			return getSimulations(JobStatuses.SUBMITED);
 		}
 
 		public LinkedList<Job> getSimulations(String status) throws Exception {
@@ -319,7 +319,7 @@ public class WebAppGate {
 			}
 		}
 
-		public void updateSimulationStatus(Job sim, String status) throws Exception {
+		public void updateJobStatus(Job sim, String status) throws Exception {
 			try {
 				System.out.println("Update simulation status for simulation " + sim._jobNumber + " to " + status);
 				Connection conn = getConnection();
