@@ -74,8 +74,8 @@ public class JobTest {
     static String PODKEY = "5vq0W6k4A3CThu7rcwFeS23KtqY"; //need to read the key from a text file that can be changed in the  middle of running
     static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
             "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
-    static String DATAROOT = "C:\\data\\";
-    static String RUNROOT = "C:\\run\\";
+    static String DATAROOT = "S:\\";
+    static String RUNROOT = "R:\\";
     static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
     static int RUNTOSYNCCOPYWAITINGTIME = 10000; //1000 MILLIsecond for testing, 300000 MILLIsecond =5 minutes for production
