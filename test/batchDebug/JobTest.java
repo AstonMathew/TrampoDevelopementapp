@@ -72,13 +72,17 @@ public class JobTest {
     static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
     static String _localHostNP = "localhost:" + _numberComputeCores;
     static String PODKEY = "5vq0W6k4A3CThu7rcwFeS23KtqY"; //need to read the key from a text file that can be changed in the  middle of running
-    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
-            "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
+    
     static String DATAROOT = "S:\\";
     static String RUNROOT = "R:\\";
-    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
+    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(RUNROOT); //PROD
+//static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling"); //TEST
+    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get(RUNROOT,"InstalledVersions.txt"); //PROD
+//    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt"); //TEST
+
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
-    static int RUNTOSYNCCOPYWAITINGTIME = 10000; //1000 MILLIsecond for testing, 300000 MILLIsecond =5 minutes for production
+    static int SCHEDULEDMOVEPERIOD = 2; //TEST
+//  static int SCHEDULEDMOVEPERIOD = 120; //PROD
 
     /**
      * @param _jobNumber
@@ -290,12 +294,12 @@ public class JobTest {
         //if (moveTask == null) {
         moveTaskScenes = new MoveTask(getScenesRunFolderPath().toFile(), getScenesSyncFolderPath().toFile());
         //}
-        moveTaskScenes.scheduleFileMove("Scene"); // non-blocking
+        moveTaskScenes.scheduleFileMove("Scene", SCHEDULEDMOVEPERIOD); // non-blocking
 
         //move plots
         moveTaskPlots = new MoveTask(getPlotsRunFolderPath().toFile(), getPlotsSyncFolderPath().toFile());
         //}
-        moveTaskPlots.scheduleFileMove("Plot"); // non-blocking
+        moveTaskPlots.scheduleFileMove("Plot", SCHEDULEDMOVEPERIOD); // non-blocking
 
         ProcessBuilder pb = new ProcessBuilder(
                 _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
@@ -316,10 +320,6 @@ public class JobTest {
             // if not redirected, Star-CCM+ processes hang and -batch*-report doesn't print
             InputStream stdout = _simulationProcess.getInputStream();
             while (stdout.read() >= 0) {
-                //trying to move files to synchronised folder
-
-//                Thread.sleep(RUNTOSYNCCOPYWAITINGTIME);
-//                File sourceDirectory = pbWorkingDirectory;
             }
 
             _simulationProcess.waitFor();

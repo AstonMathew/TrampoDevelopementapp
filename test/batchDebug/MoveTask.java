@@ -9,8 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 
 public class MoveTask {
-    private final static int PERIOD = 1; // hours
-
     private Timer cron;
     private File source;
     private File destination;
@@ -21,9 +19,9 @@ public class MoveTask {
         cron = new Timer();
     }
 
-    public void scheduleFileMove(String string) {
+    public void scheduleFileMove(String string, int integer) {
         TimerTask moveTimerTask = new MoveTimerTask(source, destination, string);
-        cron.schedule(moveTimerTask, 1, TimeUnit.SECONDS.toMillis(PERIOD));
+        cron.schedule(moveTimerTask, 1, TimeUnit.SECONDS.toMillis(integer));
     }
     public void cancelPurgeTimer() {
         cron.cancel();
@@ -40,7 +38,7 @@ public class MoveTask {
             this.source = source;
             this.destination = destination;
             this.string = string;
-            System.out.println(String.format("Move task for mask '%s' is scheduled to run every %d hour(s)", string, PERIOD));
+            //System.out.println(String.format("Move task for mask '%s' is scheduled to run every %d hour(s)", string, PERIOD));
         }
 
         @Override
