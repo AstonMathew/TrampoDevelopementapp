@@ -25,21 +25,25 @@ import constants.JobStatuses;
 import constants.ValidExtensions;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.file.FileVisitResult;
+import java.nio.file.SimpleFileVisitor;
 import java.util.concurrent.TimeUnit;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 
 /**
  *
  * @author Administrator
  *
- * TODOGUINOW remove all lines with //TESTING ONLY
- *
- * TODOLATER This code breaks if the simulation folder already exists.
- * //runDataExtraction() Job name needs to be updated to latest sim file in
- * folder tree. move InstalledVersions.txt into the code.
+ * TODOGUINOW * TODOLATER This code breaks if the simulation folder already
+ * exists. //runDataExtraction() JobTest name needs to be updated to latest sim
+ * file in folder tree. move InstalledVersions.txt into the code.
  */
 public class Job {
 
@@ -62,18 +66,23 @@ public class Job {
     String _StarCcmPlusVersionPath = null;
     String _StarCcmPlusDefaultVersion = null;
     String _StarCcmPlusDefaultVersionPath = null;
+    MoveTask moveTaskScenes;
+    MoveTask moveTaskPlots;
 
     // compute node and license parameter need to be changed for production
     static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
     static String _localHostNP = "localhost:" + _numberComputeCores;
     static String PODKEY = "5vq0W6k4A3CThu7rcwFeS23KtqY"; //need to read the key from a text file that can be changed in the  middle of running
-    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(
-            "C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling");
-    static String DATAROOT = "C:\\data\\";
-    static String RUNROOT = "C:\\data\\";
-    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt");
+    static String DATAROOT = "S:\\";
+    static String RUNROOT = "R:\\";
+    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(RUNROOT); //PROD
+//static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling"); //TEST
+    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get(RUNROOT, "InstalledVersions.txt"); //PROD
+//    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt"); //TEST
+
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
-    static int TOBACKUPCOPYWAITINGTIME = 1000; //1000 MILLIsecond for testing, 300000 MILLIsecond =5 minutes for production
+    static int SCHEDULEDMOVEPERIOD = 2; //TEST
+//  static int SCHEDULEDMOVEPERIOD = 120; //PROD
 
     /**
      * @param jobNumber
@@ -176,13 +185,14 @@ public class Job {
         _startTime = LocalTime.now();
 
         // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
-        createJobFolders();
+        createJobRunAndSyncFolders();
         createLogAndBackupDirectories(); //remove the commeting out in production
-        CreateLogHeader();
+        createLogHeader();
         _printStreamToLogFile.println("Starting processing time: " + _startTime);
-        CopyCustomerSyncFolderIntoJobRunFolder();
+        copyCustomerSyncFolderIntoJobRunFolder();
         getCustomerStarCCMPlusVersion();
         selectStarCCMPlusRunVersion(); //LATER: need to read Star-CCM+ installed on machine itself. Adress issue of latest CCM+ version not loaded on Trampo yet.
+        createPostprocessingRunFolders();
         RunJob();
         copyLogOutputWindowToFile();
         //runDataExtraction; // 
@@ -190,7 +200,7 @@ public class Job {
         System.out.println("End");
     }
 
-    private void createJobFolders() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
+    private void createJobRunAndSyncFolders() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
 //Files.createDirectory(getJobRunningFolderPath());
 // Files.createTempFile(simulationSendingToTrampoFolderPath,
         // "tmp",".txt");
@@ -205,6 +215,17 @@ public class Job {
             updateJobStatus(JobStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
             throw new Exception("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
         }
+        if (Files.isDirectory(getJobSynchronisedFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getJobSynchronisedFolderPath());
+            System.out.println("getJobSynchronisedFolderPath Folder created " + getJobSynchronisedFolderPath());
+            //System.out.println("src folder will show below as Directory copied");
+        } else {
+            System.err.println(
+                    "ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: " + getJobSynchronisedFolderPath());
+            // this needs to make the simulation exist the queue as it indicates a major problem
+            updateJobStatus(JobStatuses.CANCELLED_JOB_SYNC_FOLDER_PREEXISTING);
+            throw new Exception("ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: " + getJobSynchronisedFolderPath());
+        }
     }
 
     private void createLogAndBackupDirectories() throws FileNotFoundException, IOException {
@@ -216,7 +237,8 @@ public class Job {
         Files.createDirectories(getJobBackupPath());
         System.out.println(" getJobBackupPath Folder created " + getJobBackupPath());
 
-        File log = getJobLogsPath().resolve("\\job_" + _jobNumber + ".log").toFile();
+        File log = getJobLogsPath().resolve("job_" + _jobNumber + ".log").toFile(); // this seems t save to the C:/drive for some reason
+        System.out.println("HERE writing job_" + _jobNumber + ".log at path= " + log.toString());
         try {
             //Create the file
             Files.createFile(log.toPath());
@@ -230,7 +252,7 @@ public class Job {
 //        System.setErr(_printStreamToLogFile);
     }
 
-    private void CreateLogHeader() throws IOException, InterruptedException {
+    private void createLogHeader() throws IOException, InterruptedException {
 
         _printStreamToLogFile.println("HEADER START----------------------------------------------------------------------------------------------------------------");
         _printStreamToLogFile.println("simulationNumber = " + _jobNumber);
@@ -242,7 +264,7 @@ public class Job {
         _printStreamToLogFile.println("HEADER END-------------------------------------------------------------------------------------------------------------------");
     }
 
-    private void CopyCustomerSyncFolderIntoJobRunFolder() throws IOException, InterruptedException {
+    private void copyCustomerSyncFolderIntoJobRunFolder() throws IOException, InterruptedException {
         System.out.println("starting CopyCustomerSyncFolderIntoJobRunFolder()");
 //        SimulationFolderFileVisitor visitor = new SimulationFolderFileVisitor(getCustomerSynchronisedFolder(),
 //                getJobRunningFolderPath());
@@ -336,7 +358,18 @@ public class Job {
 
     }
 
-    private void RunJob() throws Exception {
+private void RunJob() throws Exception { //IF process desn't run while testing, i.e. no output a,d a single STAR-CCM+ process starts, make sure you have a sim file in the right folder to run!!!
+        //move scenes           
+        //if (moveTask == null) {
+        moveTaskScenes = new MoveTask(getScenesRunFolderPath().toFile(), getScenesSyncFolderPath().toFile());
+        //}
+        moveTaskScenes.scheduleFileMove("Scene", SCHEDULEDMOVEPERIOD); // non-blocking
+
+        //move plots
+        moveTaskPlots = new MoveTask(getPlotsRunFolderPath().toFile(), getPlotsSyncFolderPath().toFile());
+        //}
+        moveTaskPlots.scheduleFileMove("Plot", SCHEDULEDMOVEPERIOD); // non-blocking
+
         ProcessBuilder pb = new ProcessBuilder(
                 _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
                 "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
@@ -351,22 +384,84 @@ public class Job {
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
             _simulationProcess = pb.start();
             System.out.println("p started");
+
             //Redirection of stream and loop extremely important; http://baxincc.cc/questions/216451/windows-process-execed-from-java-not-terminating
             // if not redirected, Star-CCM+ processes hang and -batch*-report doesn't print
             InputStream stdout = _simulationProcess.getInputStream();
-            while (stdout.read() >= 0) {;
-//                BackupFolderFileVisitor visitor = new BackupFolderFileVisitor(
-//                        getJobRunningFolderPath(), getJobBackupPath());
-//                Files.walkFileTree(getJobRunningFolderPath(), visitor);
-
-                //Thread.sleep(TOBACKUPCOPYWAITINGTIME);
+            while (stdout.read() >= 0) {
             }
+
             _simulationProcess.waitFor();
+            //Stop the automatic move of Scenes and Plots from run folder to sync folder
+            moveTaskScenes.cancelPurgeTimer();
+            moveTaskPlots.cancelPurgeTimer();
+
+            //end of the run file move
             File sourceDirectory = pbWorkingDirectory;
+
             File destinationDirectory = getJobBackupPath().toFile();
-            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "@");
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "TrampoBackup");
+
             destinationDirectory = getJobLogsPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
+
+            destinationDirectory = getJobSynchronisedFolderPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
+
+            //REMOVE POD key FROM HTML report
+            File[] directoryListing = getJobSynchronisedFolderPath().toFile().listFiles();
+            if (directoryListing != null) {
+                for (File child : directoryListing) {
+                    if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(".html")) {
+                        System.out.println("HTML report file name = " + child.getName());
+                        String content = new String(Files.readAllBytes(child.toPath()), Charset.forName("UTF-8"));
+                        int index = content.indexOf("-podkey");
+                        System.out.println("indexOf -podkey in HTML report = " + index);
+                        System.out.println("OLD content.substring(index, index + 25) in HTML report = " + content.substring(index, index + 10));
+                        content = content.replace(content.substring(index, index + 25), "-podkey XXXXXXXXXXXXXXXXX");
+                        System.out.println("NEW content.substring(index, index + 25) in HTML report = " + content.substring(index, index + 10));
+                        try (PrintWriter out = new PrintWriter(new FileOutputStream(child.toPath().toString(), false))) {
+                            out.println(content);
+                        }
+                    }
+                }
+            }
+            sourceDirectory = getTablesRunFolderPath().toFile();
+            destinationDirectory = getTablesSyncFolderPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+
+            sourceDirectory = getStarViewRunFolderPath().toFile();
+            destinationDirectory = getStarViewSyncFolderPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+
+            sourceDirectory = getPowerPointRunFolderPath().toFile();
+            destinationDirectory = getPowerPointSyncFolderPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+
+            //delete anything left in the run/customer directory.  for symlink handling see http://stackoverflow.com/questions/779519/delete-directories-recursively-in-java/27917071#27917071
+            Files.walkFileTree(getJobRunningFolderPath(), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+
+            Files.walkFileTree(Paths.get(RUNROOT, getCustomerFolderRelativePath()), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    //Files.delete(Paths.get(RUNROOT, getCustomerFolderRelativePath()));
+                    return FileVisitResult.CONTINUE;
+                }
+            });
 
             // All below 
             _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't seem to be done at the end of the process.
@@ -522,23 +617,129 @@ public class Job {
     }
 
     private Path getJobRunningFolderPath() {// the Job running folder
+        return Paths.get(RUNROOT, getCustomerFolderRelativePath(), "Job_" + _jobNumber);
+    }
+    
+   private Path getJobSynchronisedFolderPath() {// the Job synchronised folder where trampo send the results back live.
         return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder", "Job_" + _jobNumber);
     }
+ 
 
     private Path getJobLogsPath() {
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\Job_" + _jobNumber, "\\logs");
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Job_" + _jobNumber, "logs");
     }
 
     private Path getJobBackupPath() {
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "\\Job_" + _jobNumber + "\\backup");
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Job_" + _jobNumber, "backup");
     }
 
     private String getJobStatusPath() {
-        return getJobRunningFolderPath() + "\\Job_" + _jobNumber + "_Status.txt";
+        return getJobRunningFolderPath() + "Job_" + _jobNumber + "_Status.txt";
     }
 
     private Path getOutputWindowLogToFile() { // might need update to work for all versions
         return Paths.get("C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ " + _StarCcmPlusVersion + "\\var\\log\\messages.log");
+    }
+private void createPostprocessingRunFolders() throws IOException, Exception {
+        //scenes
+        if (Files.isDirectory(getScenesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getScenesSyncFolderPath());
+            System.out.println("getRunScenesFolderPath created " + getScenesSyncFolderPath());
+            //System.out.println("src folder will show below as Directory copied");
+        } else {
+            System.err.println(
+                    "ERROR: getRunScenesFolderPath EXISTING !!! with Path: " + getScenesSyncFolderPath());
+            //throw new Exception("ERROR: getScenesSyncFolderPath EXISTING !!! with Path: " + getScenesSyncFolderPath());
+        }
+        //plots
+        if (Files.isDirectory(getPlotsSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getPlotsSyncFolderPath());
+            System.out.println("getRunPlotsFolderPath created " + getPlotsSyncFolderPath());
+            //System.out.println("src folder will show below as Directory copied");
+        } else {
+            System.err.println(
+                    "ERROR: getRunPlotsFolderPath EXISTING !!! with Path: " + getPlotsSyncFolderPath());
+            //throw new Exception("ERROR: getPlotsSyncFolderPath EXISTING !!! with Path: " + getPlotsSyncFolderPath());
+        }
+
+        //tables
+        if (Files.isDirectory(getTablesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getTablesSyncFolderPath());
+            System.out.println("getRunTablesFolderPath created " + getTablesSyncFolderPath());
+            //System.out.println("src folder will show below as Directory copied");
+        } else {
+            System.err.println(
+                    "ERROR: getRunTablesFolderPath EXISTING !!! with Path: " + getTablesSyncFolderPath());
+            //throw new Exception("ERROR: getTablesSyncFolderPath EXISTING !!! with Path: " + getTablesSyncFolderPath());
+        }
+
+        //Starview
+        if (Files.isDirectory(getStarViewSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getStarViewSyncFolderPath());
+            System.out.println("getRunStarViewFolderPath created " + getStarViewSyncFolderPath());
+            //System.out.println("src folder will show below as Directory copied");
+        } else {
+            System.err.println(
+                    "ERROR: getRunStarViewFolderPath EXISTING !!! with Path: " + getStarViewSyncFolderPath());
+            //throw new Exception("ERROR: getStarViewSyncFolderPath EXISTING !!! with Path: " + getStarViewSyncFolderPath());
+        }
+
+        //PowerPoint
+        if (Files.isDirectory(getPowerPointSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
+            Files.createDirectories(getPowerPointSyncFolderPath());
+            System.out.println("getRunPowerPointFolderPath created " + getPowerPointSyncFolderPath());
+            //System.out.println("src folder will show below as Directory copied");
+        } else {
+            System.err.println(
+                    "ERROR: getRunPowerPointFolderPath EXISTING !!! with Path: " + getPowerPointSyncFolderPath());
+            //throw new Exception("ERROR: getPowerPointSyncFolderPath EXISTING !!! with Path: " + getPowerPointSyncFolderPath());
+        }
+    }
+
+    private Path getScenesSyncFolderPath() {
+        return Paths.get(getJobSynchronisedFolderPath().toString(), "Scenes");
+    }
+
+    private Path getScenesRunFolderPath() {
+        return Paths.get(getJobRunningFolderPath().toString(), "Scenes");
+    }
+
+    private Path getPlotsSyncFolderPath() {
+        return Paths.get(getJobSynchronisedFolderPath().toString(), "Plots");
+    }
+
+    private Path getPlotsRunFolderPath() {
+        return Paths.get(getJobRunningFolderPath().toString(), "Plots");
+    }
+
+    private Path getTablesSyncFolderPath() {
+
+        return Paths.get(getJobSynchronisedFolderPath().toString(), "Tables");
+    }
+
+    private Path getTablesRunFolderPath() {
+
+        return Paths.get(getJobRunningFolderPath().toString(), "Tables");
+    }
+
+    private Path getStarViewSyncFolderPath() {
+
+        return Paths.get(getJobSynchronisedFolderPath().toString(), "StarView");
+    }
+
+    private Path getStarViewRunFolderPath() {
+
+        return Paths.get(getJobRunningFolderPath().toString(), "StarView");
+    }
+
+    private Path getPowerPointSyncFolderPath() {
+
+        return Paths.get(getJobSynchronisedFolderPath().toString(), "PowerPoint");
+    }
+
+    private Path getPowerPointRunFolderPath() {
+
+        return Paths.get(getJobRunningFolderPath().toString(), "PowerPoint");
     }
 
     public String getCustomerNumber() {
@@ -575,6 +776,10 @@ public class Job {
      *
      * moves all files containing the string from the source directory to the
      * destination directory both directory need to exist!
+     * @param source
+     * @param destination
+     * @param string
+     * @throws java.io.IOException
      */
     public void ConditionalMoveFiles(File source, File destination, String string) throws IOException {
         File[] directoryListing = source.listFiles();
