@@ -68,6 +68,7 @@ public class Job {
     String _StarCcmPlusDefaultVersionPath = null;
     MoveTask moveTaskScenes;
     MoveTask moveTaskPlots;
+    MoveTask moveTaskMesh;
 
     // compute node and license parameter need to be changed for production
     static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
@@ -369,6 +370,12 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
         moveTaskPlots = new MoveTask(getPlotsRunFolderPath().toFile(), getPlotsSyncFolderPath().toFile());
         //}
         moveTaskPlots.scheduleFileMove("Plot", SCHEDULEDMOVEPERIOD); // non-blocking
+        //move plots
+        moveTaskMesh = new MoveTask(getJobRunningFolderPath().toFile(), getJobSynchronisedFolderPath().toFile());
+        //}
+        moveTaskMesh.scheduleFileMove("Meshed", SCHEDULEDMOVEPERIOD); // non-blocking
+        
+        
 
         ProcessBuilder pb = new ProcessBuilder(
                 _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
@@ -395,6 +402,7 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
             //Stop the automatic move of Scenes and Plots from run folder to sync folder
             moveTaskScenes.cancelPurgeTimer();
             moveTaskPlots.cancelPurgeTimer();
+            moveTaskMesh.cancelPurgeTimer();
 
             //end of the run file move
             File sourceDirectory = pbWorkingDirectory;
