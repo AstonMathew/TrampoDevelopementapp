@@ -69,6 +69,7 @@ public class Job {
     MoveTask moveTaskScenes;
     MoveTask moveTaskPlots;
     MoveTask moveTaskMesh;
+    MoveTask moveTaskBackUp;
 
     // compute node and license parameter need to be changed for production
     static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
@@ -375,6 +376,10 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
         //}
         moveTaskMesh.scheduleFileMove("Meshed", SCHEDULEDMOVEPERIOD); // non-blocking
         
+//        moveTaskBackUp = new MoveTask(getJobRunningFolderPath().toFile(), getJobBackupPath().toFile());
+//        //}
+//        moveTaskBackUp.scheduleFileMove("TrampoBackup", SCHEDULEDMOVEPERIOD); // non-blocking
+//        
         
 
         ProcessBuilder pb = new ProcessBuilder(
@@ -404,17 +409,6 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
             moveTaskPlots.cancelPurgeTimer();
             moveTaskMesh.cancelPurgeTimer();
 
-            //end of the run file move
-            File sourceDirectory = pbWorkingDirectory;
-
-            File destinationDirectory = getJobBackupPath().toFile();
-            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "TrampoBackup");
-
-            destinationDirectory = getJobLogsPath().toFile();
-            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
-
-            destinationDirectory = getJobSynchronisedFolderPath().toFile();
-            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
 
             //REMOVE POD key FROM HTML report
             File[] directoryListing = getJobSynchronisedFolderPath().toFile().listFiles();
@@ -434,6 +428,16 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
                     }
                 }
             }
+                        //end of the run file move
+            File sourceDirectory = pbWorkingDirectory;
+
+            File destinationDirectory = getJobLogsPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
+
+            destinationDirectory = getJobSynchronisedFolderPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
+
+            
             sourceDirectory = getTablesRunFolderPath().toFile();
             destinationDirectory = getTablesSyncFolderPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
@@ -445,6 +449,10 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
             sourceDirectory = getPowerPointRunFolderPath().toFile();
             destinationDirectory = getPowerPointSyncFolderPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+            
+            sourceDirectory = getJobSynchronisedFolderPath().toFile();
+            destinationDirectory = getJobBackupPath().toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
 
             //delete anything left in the run/customer directory.  for symlink handling see http://stackoverflow.com/questions/779519/delete-directories-recursively-in-java/27917071#27917071
             Files.walkFileTree(getJobRunningFolderPath(), new SimpleFileVisitor<Path>() {
