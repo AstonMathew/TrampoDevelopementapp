@@ -2,6 +2,7 @@ package trampoprocess;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,6 +20,10 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import constants.Database;
 import constants.JobStatuses;
 
@@ -33,21 +38,78 @@ public class WebAppGate {
 	private static final Logger LOGGER = Logger.getLogger(WebAppGate.class.getName());
 
 	public static WebAppGateDatabase make() { return new WebAppGateDatabase(); }
+    // public static WebAppGateHttp make() { return new WebAppGateHttp(); }
 	
 	public static class WebAppGateHttp {
-		public String getSimulationStatus(Job sim) throws Exception {
-			throw new Exception("Function not implemented");
-			// return null;
+		private static JSONParser _jsonParser = new JSONParser();
+		
+		public WebAppGateHttp() {
+		}
+		
+		public String getJobStatus(Job sim) throws Exception {
+			try {
+				System.out.println("Check job status for job " + sim._jobNumber.toString());
+				String url = webAppBuildUrl("getjobStatus");
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("customer_id", sim._customerNumber);
+				map.put("sim_no", sim._jobNumber.toString());
+				String resp = webAppHttpRequest(url, urlEncode(map));
+				JSONObject resp2 = (JSONObject) _jsonParser.parse(resp);
+				if (((String) resp2.get("result")).equals("success")) {
+					return (String) resp2.get("status");
+				} else {
+					System.out.println("Web App report error message: " + (String) resp2.get("result"));
+					return null;
+				}
+			} catch (Exception e) {
+				LOGGER.info("Unable to connect to webApp");
+				LOGGER.log(Level.WARNING, null, e);
+			}
+			return null;			
 		}
 
-		public boolean isSimulationCanceled(Job sim) throws Exception {
-			throw new Exception("Function not implemented");
-			// return null;
+		public boolean isJobCanceled(Job sim) throws Exception {
+			try {
+				System.out.println("Check if job has been canceled for job " + sim._jobNumber.toString());
+				String url = webAppBuildUrl("isjobCanceled");
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("customer_id", sim._customerNumber);
+				map.put("sim_no", sim._jobNumber.toString());
+				String resp = webAppHttpRequest(url, urlEncode(map));
+				JSONObject resp2 = (JSONObject) _jsonParser.parse(resp);
+				if (((String) resp2.get("result")).equals("success")) {
+					return (boolean) resp2.get("isjobCanceled");
+				} else {
+					System.out.println("Web App report error message: " + (String) resp2.get("result"));
+					return false;
+				}
+			} catch (Exception e) {
+				LOGGER.info("Unable to connect to webApp");
+				LOGGER.log(Level.WARNING, null, e);
+			}
+			return false;			
 		}
 		
 		public Integer getJobMaxRuntime(Job sim) throws Exception {
-			throw new Exception("Function not implemented");
-			// return null;			
+			try {
+				System.out.println("Get Job maximum runtime for simulation " + sim._jobNumber.toString());
+				String url = webAppBuildUrl("getJobMaxRuntime");
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("customer_id", sim._customerNumber);
+				map.put("sim_no", sim._jobNumber.toString());
+				String resp = webAppHttpRequest(url, urlEncode(map));
+				JSONObject resp2 = (JSONObject) _jsonParser.parse(resp);
+				if (((String) resp2.get("result")).equals("success")) {
+					return (int) resp2.get("jobMaxRuntime");
+				} else {
+					System.out.println("Web App report error message: " + (String) resp2.get("result"));
+					return null;
+				}
+			} catch (Exception e) {
+				LOGGER.info("Unable to connect to webApp to Job maximum runtime for simulation " + sim._jobNumber.toString());
+				LOGGER.log(Level.WARNING, null, e);
+			}
+			return null;			
 		}
 		
 		public LinkedList<Job> getSimulations() throws Exception {
@@ -55,8 +117,36 @@ public class WebAppGate {
 		}
 
 		public LinkedList<Job> getSimulations(String status) throws Exception {
-			throw new Exception("Function not implemented");
-			// return null;						
+			LinkedList<Job> simulations = new LinkedList<Job>();
+			try {
+				System.out.println("Get simulations with status " + status);
+				String url = webAppBuildUrl("getJobs");
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("status", status);
+				String resp = webAppHttpRequest(url, urlEncode(map));
+				JSONObject resp2 = (JSONObject) _jsonParser.parse(resp);
+				if (((String) resp2.get("result")).equals("success")) {
+					System.out.println("Response is : " + resp);
+					JSONArray jobs = (JSONArray) resp2.get("jobs");
+					Iterator<JSONObject> jobsIt = jobs.iterator();
+					while(jobsIt.hasNext()) {
+						JSONObject job = jobsIt.next();
+						// JSONObject job = (JSONObject) _jsonParser.parse(jobInfo);
+						simulations.add(new Job(((int)(long) job.get(Database.SIMULATION_NO)), 
+								(String) job.get(Database.CUSTOMER_ID),
+								(String) job.get(Database.SUBMISSION_DATE), 
+								(int)(long) job.get(Database.MAX_RUNTIME),
+								(String) job.get(Database.FILE_NAME), 
+								(int)(long) job.get(Database.FILE_COUNT)));
+					}
+				} else {
+					System.out.println("Web App report error message: " + (String) resp2.get("result"));
+				}
+			} catch (Exception e) {
+				LOGGER.info("Unable to connect to webApp to retrieve simulations with status " + status);
+				LOGGER.log(Level.WARNING, null, e);
+			}
+			return simulations;						
 		}
 		
 		public LinkedList<String> getCustomerList() throws Exception {
@@ -64,7 +154,7 @@ public class WebAppGate {
 			// return null;						
 		}
 		
-		private void updateJobActualRuntime(Job sim, Integer actualRuntime) throws Exception {
+		public void updateJobActualRuntime(Job sim, Integer actualRuntime) throws Exception {
 			try {
 				System.out.println("Update simulation run time for simulation " + sim._jobNumber);
 				Map<String, String> map = new HashMap<String, String>();
@@ -81,7 +171,7 @@ public class WebAppGate {
 			}
 		}
 
-		public void updateSimulationStatus(String customerNumber, Integer jobNumber, String status)
+		public void updateJobStatus(String customerNumber, Integer jobNumber, String status)
 				throws Exception {
 			try {
 				System.out.println("Update simulation status for simulation " + jobNumber);
@@ -99,7 +189,7 @@ public class WebAppGate {
 			}
 		}
 
-		private void updateSimulationStatus(Job sim, String status) throws Exception {
+		public void updateJobStatus(Job sim, String status) throws Exception {
 			try {
 				System.out.println("Update simulation status for simulation " + sim._jobNumber);
 				Map<String, String> map = new HashMap<String, String>();
@@ -114,6 +204,27 @@ public class WebAppGate {
 						+ " by " + sim._customerNumber + " has been canceled. Keep simulation running");
 				LOGGER.log(Level.WARNING, null, e);
 			}
+		}
+
+		private String urlEncode(Map<String, String> hash) throws UnsupportedEncodingException {
+			Iterator<Entry<String, String>> hashIt = hash.entrySet().iterator();
+			Boolean addAmpersend = false;
+			String url = "";
+			while (hashIt.hasNext()) {
+				Entry<String, String> entry = hashIt.next();
+				if (addAmpersend) {
+					url += "&";
+				}
+				url += URLEncoder.encode(entry.getKey(), "UTF-8") + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+				addAmpersend = true;
+			}
+			return url;			
+		}
+
+		private String webAppBuildUrl(String method) throws UnsupportedEncodingException {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("method", method);
+			return webAppBuildUrl(map);
 		}
 
 		private String webAppBuildUrl(Map<String, String> hash) throws UnsupportedEncodingException {
@@ -132,14 +243,30 @@ public class WebAppGate {
 		}
 
 		private String webAppHttpRequest(String url) throws Exception {
+			return webAppHttpRequest(url, null);
+		}
+		
+		private String webAppHttpRequest(String url, String postdata) throws Exception {
 			// send HTTP GET request
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			
+			if (postdata == null) {
+				//System.out.println("\nSending 'GET' request to URL : " + url);	
+			} else {
+				//System.out.println("\nSending 'POST' request to URL : " + url);
+				con.setRequestMethod("POST");
+				// con.setRequestProperty("User-Agent", USER_AGENT);
+				con.setDoOutput(true);
+				OutputStream os = con.getOutputStream();
+				os.write(postdata.getBytes());
+				os.flush();
+				os.close();
+			}
 
 			// if responseCode = 200 is OK
 			int responseCode = con.getResponseCode();
-			System.out.println("\nSending 'GET' request to URL : " + url);
-			System.out.println("Response Code : " + responseCode);
+			//System.out.println("Response Code : " + responseCode);
 			if (responseCode != 200) {
 				throw new Exception("Unable to connect to server");
 			}
@@ -151,7 +278,7 @@ public class WebAppGate {
 			while ((inputLine = in.readLine()) != null) {
 				response.append(inputLine);
 			}
-			System.out.println(response.toString());
+			// System.out.println(response.toString());
 			in.close();
 			return response.toString();
 		}
