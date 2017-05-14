@@ -133,7 +133,7 @@ public class WebAppGate {
 						JSONObject job = jobsIt.next();
 						// JSONObject job = (JSONObject) _jsonParser.parse(jobInfo);
 						simulations.add(new Job(((int)(long) job.get(Database.SIMULATION_NO)), 
-								(String) job.get(Database.CUSTOMER_ID),
+								((String) job.get(Database.CUSTOMER_ID)).trim(),
 								(String) job.get(Database.SUBMISSION_DATE), 
 								(int)(long) job.get(Database.MAX_RUNTIME),
 								(String) job.get(Database.FILE_NAME), 
