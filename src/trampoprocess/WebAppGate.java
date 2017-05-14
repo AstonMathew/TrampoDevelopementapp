@@ -90,7 +90,7 @@ public class WebAppGate {
 			return false;			
 		}
 		
-		public Integer getJobMaxRuntime(Job sim) throws Exception {
+		public Long getJobMaxRuntime(Job sim) throws Exception {
 			try {
 				System.out.println("Get Job maximum runtime for simulation " + sim._jobNumber.toString());
 				String url = webAppBuildUrl("getJobMaxRuntime");
@@ -100,7 +100,7 @@ public class WebAppGate {
 				String resp = webAppHttpRequest(url, urlEncode(map));
 				JSONObject resp2 = (JSONObject) _jsonParser.parse(resp);
 				if (((String) resp2.get("result")).equals("success")) {
-					return (int) resp2.get("jobMaxRuntime");
+					return (Long) resp2.get("jobMaxRuntime");
 				} else {
 					System.out.println("Web App report error message: " + (String) resp2.get("result"));
 					return null;
@@ -135,7 +135,7 @@ public class WebAppGate {
 						simulations.add(new Job(((int)(long) job.get(Database.SIMULATION_NO)), 
 								((String) job.get(Database.CUSTOMER_ID)).trim(),
 								(String) job.get(Database.SUBMISSION_DATE), 
-								(int)(long) job.get(Database.MAX_RUNTIME),
+								(long) job.get(Database.MAX_RUNTIME),
 								(String) job.get(Database.FILE_NAME), 
 								(int)(long) job.get(Database.FILE_COUNT)));
 					}
@@ -389,7 +389,7 @@ public class WebAppGate {
 				while (rs.next()) {
 					rs.getMetaData();
 					simulations.add(new Job(rs.getInt(Database.SIMULATION_NO), rs.getString(Database.CUSTOMER_ID),
-							rs.getString(Database.SUBMISSION_DATE), rs.getInt(Database.MAX_RUNTIME),
+							rs.getString(Database.SUBMISSION_DATE), rs.getLong(Database.MAX_RUNTIME),
 							rs.getString(Database.FILE_NAME), rs.getInt(Database.FILE_COUNT)));
 				}
 				rs.close();

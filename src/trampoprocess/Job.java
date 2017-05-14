@@ -52,7 +52,7 @@ public class Job {
     String _customerNumber = null;
     String _submissionDate = null; // UTC date
     String _submissionTime = null;// UTC Time
-    Integer _maxSeconds = null;
+    Long _maxSeconds = null;
     String _simulation = null;
     Integer _fileCount = null;
 
@@ -95,7 +95,7 @@ public class Job {
      * @param fileCount
      *
      */
-    public Job(Integer jobNumber, String customerNumber, String submissionDate, int maxSeconds,
+    public Job(Integer jobNumber, String customerNumber, String submissionDate, Long maxSeconds,
             String simulation, int fileCount) {
         _jobNumber = jobNumber;
         _customerNumber = customerNumber;
@@ -763,7 +763,7 @@ private void createPostprocessingRunFolders() throws IOException, Exception {
     }
 
     public void markAsCanceled() {
-        _maxSeconds = ((_startSimulationTime == null) ? 0 : (int) timeInSeconds(_startSimulationTime));
+        _maxSeconds = ((_startSimulationTime == null) ? 0 : (long) timeInSeconds(_startSimulationTime));
     }
 
     public void updateMaximumClocktimeInSecondsFromWebApp() {
