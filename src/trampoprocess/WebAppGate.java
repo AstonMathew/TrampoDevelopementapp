@@ -37,8 +37,8 @@ import constants.JobStatuses;
 public class WebAppGate {
 	private static final Logger LOGGER = Logger.getLogger(WebAppGate.class.getName());
 
-	public static WebAppGateDatabase make() { return new WebAppGateDatabase(); }
-    // public static WebAppGateHttp make() { return new WebAppGateHttp(); }
+	//public static WebAppGateDatabase make() { return new WebAppGateDatabase(); }
+   public static WebAppGateHttp make() { return new WebAppGateHttp(); }
 	
 	public static class WebAppGateHttp {
 		private static JSONParser _jsonParser = new JSONParser();
