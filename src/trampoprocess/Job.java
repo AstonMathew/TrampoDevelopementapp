@@ -18,6 +18,9 @@ import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +39,9 @@ import java.util.concurrent.TimeUnit;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -50,7 +56,7 @@ public class Job {
     // Job parameters from the website
     Integer _jobNumber = null; // = 65;
     String _customerNumber = null;
-    String _submissionDate = null; // UTC date
+    Date _submissionDate = null; // UTC date
     String _submissionTime = null;// UTC Time
     Long _maxSeconds = null;
     String _simulation = null;
@@ -58,7 +64,7 @@ public class Job {
 
     //Instance variables
     Process _simulationProcess = null;
-    LocalTime _creationTime = null;
+    Date _creationTime = null;
     LocalTime _startTime = null;
     LocalTime _startSimulationTime = null;
     PrintStream _printStreamToLogFile = null;
@@ -99,16 +105,28 @@ public class Job {
             String simulation, int fileCount) {
         _jobNumber = jobNumber;
         _customerNumber = customerNumber;
-        _submissionDate = submissionDate;
+
+        try {
+        	DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+			_submissionDate = df.parse(submissionDate);
+		} catch (ParseException e) {
+			System.out.println("Error parsing date " + submissionDate + ". Revert to now");
+			_submissionDate = new GregorianCalendar().getTime();
+		};
         _maxSeconds = maxSeconds;
         _simulation = simulation;
         _fileCount = fileCount;
         _simulationProcess = null;
         _startTime = null;
-        _creationTime = LocalTime.now();
+        // _creationTime = LocalTime.now();
+        _creationTime = new GregorianCalendar().getTime();
     }
 
-    public LocalTime getCreationTime() {
+    public Date getSubmissionDate() {
+		return _submissionDate;    	
+    }
+    
+    public Date getCreationTime() {
         return _creationTime;
     }
 

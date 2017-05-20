@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -131,8 +132,8 @@ public class JobQueue {
 							_jobsWaitingForFiles.remove(job);
 						}
 					}
-				} else if (ChronoUnit.HOURS.between(job.getCreationTime(), LocalTime.now()) >= 3*24) {
-					// Files are not available after 3 days.
+				} else if (ChronoUnit.HOURS.between(job.getSubmissionDate().toInstant(), new GregorianCalendar().getTime().toInstant()) >= 4*24) {
+					// Files are not available after 4 days.
 					_jobsWaitingForFiles.remove(job);
                                         System.out.println(" job " + job._jobNumber + " canceled: files took too long to upload ");
                                         //update status: CANCELLED: still haven't uploaded in 3 days
