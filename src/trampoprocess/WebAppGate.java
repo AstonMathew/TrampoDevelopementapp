@@ -56,7 +56,7 @@ public class WebAppGate {
 				String resp = webAppHttpRequest(url, urlEncode(map));
 				JSONObject resp2 = (JSONObject) _jsonParser.parse(resp);
 				if (((String) resp2.get("result")).equals("success")) {
-					return (String) resp2.get("status");
+					return ((String) resp2.get("status")).trim();
 				} else {
 					System.out.println("Web App report error message: " + (String) resp2.get("result"));
 					return null;

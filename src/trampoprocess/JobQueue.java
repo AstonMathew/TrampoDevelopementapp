@@ -101,9 +101,13 @@ public class JobQueue {
 			  job.checkSim_name_AndFiles_count_extension();
 			  String c = WebAppGate.make().getJobStatus(job); 
 			  if ((c.equals(JobStatuses.SUBMITED)) || (c.equals(JobStatuses.PAUSED_MAINTENANCE))) { 
+				System.out.println("Job " + job._jobNumber + " will be treated soon ");
 			    _jobs.add(job);
 			    WebAppGate.make().updateJobStatus(job, JobStatuses.JOB_QUEUED);
 			    return true;
+			  } else {
+			    System.out.println("Job " + job._jobNumber + " will not be treated as status is " + c);				  
+			    return false;
 			  }
 		} catch (Exception e) {
 			System.out.println("Error when adding job " + job._jobNumber + " with error " + e.getMessage());
@@ -196,7 +200,7 @@ public class JobQueue {
 														
 			} else {
 				_currentJob = null; // If job is cancelled reset it.
-			        _timeLastRunTimeUpdate = null;
+			    _timeLastRunTimeUpdate = null;
 			}
 		}
 	}
