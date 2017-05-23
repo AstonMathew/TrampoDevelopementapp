@@ -6,7 +6,7 @@ package constants;
  *
  */
 public class JobStatuses {
-    // Status index as per the webapp (hopefully) variable simulationStatuses
+    // Status index as per the webapp (hopefully) variable simulationStatuses,  Check String[] simulationStatuses in webapp/Simulation.java and webapp/SimulationAdmin.java
 
     public static String SUBMITED = "Submited";
     public static String FILESUPLOADED = "Files Uploaded";
