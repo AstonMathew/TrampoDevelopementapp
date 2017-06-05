@@ -21,8 +21,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import constants.JobStatuses;
 import constants.ValidExtensions;
@@ -42,6 +40,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -91,6 +92,8 @@ public class Job {
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
     static int SCHEDULEDMOVEPERIOD = 2; //TEST
 //  static int SCHEDULEDMOVEPERIOD = 120; //PROD
+    
+    static final Logger LOG = LoggerFactory.getLogger(Job.class); //replace Test with actual class name (Job in this example)
 
     /**
      * @param jobNumber
@@ -153,6 +156,7 @@ public class Job {
         if (_simulation.isEmpty()) { // redundant with simulation file name a required field
             updateJobStatus(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
             System.out.println(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
+            
         } else {
             // Check for .sim file
             String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
@@ -264,8 +268,8 @@ public class Job {
             Files.createFile(log.toPath());
             System.out.println("job_" + _jobNumber + ".log File is created!");
         } catch (IOException ex) {
-            Logger.getLogger(Job.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
+            LOG.error("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
+            //System.out.println("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
         }
         _printStreamToLogFile = new PrintStream(log);
 //        System.setOut(_printStreamToLogFile);
@@ -629,8 +633,8 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
                 file.createNewFile();
                 System.out.println("ABORT.txt File is created!");
             } catch (IOException ex) {
-                Logger.getLogger(Job.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("ABORT.txt File already exists or the operation failed for some reason");
+                LOG.error("ABORT.txt File already exists or the operation failed for some reason");
+                //                System.out.println("ABORT.txt File already exists or the operation failed for some reason");
             }
             _simulationProcess.waitFor(2, TimeUnit.MINUTES);
             _isAborting = true;
