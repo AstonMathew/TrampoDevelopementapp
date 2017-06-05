@@ -27,4 +27,5 @@ public class JobStatuses {
     public static String CANCELLED_JOB_SYNC_FOLDER_PREEXISTING = "CANCELLED: Job Sync Folder Preexisting";
     public static String CANCELLED_JOB_RUN_FOLDER_PREEXISTING = "CANCELLED: Job Run Folder Preexisting";
     public static String CANCELLED_FILES_TOO_LONG_TO_UPLOAD = "CANCELLED: files took too long to upload";
+    public static String CANCELLED_SCAN4MACRO_UNSAFE_OPERATION = "CANCELLED: Scan4Macro detected an unsafe operation";
 }
