@@ -98,7 +98,7 @@ public class JobQueue {
 	private boolean addJobToQueue(Job job) throws Exception {
  		try {
 			System.out.println("Adding job from " + job._customerNumber + " job id: " + job._jobNumber + " with file " + job._simulation);
-			  job.checkSim_name_AndFiles_count_extension();
+			  job.checkSimName_FileCount_FileExtension_Scan4Macro();
 			  String c = WebAppGate.make().getJobStatus(job); 
 			  if ((c.equals(JobStatuses.SUBMITED)) || (c.equals(JobStatuses.PAUSED_MAINTENANCE))) { 
 				System.out.println("Job " + job._jobNumber + " will be treated soon ");

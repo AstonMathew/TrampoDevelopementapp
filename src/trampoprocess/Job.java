@@ -92,7 +92,7 @@ public class Job {
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
     static int SCHEDULEDMOVEPERIOD = 2; //TEST
 //  static int SCHEDULEDMOVEPERIOD = 120; //PROD
-    
+
     static final Logger LOG = LoggerFactory.getLogger(Job.class); //replace Test with actual class name (Job in this example)
 
     /**
@@ -110,12 +110,12 @@ public class Job {
         _customerNumber = customerNumber;
 
         try {
-        	DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-			_submissionDate = df.parse(submissionDate);
-		} catch (ParseException e) {
-			System.out.println("Error parsing date " + submissionDate + ". Revert to now");
-			_submissionDate = new GregorianCalendar().getTime();
-		};
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+            _submissionDate = df.parse(submissionDate);
+        } catch (ParseException e) {
+            System.out.println("Error parsing date " + submissionDate + ". Revert to now");
+            _submissionDate = new GregorianCalendar().getTime();
+        };
         _maxSeconds = maxSeconds;
         _simulation = simulation;
         _fileCount = fileCount;
@@ -126,9 +126,9 @@ public class Job {
     }
 
     public Date getSubmissionDate() {
-		return _submissionDate;    	
+        return _submissionDate;
     }
-    
+
     public Date getCreationTime() {
         return _creationTime;
     }
@@ -146,7 +146,7 @@ public class Job {
         return (FileFunctions.countFiles(getCustomerSynchronisedFolder()) >= _fileCount);
     }
 
-    public void checkSim_name_AndFiles_count_extension() throws Exception { //used in simulation queue/add simulation()
+    public void checkSimName_FileCount_FileExtension_Scan4Macro() throws Exception { //used in simulation queue/add simulation()
         // test the sim exits is file count and file name is wrong
         // _simulation = _simulation.concat("\"");
 
@@ -156,7 +156,7 @@ public class Job {
         if (_simulation.isEmpty()) { // redundant with simulation file name a required field
             updateJobStatus(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
             System.out.println(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
-            
+
         } else {
             // Check for .sim file
             String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
@@ -183,6 +183,16 @@ public class Job {
                             System.out.println("File " + child.getName() + " extension is not supported");
                             updateJobStatus(JobStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
                             throw new Exception("File " + child.getName() + " extension is not supported");
+                        }
+                        if (res == true) {
+                            if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[3])) { // 
+                                scan4macro.Scan scan = new scan4macro.Scan(child);
+                                if (!scan.scan()) {
+                                    LOG.warn("scan4maco returned unsafe operation" + " customer = " + _customerNumber + " job = " + _jobNumber);
+                                    new SendEmail().send(SendEmail.TO, "scan4maco returned unsafe operation", "customer = " + _customerNumber + " job = " + _jobNumber);
+                                }
+                            }
+
                         }
                     }
                 }
@@ -382,7 +392,7 @@ public class Job {
 
     }
 
-private void RunJob() throws Exception { //IF process desn't run while testing, i.e. no output a,d a single STAR-CCM+ process starts, make sure you have a sim file in the right folder to run!!!
+    private void RunJob() throws Exception { //IF process desn't run while testing, i.e. no output a,d a single STAR-CCM+ process starts, make sure you have a sim file in the right folder to run!!!
         //move scenes           
         //if (moveTask == null) {
         moveTaskScenes = new MoveTask(getScenesRunFolderPath().toFile(), getScenesSyncFolderPath().toFile());
@@ -397,13 +407,11 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
         moveTaskMesh = new MoveTask(getJobRunningFolderPath().toFile(), getJobSynchronisedFolderPath().toFile());
         //}
         moveTaskMesh.scheduleFileMove("Meshed", SCHEDULEDMOVEPERIOD); // non-blocking
-        
+
 //        moveTaskBackUp = new MoveTask(getJobRunningFolderPath().toFile(), getJobBackupPath().toFile());
 //        //}
 //        moveTaskBackUp.scheduleFileMove("TrampoBackup", SCHEDULEDMOVEPERIOD); // non-blocking
 //        
-        
-
         ProcessBuilder pb = new ProcessBuilder(
                 _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
                 "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
@@ -431,7 +439,6 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
             moveTaskPlots.cancelPurgeTimer();
             moveTaskMesh.cancelPurgeTimer();
 
-
             //REMOVE POD key FROM HTML report
             File[] directoryListing = getJobSynchronisedFolderPath().toFile().listFiles();
             if (directoryListing != null) {
@@ -450,7 +457,7 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
                     }
                 }
             }
-                        //end of the run file move
+            //end of the run file move
             File sourceDirectory = pbWorkingDirectory;
 
             File destinationDirectory = getJobLogsPath().toFile();
@@ -459,7 +466,6 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
             destinationDirectory = getJobSynchronisedFolderPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
 
-            
             sourceDirectory = getTablesRunFolderPath().toFile();
             destinationDirectory = getTablesSyncFolderPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
@@ -471,7 +477,7 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
             sourceDirectory = getPowerPointRunFolderPath().toFile();
             destinationDirectory = getPowerPointSyncFolderPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
-            
+
             sourceDirectory = getJobSynchronisedFolderPath().toFile();
             destinationDirectory = getJobBackupPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
@@ -657,11 +663,10 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
     private Path getJobRunningFolderPath() {// the Job running folder
         return Paths.get(RUNROOT, getCustomerFolderRelativePath(), "Job_" + _jobNumber);
     }
-    
-   private Path getJobSynchronisedFolderPath() {// the Job synchronised folder where trampo send the results back live.
+
+    private Path getJobSynchronisedFolderPath() {// the Job synchronised folder where trampo send the results back live.
         return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder", "Job_" + _jobNumber);
     }
- 
 
     private Path getJobLogsPath() {
         return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Job_" + _jobNumber, "logs");
@@ -678,7 +683,8 @@ private void RunJob() throws Exception { //IF process desn't run while testing, 
     private Path getOutputWindowLogToFile() { // might need update to work for all versions
         return Paths.get("C:\\Users\\Administrator\\AppData\\Local\\CD-adapco\\STAR-CCM+ " + _StarCcmPlusVersion + "\\var\\log\\messages.log");
     }
-private void createPostprocessingRunFolders() throws IOException, Exception {
+
+    private void createPostprocessingRunFolders() throws IOException, Exception {
         //scenes
         if (Files.isDirectory(getScenesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getScenesSyncFolderPath());
@@ -814,6 +820,7 @@ private void createPostprocessingRunFolders() throws IOException, Exception {
      *
      * moves all files containing the string from the source directory to the
      * destination directory both directory need to exist!
+     *
      * @param source
      * @param destination
      * @param string
