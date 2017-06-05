@@ -14,7 +14,7 @@ public class SendEmail {
 	 * Access at https://myaccount.google.com/security */
 	public static final String TO = "gui@trampocfd.com";
         private final String _username = "trampointernalnotifications@gmail.com";
-        private final String _password = "N{08M]-i=K%^";
+        private final String _password = "izcdreavdjooopxv";
 	
 	Properties _props = null;
 	Session _session = null;
