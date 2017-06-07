@@ -17,8 +17,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,7 +35,7 @@ import constants.JobStatuses;
  *
  */
 public class WebAppGate {
-	private static final Logger LOGGER = Logger.getLogger(WebAppGate.class.getName());
+	static final Logger LOG = LoggerFactory.getLogger(WebAppGate.class);
 
 	//public static WebAppGateDatabase make() { return new WebAppGateDatabase(); }
    public static WebAppGateHttp make() { return new WebAppGateHttp(); }
@@ -48,7 +48,7 @@ public class WebAppGate {
 		
 		public String getJobStatus(Job sim) throws Exception {
 			try {
-				System.out.println("Check job status for job " + sim._jobNumber.toString());
+				LOG.debug("Check job status for job " + sim._jobNumber.toString());
 				String url = webAppBuildUrl("getjobStatus");
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("customer_id", sim._customerNumber);
@@ -58,19 +58,19 @@ public class WebAppGate {
 				if (((String) resp2.get("result")).equals("success")) {
 					return ((String) resp2.get("status")).trim();
 				} else {
-					System.out.println("Web App report error message: " + (String) resp2.get("result"));
+					LOG.debug("Web App report error message: " + (String) resp2.get("result"));
 					return null;
 				}
 			} catch (Exception e) {
-				LOGGER.info("Unable to connect to webApp");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to webApp", null, e);
+				
 			}
 			return null;			
 		}
 
 		public boolean isJobCanceled(Job sim) throws Exception {
 			try {
-				System.out.println("Check if job has been canceled for job " + sim._jobNumber.toString());
+				LOG.debug("Check if job has been canceled for job " + sim._jobNumber.toString());
 				String url = webAppBuildUrl("isjobCanceled");
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("customer_id", sim._customerNumber);
@@ -80,19 +80,19 @@ public class WebAppGate {
 				if (((String) resp2.get("result")).equals("success")) {
 					return (boolean) resp2.get("isjobCanceled");
 				} else {
-					System.out.println("Web App report error message: " + (String) resp2.get("result"));
+					LOG.debug("Web App report error message: " + (String) resp2.get("result"));
 					return false;
 				}
 			} catch (Exception e) {
-				LOGGER.info("Unable to connect to webApp");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to webApp", null, e);
+				
 			}
 			return false;			
 		}
 		
 		public Long getJobMaxRuntime(Job sim) throws Exception {
 			try {
-				System.out.println("Get Job maximum runtime for simulation " + sim._jobNumber.toString());
+				LOG.debug("Get Job maximum runtime for simulation " + sim._jobNumber.toString());
 				String url = webAppBuildUrl("getJobMaxRuntime");
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("customer_id", sim._customerNumber);
@@ -102,12 +102,11 @@ public class WebAppGate {
 				if (((String) resp2.get("result")).equals("success")) {
 					return (Long) resp2.get("jobMaxRuntime");
 				} else {
-					System.out.println("Web App report error message: " + (String) resp2.get("result"));
+					LOG.debug("Web App report error message: " + (String) resp2.get("result"));
 					return null;
 				}
 			} catch (Exception e) {
-				LOGGER.info("Unable to connect to webApp to Job maximum runtime for simulation " + sim._jobNumber.toString());
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to webApp to Job maximum runtime for simulation " + sim._jobNumber.toString(),null, e);
 			}
 			return null;			
 		}
@@ -119,14 +118,14 @@ public class WebAppGate {
 		public LinkedList<Job> getSimulations(String status) throws Exception {
 			LinkedList<Job> simulations = new LinkedList<Job>();
 			try {
-				System.out.println("Get simulations with status " + status);
+				LOG.debug("Get simulations with status " + status);
 				String url = webAppBuildUrl("getJobs");
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("status", status);
 				String resp = webAppHttpRequest(url, urlEncode(map));
 				JSONObject resp2 = (JSONObject) _jsonParser.parse(resp);
 				if (((String) resp2.get("result")).equals("success")) {
-					System.out.println("Response is : " + resp);
+					LOG.debug("Response is : " + resp);
 					JSONArray jobs = (JSONArray) resp2.get("jobs");
 					Iterator<JSONObject> jobsIt = jobs.iterator();
 					while(jobsIt.hasNext()) {
@@ -140,11 +139,10 @@ public class WebAppGate {
 								(int)(long) job.get(Database.FILE_COUNT)));
 					}
 				} else {
-					System.out.println("Web App report error message: " + (String) resp2.get("result"));
+					LOG.debug("Web App report error message: " + (String) resp2.get("result"));
 				}
 			} catch (Exception e) {
-				LOGGER.info("Unable to connect to webApp to retrieve simulations with status " + status);
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to webApp to retrieve simulations with status " + status, null, e);
 			}
 			return simulations;						
 		}
@@ -156,7 +154,7 @@ public class WebAppGate {
 		
 		public void updateJobActualRuntime(Job sim, Integer actualRuntime) throws Exception {
 			try {
-				System.out.println("Update simulation run time for simulation " + sim._jobNumber);
+				LOG.debug("Update simulation run time for simulation " + sim._jobNumber);
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("method", "updateActualRuntime");
 				map.put("customer_id", sim._customerNumber);
@@ -165,16 +163,15 @@ public class WebAppGate {
 				String url = webAppBuildUrl(map);
 				webAppHttpRequest(url);
 			} catch (Exception e) {
-				LOGGER.info("Unable to connect to webApp to update runtime for simulation " + sim._jobNumber + " by "
-						+ sim._customerNumber + ". Keep simulation running");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to webApp to update runtime for simulation " + sim._jobNumber + " by "
+						+ sim._customerNumber + ". Keep simulation running", null, e);
 			}
 		}
 
 		public void updateJobStatus(String customerNumber, Integer jobNumber, String status)
 				throws Exception {
 			try {
-				System.out.println("Update simulation status for simulation " + jobNumber);
+				LOG.debug("Update simulation status for simulation " + jobNumber);
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("method", "updateJobStatus");
 				map.put("customer_id", customerNumber);
@@ -183,15 +180,14 @@ public class WebAppGate {
 				String url = webAppBuildUrl(map);
 				webAppHttpRequest(url);
 			} catch (Exception e) {
-				LOGGER.info("Unable to connect to webApp to update simulation status for simulation " + jobNumber
-						+ " by " + customerNumber + " has been canceled. Keep simulation running");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to webApp to update simulation status for simulation " + jobNumber
+						+ " by " + customerNumber + " has been canceled. Keep simulation running", null, e);
 			}
 		}
 
 		public void updateJobStatus(Job sim, String status) throws Exception {
 			try {
-				System.out.println("Update simulation status for simulation " + sim._jobNumber);
+				LOG.debug("Update simulation status for simulation " + sim._jobNumber);
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("method", "updateJobStatus");
 				map.put("customer_id", sim._customerNumber);
@@ -200,9 +196,8 @@ public class WebAppGate {
 				String url = webAppBuildUrl(map);
 				webAppHttpRequest(url);
 			} catch (Exception e) {
-				LOGGER.info("Unable to connect to webApp to update simulation status for simulation " + sim._jobNumber
-						+ " by " + sim._customerNumber + " has been canceled. Keep simulation running");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to webApp to update simulation status for simulation " + sim._jobNumber
+						+ " by " + sim._customerNumber + " has been canceled. Keep simulation running", null, e);
 			}
 		}
 
@@ -252,9 +247,9 @@ public class WebAppGate {
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 			
 			if (postdata == null) {
-				//System.out.println("\nSending 'GET' request to URL : " + url);	
+				//LOG.debug("\nSending 'GET' request to URL : " + url);	
 			} else {
-				//System.out.println("\nSending 'POST' request to URL : " + url);
+				//LOG.debug("\nSending 'POST' request to URL : " + url);
 				con.setRequestMethod("POST");
 				// con.setRequestProperty("User-Agent", USER_AGENT);
 				con.setDoOutput(true);
@@ -266,7 +261,7 @@ public class WebAppGate {
 
 			// if responseCode = 200 is OK
 			int responseCode = con.getResponseCode();
-			//System.out.println("Response Code : " + responseCode);
+			//LOG.debug("Response Code : " + responseCode);
 			if (responseCode != 200) {
 				throw new Exception("Unable to connect to server");
 			}
@@ -278,7 +273,7 @@ public class WebAppGate {
 			while ((inputLine = in.readLine()) != null) {
 				response.append(inputLine);
 			}
-			// System.out.println(response.toString());
+			// LOG.debug(response.toString());
 			in.close();
 			return response.toString();
 		}
@@ -300,17 +295,16 @@ public class WebAppGate {
 				if (rs.next()) {
 					result = rs.getString(Database.STATUS).trim();
 				} else {
-					LOGGER.info("Database no longer has information on simulation " + sim._jobNumber + " by "
+					LOG.error("Database no longer has information on simulation " + sim._jobNumber + " by "
 							+ sim._customerNumber + " has been canceled. Keep simulation running");
-					LOGGER.log(Level.SEVERE, "");
+
 				}
 				pstmt.close();
 				conn.close();
 				return result;
 			} catch (SQLException e) {
-				LOGGER.info("Unable to connect to database to check if simulation " + sim._jobNumber + " by "
-						+ sim._customerNumber + " has been canceled. Keep simulation running");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to database to check if simulation " + sim._jobNumber + " by "
+						+ sim._customerNumber + " has been canceled. Keep simulation running", null, e);
 			}
 			return "";
 		}
@@ -329,16 +323,15 @@ public class WebAppGate {
 				if (rs.next()) {
 					return (rs.getInt(Database.CANCELED_BY_USER) == 1);
 				} else {
-					LOGGER.info("Database no longer has information on simulation " + sim._jobNumber + " by "
+					LOG.error("Database no longer has information on simulation " + sim._jobNumber + " by "
 							+ sim._customerNumber + " has been canceled. Keep simulation running");
-					LOGGER.log(Level.SEVERE, "");
+					
 				}
 				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
-				LOGGER.info("Unable to connect to database to check if simulation " + sim._jobNumber + " by "
-						+ sim._customerNumber + " has been canceled. Keep simulation running");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to database to check if simulation " + sim._jobNumber + " by "
+						+ sim._customerNumber + " has been canceled. Keep simulation running", null, e);
 			}
 			return false;
 		}
@@ -357,16 +350,15 @@ public class WebAppGate {
 				if (rs.next()) {
 					return rs.getInt(Database.MAX_RUNTIME);
 				} else {
-					LOGGER.info("Database no longer has information on simulation " + sim._jobNumber + " by "
+					LOG.error("Database no longer has information on simulation " + sim._jobNumber + " by "
 							+ sim._customerNumber + " has been canceled. Keep simulation running");
-					LOGGER.log(Level.SEVERE, "");
+					
 				}
 				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
-				LOGGER.info("Unable to connect to database to check if simulation " + sim._jobNumber + " by "
-						+ sim._customerNumber + " has been canceled. Keep simulation running");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to database to check if simulation " + sim._jobNumber + " by "
+						+ sim._customerNumber + " has been canceled. Keep simulation running", null, e);
 			}
 			return null;
 		}
@@ -396,8 +388,7 @@ public class WebAppGate {
 				pstmt.close();
 				conn.close();
 			} catch (SQLException ex) {
-				LOGGER.info("Unable to connect to database to query new simulation");
-				LOGGER.log(Level.SEVERE, null, ex);
+				LOG.error("Unable to connect to database to query new simulation", null, ex);
 			}
 			return simulations;
 		}
@@ -418,15 +409,14 @@ public class WebAppGate {
 				pstmt.close();
 				conn.close();
 			} catch (SQLException ex) {
-				LOGGER.info("Unable to connect to database to query new simulation");
-				LOGGER.log(Level.SEVERE, null, ex);
+				LOG.error("Unable to connect to database to query new simulation", null, ex);
 			}
 			return customerList;
 		}
 
 		public void updateJobActualRuntime(Job sim, Integer actualRuntime) throws Exception {
 			try {
-				System.out.println("Update simulation run time for simulation " + sim._jobNumber);
+				LOG.debug("Update simulation run time for simulation " + sim._jobNumber);
 				Connection conn = getConnection();
 				if (conn == null) {
 					throw new Exception("No connection made");
@@ -440,15 +430,14 @@ public class WebAppGate {
 				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
-				LOGGER.info("Unable to connect to database for simulation " + sim._jobNumber + " by "
-						+ sim._customerNumber + " to update runtime. Keep simulation running");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to database for simulation " + sim._jobNumber + " by "
+						+ sim._customerNumber + " to update runtime. Keep simulation running", null, e);
 			}
 		}
 
 		public void updateJobStatus(Job sim, String status) throws Exception {
 			try {
-				System.out.println("Update simulation status for simulation " + sim._jobNumber + " to " + status);
+				LOG.debug("Update simulation status for simulation " + sim._jobNumber + " to " + status);
 				Connection conn = getConnection();
 				if (conn == null) {
 					throw new Exception("No connection made");
@@ -462,9 +451,8 @@ public class WebAppGate {
 				pstmt.close();
 				conn.close();
 			} catch (SQLException e) {
-				LOGGER.info("Unable to connect to database to check if simulation " + sim._jobNumber + " by "
-						+ sim._customerNumber + " has been canceled. Keep simulation running");
-				LOGGER.log(Level.WARNING, null, e);
+				LOG.error("Unable to connect to database to check if simulation " + sim._jobNumber + " by "
+						+ sim._customerNumber + " has been canceled. Keep simulation running", null, e);
 			}
 		}
 
@@ -475,7 +463,7 @@ public class WebAppGate {
 				conn = DriverManager.getConnection(Database.URL, Database.USERNAME, Database.PASSWORD);
 			} catch (Exception e) {
 				e.printStackTrace();
-				LOGGER.log(Level.SEVERE, null, e);
+				LOG.error("getConnection() did not work", null, e);
 			}
 			return conn;
 		}
