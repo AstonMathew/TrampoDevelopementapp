@@ -27,6 +27,13 @@ public class TrampoProcess {
         LOG.info("Start trampo process in directory " + currentPath);
         LOG.info("Create file stop.txt in directory to stop trampo process, currently run simulaiton will finish");
         LOG.info("Create file stop_now.txt in directory to stop trampo process now...");
+        
+        try  {
+        throw new Exception("test stack trace print to log");
+        }
+        catch(Exception e){
+        LOG.error("test exception",e);
+        }
 
         // Retrieve paused simulations from webapp
         {
@@ -70,7 +77,7 @@ public class TrampoProcess {
 //				counter += 1;
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error("error with stack trace",e);
                 e.printStackTrace();
             }
         } // while (...)

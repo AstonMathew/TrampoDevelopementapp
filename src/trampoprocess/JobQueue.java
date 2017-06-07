@@ -73,7 +73,7 @@ public class JobQueue {
 			try {
 				WebAppGate.make().updateJobStatus(job, status);
 			} catch (Exception e) {
-				LOG.error("Error when updating status for job " + job._jobNumber + " with error " + e.getMessage());
+				LOG.error("Error when updating status for job " + job._jobNumber + " with error " + e.getMessage(),e);
 			}
 		}
 		_jobs.clear();
@@ -114,10 +114,8 @@ public class JobQueue {
 			    return false;
 			  }
 		} catch (Exception e) {
-			LOG.error("Error when adding job " + job._jobNumber + " with error " + e.getMessage());
-			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));
-			LOG.error(sw.toString());
+			LOG.error("Error when adding job " + job._jobNumber + " with error ", e);
+
 		}
 		return false;
 	}
@@ -150,7 +148,7 @@ public class JobQueue {
 				}
 			}
 	   } catch (Exception e) {
-		  LOG.error("Error with error " + e.getMessage());
+		  LOG.error("Error with error ",e);
 	   }
 		
 		// Handle current process

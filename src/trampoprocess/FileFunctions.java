@@ -29,7 +29,7 @@ public class FileFunctions {
                 }
             }
         } catch (IOException e) {
-            LOG.error("Unable to count files in " + dir);
+            LOG.error("Unable to count files in " + dir,e);
             count = 0;
         }
         return count;

@@ -150,6 +150,8 @@ public class Job {
         // _simulation = _simulation.concat("\"");
 
         //_fileCount = 1; //TESTING ONLY
+        
+        
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         if (_simulation.isEmpty()) { // redundant with simulation file name a required field
             updateJobStatus(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
@@ -184,11 +186,10 @@ public class Job {
                         }
                         if (res == true) {
                             if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[3])) { // 
-                                scan4macro.Scan scan = new scan4macro.Scan(child, child.getParentFile().getPath() + "\\csv");
-                                LOG.warn("!scan.scan()=" + !scan.scan());
+                                scan4macro.Scan scan = new scan4macro.Scan(child);
                                 if (!scan.scan()) {
                                     LOG.warn("!scan.scan()=" + !scan.scan());
-                                    LOG.warn("scan4maco returned unsafe operation" + " customer = " + _customerNumber + " job = " + _jobNumber + "File " + child.getName());
+                                    LOG.warn("scan4maco returned unsafe operation" + " customer = " + _customerNumber + " job = " + _jobNumber + " File = " + child.getName());
                                     new SendEmail().send(SendEmail.TO, "scan4maco returned unsafe operation", "customer = " + _customerNumber + " job = " + _jobNumber);
                                     updateJobStatus(JobStatuses.CANCELLED_SCAN4MACRO_UNSAFE_OPERATION);
                                     throw new Exception("File " + child.getName() + " SCAN4MACRO_UNSAFE_OPERATION");
@@ -245,11 +246,13 @@ public class Job {
             LOG.debug("JobRunningFolder created " + getJobRunningFolderPath());
             //LOG.debug("src folder will show below as Directory copied");
         } else {
+            
+            updateJobStatus(JobStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
             LOG.error(
                     "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
+            throw new Exception ("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
+            
             // this needs to make the simulation exist the queue as it indicates a major problem
-            updateJobStatus(JobStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
-            throw new Exception("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
         }
         if (Files.isDirectory(getJobSynchronisedFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getJobSynchronisedFolderPath());
@@ -280,7 +283,7 @@ public class Job {
             Files.createFile(log.toPath());
             LOG.debug("job_" + _jobNumber + ".log File is created!");
         } catch (IOException ex) {
-            LOG.error("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
+            LOG.error("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason",ex);
             //LOG.debug("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
         }
         _printStreamToLogFile = new PrintStream(log);
@@ -641,7 +644,7 @@ public class Job {
                 file.createNewFile();
                 LOG.debug("ABORT.txt File is created!");
             } catch (IOException ex) {
-                LOG.error("ABORT.txt File already exists or the operation failed for some reason");
+                LOG.error("ABORT.txt File already exists or the operation failed for some reason",ex);
                 //                LOG.debug("ABORT.txt File already exists or the operation failed for some reason");
             }
             _simulationProcess.waitFor(2, TimeUnit.MINUTES);
