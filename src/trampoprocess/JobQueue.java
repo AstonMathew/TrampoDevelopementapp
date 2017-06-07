@@ -11,9 +11,13 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import constants.JobStatuses;
 
 public class JobQueue {
+    static final Logger LOG = LoggerFactory.getLogger(JobQueue.class);
 
 	public class JobHandler implements Runnable {
 		Job _job = null;
@@ -23,7 +27,7 @@ public class JobQueue {
 		}
 
 		public void run() {
-			System.out.println("Running in a thread");
+			LOG.debug("Running in a thread");
 			 try {
 				_job.runJobWorkflow();
 			} catch (Exception e) {
@@ -69,7 +73,7 @@ public class JobQueue {
 			try {
 				WebAppGate.make().updateJobStatus(job, status);
 			} catch (Exception e) {
-				System.out.println("Error when updating status for job " + job._jobNumber + " with error " + e.getMessage());
+				LOG.error("Error when updating status for job " + job._jobNumber + " with error " + e.getMessage());
 			}
 		}
 		_jobs.clear();
@@ -84,10 +88,10 @@ public class JobQueue {
 	
 	public void addJob(Job job) throws Exception {
 		if (_jobProcessed.containsKey(job._jobNumber) == false) {
-			System.out.println("Add job " + job._jobNumber + " to queue");
+			LOG.info("Add job " + job._jobNumber + " to queue");
 			_jobProcessed.put(job._jobNumber, job);
 			if (job.areFilesAvailable()) {
-				System.out.println("Files for job " + job._jobNumber + " are available, job will be processed");
+				LOG.info("Files for job " + job._jobNumber + " are available, job will be processed");
 				addJobToQueue(job);
 			} else {
 				_jobsWaitingForFiles.add(job);
@@ -97,23 +101,23 @@ public class JobQueue {
 	
 	private boolean addJobToQueue(Job job) throws Exception {
  		try {
-			System.out.println("Adding job from " + job._customerNumber + " job id: " + job._jobNumber + " with file " + job._simulation);
+			LOG.info("Adding job from " + job._customerNumber + " job id: " + job._jobNumber + " with file " + job._simulation);
 			  job.checkSimName_FileCount_FileExtension_Scan4Macro();
 			  String c = WebAppGate.make().getJobStatus(job); 
 			  if ((c.equals(JobStatuses.SUBMITED)) || (c.equals(JobStatuses.PAUSED_MAINTENANCE))) { 
-				System.out.println("Job " + job._jobNumber + " will be treated soon ");
+				LOG.debug("Job " + job._jobNumber + " will be treated soon ");
 			    _jobs.add(job);
 			    WebAppGate.make().updateJobStatus(job, JobStatuses.JOB_QUEUED);
 			    return true;
 			  } else {
-			    System.out.println("Job " + job._jobNumber + " will not be treated as status is " + c);				  
+			    LOG.warn("Job " + job._jobNumber + " will not be treated as status is " + c);				  
 			    return false;
 			  }
 		} catch (Exception e) {
-			System.out.println("Error when adding job " + job._jobNumber + " with error " + e.getMessage());
+			LOG.error("Error when adding job " + job._jobNumber + " with error " + e.getMessage());
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			System.out.println(sw.toString());
+			LOG.error(sw.toString());
 		}
 		return false;
 	}
@@ -139,14 +143,14 @@ public class JobQueue {
 				} else if (ChronoUnit.HOURS.between(job.getSubmissionDate().toInstant(), new GregorianCalendar().getTime().toInstant()) >= 4*24) {
 					// Files are not available after 4 days.
 					_jobsWaitingForFiles.remove(job);
-                                        System.out.println(" job " + job._jobNumber + " canceled: files took too long to upload ");
+                                        LOG.error(" job " + job._jobNumber + " canceled: files took too long to upload ");
                                         //update status: CANCELLED: still haven't uploaded in 3 days
                                         WebAppGate.make().updateJobStatus(job, JobStatuses.CANCELLED_FILES_TOO_LONG_TO_UPLOAD); //NOT TESTED
 					//addJobToQueue(job);					
 				}
 			}
 	   } catch (Exception e) {
-		  System.out.println("Error with error " + e.getMessage());
+		  LOG.error("Error with error " + e.getMessage());
 	   }
 		
 		// Handle current process
@@ -168,8 +172,8 @@ public class JobQueue {
 			}
 			
 			if (rt < cJob.maximumClocktimeInSeconds()) {
-                            System.out.println("cJob.maximumClocktimeInSeconds()= "+cJob.maximumClocktimeInSeconds());
-                            System.out.println("cJob._maxSeconds= "+cJob._maxSeconds);
+                            LOG.debug("cJob.maximumClocktimeInSeconds()= "+cJob.maximumClocktimeInSeconds());
+                            LOG.debug("cJob._maxSeconds= "+cJob._maxSeconds);
 				_currentJobThread.join(60000); // 1000=1sec 60000=10min
 													
 			} else if (rt < cJob.maximumClocktimeInSeconds() + 120) {
@@ -192,7 +196,7 @@ public class JobQueue {
 												
 			_currentJob = new JobHandler(_jobs.poll());
 			if (! WebAppGate.make().isJobCanceled(_currentJob.getJob())) {
-				System.out.println("Start new job " + _currentJob._job._jobNumber);
+				LOG.info("Start new job " + _currentJob._job._jobNumber);
 				_currentJobThread = new Thread(_currentJob);
 				_currentJobThread.start();
 			        _timeLastRunTimeUpdate = LocalTime.now();
