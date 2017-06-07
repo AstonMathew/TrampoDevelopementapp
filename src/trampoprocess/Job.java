@@ -113,7 +113,7 @@ public class Job {
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             _submissionDate = df.parse(submissionDate);
         } catch (ParseException e) {
-            System.out.println("Error parsing date " + submissionDate + ". Revert to now");
+            LOG.debug("Error parsing date " + submissionDate + ". Revert to now");
             _submissionDate = new GregorianCalendar().getTime();
         };
         _maxSeconds = maxSeconds;
@@ -135,8 +135,7 @@ public class Job {
 
     public boolean areFilesAvailable() throws Exception { //used in Job queue/add job()
 
-        _fileCount = 1; //TESTING ONLY
-
+        //_fileCount = 1; //TESTING ONLY
         // test the sim exits is file count and file name is wrong
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
@@ -150,21 +149,20 @@ public class Job {
         // test the sim exits is file count and file name is wrong
         // _simulation = _simulation.concat("\"");
 
-        _fileCount = 1; //TESTING ONLY
-
+        //_fileCount = 1; //TESTING ONLY
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         if (_simulation.isEmpty()) { // redundant with simulation file name a required field
             updateJobStatus(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
-            System.out.println(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
+            LOG.debug(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
 
         } else {
             // Check for .sim file
             String sim = (_simulation.toLowerCase().endsWith(".sim")) ? _simulation : (_simulation + ".sim");
             if (!FileFunctions.fileIsAvailable(getCustomerSynchronisedFolder().resolve(sim))) {
-                System.out.println("Simulation file " + sim + " is NOT available");
+                LOG.debug("Simulation file " + sim + " is NOT available");
                 throw new Exception("Simulation " + _jobNumber + " - Simulation file " + sim + " is NOT available");
             } else {
-                System.out.println("Simulation file " + sim + " is available");
+                LOG.debug("Simulation file " + sim + " is available");
             }
 
             // check file extensions.
@@ -180,16 +178,20 @@ public class Job {
                             }
                         }
                         if (res == false) {
-                            System.out.println("File " + child.getName() + " extension is not supported");
+                            LOG.warn("File " + child.getName() + " extension is not supported");
                             updateJobStatus(JobStatuses.CANCELLED_UNSAFE_FILES_EXTENSION);
                             throw new Exception("File " + child.getName() + " extension is not supported");
                         }
                         if (res == true) {
                             if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[3])) { // 
-                                scan4macro.Scan scan = new scan4macro.Scan(child);
+                                scan4macro.Scan scan = new scan4macro.Scan(child, child.getParentFile().getPath() + "\\csv");
+                                LOG.warn("!scan.scan()=" + !scan.scan());
                                 if (!scan.scan()) {
-                                    LOG.warn("scan4maco returned unsafe operation" + " customer = " + _customerNumber + " job = " + _jobNumber);
+                                    LOG.warn("!scan.scan()=" + !scan.scan());
+                                    LOG.warn("scan4maco returned unsafe operation" + " customer = " + _customerNumber + " job = " + _jobNumber + "File " + child.getName());
                                     new SendEmail().send(SendEmail.TO, "scan4maco returned unsafe operation", "customer = " + _customerNumber + " job = " + _jobNumber);
+                                    updateJobStatus(JobStatuses.CANCELLED_SCAN4MACRO_UNSAFE_OPERATION);
+                                    throw new Exception("File " + child.getName() + " SCAN4MACRO_UNSAFE_OPERATION");
                                 }
                             }
 
@@ -199,23 +201,23 @@ public class Job {
             }
 
             // Check files count
-            System.out.println("FileFunctions.countFiles(getCustomerSynchronisedFolder()) = " + FileFunctions.countFiles(getCustomerSynchronisedFolder()));
-            System.out.println("_fileCount = " + _fileCount);
+            LOG.debug("FileFunctions.countFiles(getCustomerSynchronisedFolder()) = " + FileFunctions.countFiles(getCustomerSynchronisedFolder()));
+            LOG.debug("_fileCount = " + _fileCount);
 
             if (FileFunctions.countFiles(getCustomerSynchronisedFolder()) != _fileCount) {
 
-                System.out.println("!!! Actual file count does not match nominated file count !!!");
+                LOG.warn("!!! Actual file count does not match nominated file count !!!");
                 updateJobStatus(JobStatuses.CANCELLED_NOFILEUPLOADED);
                 throw new Exception("Simulation " + _jobNumber + "!!! Actual file count does not match nominated file count !!!");
             } else {
-                System.out.println("Actual file count matches nominated file count !!!");
+                LOG.debug("Actual file count matches nominated file count !!!");
             }
         }
     }
 
     public void runJobWorkflow() throws Exception {
-        // System.out.println("1+1=" + 1 + 1);
-        _fileCount = 1; //TESTING ONLY
+        // LOG.debug("1+1=" + 1 + 1);
+        //_fileCount = 1; //TESTING ONLY
         _startTime = LocalTime.now();
 
         // for some reason, _simulation is sometimes missing its last " when checking the variable in debug mode. That kills the run processes. The line below is a first attenpt at fixing it
@@ -231,7 +233,7 @@ public class Job {
         copyLogOutputWindowToFile();
         //runDataExtraction; // 
         // check that the running Job is “alive” in all processes.
-        System.out.println("End");
+        LOG.info("End");
     }
 
     private void createJobRunAndSyncFolders() throws IOException, Exception {  // test the sim exits thye queue if CANCELLED_SIMULATION_FOLDER_PREEXISTING
@@ -240,10 +242,10 @@ public class Job {
         // "tmp",".txt");
         if (Files.isDirectory(getJobRunningFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getJobRunningFolderPath());
-            System.out.println("JobRunningFolder created " + getJobRunningFolderPath());
-            //System.out.println("src folder will show below as Directory copied");
+            LOG.debug("JobRunningFolder created " + getJobRunningFolderPath());
+            //LOG.debug("src folder will show below as Directory copied");
         } else {
-            System.err.println(
+            LOG.error(
                     "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
             // this needs to make the simulation exist the queue as it indicates a major problem
             updateJobStatus(JobStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
@@ -251,10 +253,10 @@ public class Job {
         }
         if (Files.isDirectory(getJobSynchronisedFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getJobSynchronisedFolderPath());
-            System.out.println("getJobSynchronisedFolderPath Folder created " + getJobSynchronisedFolderPath());
-            //System.out.println("src folder will show below as Directory copied");
+            LOG.debug("getJobSynchronisedFolderPath Folder created " + getJobSynchronisedFolderPath());
+            //LOG.debug("src folder will show below as Directory copied");
         } else {
-            System.err.println(
+            LOG.error(
                     "ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: " + getJobSynchronisedFolderPath());
             // this needs to make the simulation exist the queue as it indicates a major problem
             updateJobStatus(JobStatuses.CANCELLED_JOB_SYNC_FOLDER_PREEXISTING);
@@ -265,21 +267,21 @@ public class Job {
     private void createLogAndBackupDirectories() throws FileNotFoundException, IOException {
         Files.createDirectories(getJobLogsPath());
         boolean JobLogs = Files.isDirectory(getJobLogsPath(), LinkOption.NOFOLLOW_LINKS);
-        System.out.println("JobLogs isDirectory " + JobLogs);
-        System.out.println(" getJobLogsPath Folder created " + getJobLogsPath());
+        LOG.debug("JobLogs isDirectory " + JobLogs);
+        LOG.debug(" getJobLogsPath Folder created " + getJobLogsPath());
 
         Files.createDirectories(getJobBackupPath());
-        System.out.println(" getJobBackupPath Folder created " + getJobBackupPath());
+        LOG.debug(" getJobBackupPath Folder created " + getJobBackupPath());
 
         File log = getJobLogsPath().resolve("job_" + _jobNumber + ".log").toFile(); // this seems t save to the C:/drive for some reason
-        System.out.println("HERE writing job_" + _jobNumber + ".log at path= " + log.toString());
+        LOG.debug("HERE writing job_" + _jobNumber + ".log at path= " + log.toString());
         try {
             //Create the file
             Files.createFile(log.toPath());
-            System.out.println("job_" + _jobNumber + ".log File is created!");
+            LOG.debug("job_" + _jobNumber + ".log File is created!");
         } catch (IOException ex) {
             LOG.error("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
-            //System.out.println("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
+            //LOG.debug("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
         }
         _printStreamToLogFile = new PrintStream(log);
 //        System.setOut(_printStreamToLogFile);
@@ -299,7 +301,7 @@ public class Job {
     }
 
     private void copyCustomerSyncFolderIntoJobRunFolder() throws IOException, InterruptedException {
-        System.out.println("starting CopyCustomerSyncFolderIntoJobRunFolder()");
+        LOG.debug("starting CopyCustomerSyncFolderIntoJobRunFolder()");
 //        SimulationFolderFileVisitor visitor = new SimulationFolderFileVisitor(getCustomerSynchronisedFolder(),
 //                getJobRunningFolderPath());
 //        Files.walkFileTree(getCustomerSynchronisedFolder(), visitor);
@@ -312,14 +314,14 @@ public class Job {
 //            for (File child : directoryListing) {
 //                if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)) { //we're not copying directories, just files
 //                    Files.move(child.toPath(), getJobRunningFolderPath().resolve(child.getName()), StandardCopyOption.REPLACE_EXISTING);
-//                    System.out.println("File Copied: " + child.toString());//.replaceAll(Matcher.quoteReplacement(src.toString()), ""));
+//                    LOG.debug("File Copied: " + child.toString());//.replaceAll(Matcher.quoteReplacement(src.toString()), ""));
 //                } else {
-//                    System.out.println("File NOT Copied: " + child.toString());
+//                    LOG.debug("File NOT Copied: " + child.toString());
 //                }
 //            }
 //        }
 
-        System.out.println("finished CopyCustomerSyncFolderIntoJobRunFolder()");
+        LOG.debug("finished CopyCustomerSyncFolderIntoJobRunFolder()");
     }
 
     private void getCustomerStarCCMPlusVersion() throws IOException, InterruptedException {
@@ -331,21 +333,21 @@ public class Job {
         pb.directory(pbWorkingDirectory);
         Process p = pb.start();
         p.waitFor();
-        System.out.println("version.log created");
+        LOG.debug("version.log created");
         String content = new String(Files.readAllBytes(InitialVersionLogPath));
-        System.out.println("version.log=" + content);
+        LOG.debug("version.log=" + content);
 
         int index = content.lastIndexOf("STAR-CCM+");
-        System.out.println("index=" + index);
+        LOG.debug("index=" + index);
         int startindex = index + 9;
-        System.out.println("versionsectionstartindex=" + startindex);
+        LOG.debug("versionsectionstartindex=" + startindex);
         int stopindex = startindex + 9;
-        System.out.println("stopindex=" + stopindex);
+        LOG.debug("stopindex=" + stopindex);
         String ccmplusversion = content.substring(startindex, stopindex);
-        System.out.println("CCM+ version = " + ccmplusversion);
+        LOG.info("CCM+ version = " + ccmplusversion);
         _StarCcmPlusVersion = ccmplusversion.replace(" ", "");
         Path finalVersionLogPath = getJobLogsPath().resolve("version.log");
-        System.out.println("finalVersionLogPath = " + finalVersionLogPath.toString());
+        LOG.info("finalVersionLogPath = " + finalVersionLogPath.toString());
         Files.createFile(finalVersionLogPath);
         Files.move(InitialVersionLogPath, finalVersionLogPath, StandardCopyOption.REPLACE_EXISTING);
         //Files.delete(InitialVersionLogPath);
@@ -361,32 +363,32 @@ public class Job {
                 .map(a -> new String[]{a[0], a[1]})
                 .toArray(String[][]::new);
 
-        System.out.println(Arrays.deepToString(array));
+        LOG.debug(Arrays.deepToString(array));
         String version = array[0][0];
-        System.out.println("version is = " + version.replace(",", ""));
+        LOG.debug("version is = " + version.replace(",", ""));
         version = array[1][0];
-        System.out.println("version is = " + version.replace(",", ""));
+        LOG.debug("version is = " + version.replace(",", ""));
 
         _StarCcmPlusVersion = "11.00.011"; // caught by getStarCCMPlusVersion()
-        System.out.println("simulationCcmPlusVersion= " + _StarCcmPlusVersion);
+        LOG.debug("simulationCcmPlusVersion= " + _StarCcmPlusVersion);
         for (int i = 0; i < array.length; i++) {
             _StarCcmPlusDefaultVersion = array[0][0].replace(",", "");
             _StarCcmPlusDefaultVersionPath = array[0][1].replace(",", "");
 
             if (array[i][0].replace(",", "").equals(_StarCcmPlusVersion)) {
                 _StarCcmPlusVersionPath = array[i][1].replace(",", "");
-                System.out.println("simulationCcmPlusVersionPath= " + array[i][1]);
+                LOG.debug("simulationCcmPlusVersionPath= " + array[i][1]);
             }
         }
         if (_StarCcmPlusVersionPath == null) {
-            System.out.println("simulationCcmPlusVersion is NOT installed on compute node");
-            System.out.println("using DEFAULT VERSION");
+            LOG.debug("simulationCcmPlusVersion is NOT installed on compute node");
+            LOG.debug("using DEFAULT VERSION");
             _StarCcmPlusVersion = _StarCcmPlusDefaultVersion;
-            System.out.println("_StarCcmPlusDefaultVersion= " + _StarCcmPlusDefaultVersion);
+            LOG.info("_StarCcmPlusDefaultVersion= " + _StarCcmPlusDefaultVersion);
             _StarCcmPlusVersionPath = _StarCcmPlusDefaultVersionPath;
-            System.out.println("_StarCcmPlusDefaultVersionPath= " + _StarCcmPlusDefaultVersionPath);
+            LOG.info("_StarCcmPlusDefaultVersionPath= " + _StarCcmPlusDefaultVersionPath);
         } else {
-            System.out.println("simulationCcmPlusVersion is installed on compute node");
+            LOG.debug("simulationCcmPlusVersion is installed on compute node");
 
         }
 
@@ -425,7 +427,7 @@ public class Job {
             _startSimulationTime = LocalTime.now();
             _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
             _simulationProcess = pb.start();
-            System.out.println("p started");
+            LOG.info("simulation run process started");
 
             //Redirection of stream and loop extremely important; http://baxincc.cc/questions/216451/windows-process-execed-from-java-not-terminating
             // if not redirected, Star-CCM+ processes hang and -batch*-report doesn't print
@@ -444,13 +446,13 @@ public class Job {
             if (directoryListing != null) {
                 for (File child : directoryListing) {
                     if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(".html")) {
-                        System.out.println("HTML report file name = " + child.getName());
+                        LOG.debug("HTML report file name = " + child.getName());
                         String content = new String(Files.readAllBytes(child.toPath()), Charset.forName("UTF-8"));
                         int index = content.indexOf("-podkey");
-                        System.out.println("indexOf -podkey in HTML report = " + index);
-                        System.out.println("OLD content.substring(index, index + 25) in HTML report = " + content.substring(index, index + 10));
+                        LOG.debug("indexOf -podkey in HTML report = " + index);
+                        LOG.debug("OLD content.substring(index, index + 25) in HTML report = " + content.substring(index, index + 10));
                         content = content.replace(content.substring(index, index + 25), "-podkey XXXXXXXXXXXXXXXXX");
-                        System.out.println("NEW content.substring(index, index + 25) in HTML report = " + content.substring(index, index + 10));
+                        LOG.debug("NEW content.substring(index, index + 25) in HTML report = " + content.substring(index, index + 10));
                         try (PrintWriter out = new PrintWriter(new FileOutputStream(child.toPath().toString(), false))) {
                             out.println(content);
                         }
@@ -526,7 +528,7 @@ public class Job {
 
     private void copyLogOutputWindowToFile() throws IOException, InterruptedException {
         Files.copy(getOutputWindowLogToFile(), getJobLogsPath().resolve("outputWindowToFileJob_" + _jobNumber + ".log"), COPY_ATTRIBUTES);
-        System.out.println("OUTPUTWINDOWLOGTOFILELOCATION COPIED");
+        LOG.debug("OUTPUTWINDOWLOGTOFILELOCATION COPIED");
     }
 
     private void runDataExtraction() throws IOException, InterruptedException {
@@ -637,10 +639,10 @@ public class Job {
             try {
                 //Create the file
                 file.createNewFile();
-                System.out.println("ABORT.txt File is created!");
+                LOG.debug("ABORT.txt File is created!");
             } catch (IOException ex) {
                 LOG.error("ABORT.txt File already exists or the operation failed for some reason");
-                //                System.out.println("ABORT.txt File already exists or the operation failed for some reason");
+                //                LOG.debug("ABORT.txt File already exists or the operation failed for some reason");
             }
             _simulationProcess.waitFor(2, TimeUnit.MINUTES);
             _isAborting = true;
@@ -688,42 +690,42 @@ public class Job {
         //scenes
         if (Files.isDirectory(getScenesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getScenesSyncFolderPath());
-            System.out.println("getRunScenesFolderPath created " + getScenesSyncFolderPath());
-            //System.out.println("src folder will show below as Directory copied");
+            LOG.debug("getRunScenesFolderPath created " + getScenesSyncFolderPath());
+            //LOG.debug("src folder will show below as Directory copied");
         } else {
-            System.err.println(
+            LOG.error(
                     "ERROR: getRunScenesFolderPath EXISTING !!! with Path: " + getScenesSyncFolderPath());
-            //throw new Exception("ERROR: getScenesSyncFolderPath EXISTING !!! with Path: " + getScenesSyncFolderPath());
+            throw new Exception("ERROR: getScenesSyncFolderPath EXISTING !!! with Path: " + getScenesSyncFolderPath());
         }
         //plots
         if (Files.isDirectory(getPlotsSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getPlotsSyncFolderPath());
-            System.out.println("getRunPlotsFolderPath created " + getPlotsSyncFolderPath());
-            //System.out.println("src folder will show below as Directory copied");
+            LOG.debug("getRunPlotsFolderPath created " + getPlotsSyncFolderPath());
+            //LOG.debug("src folder will show below as Directory copied");
         } else {
-            System.err.println(
+            LOG.error(
                     "ERROR: getRunPlotsFolderPath EXISTING !!! with Path: " + getPlotsSyncFolderPath());
-            //throw new Exception("ERROR: getPlotsSyncFolderPath EXISTING !!! with Path: " + getPlotsSyncFolderPath());
+            throw new Exception("ERROR: getPlotsSyncFolderPath EXISTING !!! with Path: " + getPlotsSyncFolderPath());
         }
 
         //tables
         if (Files.isDirectory(getTablesSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getTablesSyncFolderPath());
-            System.out.println("getRunTablesFolderPath created " + getTablesSyncFolderPath());
-            //System.out.println("src folder will show below as Directory copied");
+            LOG.debug("getRunTablesFolderPath created " + getTablesSyncFolderPath());
+            //LOG.debug("src folder will show below as Directory copied");
         } else {
-            System.err.println(
+            LOG.error(
                     "ERROR: getRunTablesFolderPath EXISTING !!! with Path: " + getTablesSyncFolderPath());
-            //throw new Exception("ERROR: getTablesSyncFolderPath EXISTING !!! with Path: " + getTablesSyncFolderPath());
+            throw new Exception("ERROR: getTablesSyncFolderPath EXISTING !!! with Path: " + getTablesSyncFolderPath());
         }
 
         //Starview
         if (Files.isDirectory(getStarViewSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getStarViewSyncFolderPath());
-            System.out.println("getRunStarViewFolderPath created " + getStarViewSyncFolderPath());
-            //System.out.println("src folder will show below as Directory copied");
+            LOG.debug("getRunStarViewFolderPath created " + getStarViewSyncFolderPath());
+            //LOG.debug("src folder will show below as Directory copied");
         } else {
-            System.err.println(
+           LOG.error(
                     "ERROR: getRunStarViewFolderPath EXISTING !!! with Path: " + getStarViewSyncFolderPath());
             //throw new Exception("ERROR: getStarViewSyncFolderPath EXISTING !!! with Path: " + getStarViewSyncFolderPath());
         }
@@ -731,10 +733,10 @@ public class Job {
         //PowerPoint
         if (Files.isDirectory(getPowerPointSyncFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
             Files.createDirectories(getPowerPointSyncFolderPath());
-            System.out.println("getRunPowerPointFolderPath created " + getPowerPointSyncFolderPath());
-            //System.out.println("src folder will show below as Directory copied");
+            LOG.debug("getRunPowerPointFolderPath created " + getPowerPointSyncFolderPath());
+            //LOG.debug("src folder will show below as Directory copied");
         } else {
-            System.err.println(
+            LOG.error(
                     "ERROR: getRunPowerPointFolderPath EXISTING !!! with Path: " + getPowerPointSyncFolderPath());
             //throw new Exception("ERROR: getPowerPointSyncFolderPath EXISTING !!! with Path: " + getPowerPointSyncFolderPath());
         }
@@ -813,7 +815,7 @@ public class Job {
         if (_printStreamToLogFile != null) {
             _printStreamToLogFile.println(LocalTime.now() + ": Job status updated to " + newStatus);
         }
-        System.out.println("Job status updated to " + newStatus);
+        LOG.info("Job status updated to " + newStatus);
     }
 
     /**
@@ -831,9 +833,9 @@ public class Job {
         if (directoryListing != null) {
             for (File child : directoryListing) {
                 if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(string.toLowerCase())) {
-                    System.out.println("directoryListing child.getName = " + child.getName());
+                    LOG.debug("directoryListing child.getName = " + child.getName());
                     Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
-                    System.out.println(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));
+                    LOG.debug(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));
 
                 }
             }
