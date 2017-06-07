@@ -78,21 +78,19 @@ public class Job {
     MoveTask moveTaskMesh;
     MoveTask moveTaskBackUp;
 
-    // compute node and license parameter need to be changed for production
-    static String _numberComputeCores = "7"; //7 for testing on Gui's PC, 24 in production.
-    static String _localHostNP = "localhost:" + _numberComputeCores;
+    // compute node and license parameter
+    static DevProdSwitch config = new DevProdSwitch();
+    static String _localHostNP = "localhost:" + config.getProperty("_numberComputeCores");
     static String PODKEY = "5vq0W6k4A3CThu7rcwFeS23KtqY"; //need to read the key from a text file that can be changed in the  middle of running
+    
     static String DATAROOT = "S:\\";
     static String RUNROOT = "R:\\";
-    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(RUNROOT); //PROD
-//static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\smartSimulationHandling\\src\\smartsimulationhandling"); //TEST
-    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get(RUNROOT, "InstalledVersions.txt"); //PROD
-//    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get("C:\\Users\\Administrator\\Dropbox\\Trampo\\IT\\Code\\Gui\\TrampoProcess\\src\\Constants\\InstalledVersions.txt"); //TEST
+    static Path TRAMPOCLUSTERUTILFOLDERPATH = Paths.get(RUNROOT); 
+    static Path CCMPLUSINSTALLEDVERSIONS = Paths.get(RUNROOT, "InstalledVersions.txt");
 
     static String CCMPLUSVERSIONFORINFOFLAGRUNPATH = "C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe";
-    static int SCHEDULEDMOVEPERIOD = 2; //TEST
-//  static int SCHEDULEDMOVEPERIOD = 120; //PROD
-
+    
+    //log
     static final Logger LOG = LoggerFactory.getLogger(Job.class); //replace Test with actual class name (Job in this example)
 
     /**
@@ -150,8 +148,6 @@ public class Job {
         // _simulation = _simulation.concat("\"");
 
         //_fileCount = 1; //TESTING ONLY
-        
-        
         _simulation = _simulation.replaceAll("\\s+", ""); //DO NOT DELETE!!!
         if (_simulation.isEmpty()) { // redundant with simulation file name a required field
             updateJobStatus(JobStatuses.CANCELLED_NULL_SIMULATION_NAME);
@@ -246,12 +242,12 @@ public class Job {
             LOG.debug("JobRunningFolder created " + getJobRunningFolderPath());
             //LOG.debug("src folder will show below as Directory copied");
         } else {
-            
+
             updateJobStatus(JobStatuses.CANCELLED_JOB_RUN_FOLDER_PREEXISTING);
             LOG.error(
                     "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
-            throw new Exception ("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
-            
+            throw new Exception("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath());
+
             // this needs to make the simulation exist the queue as it indicates a major problem
         }
         if (Files.isDirectory(getJobSynchronisedFolderPath(), LinkOption.NOFOLLOW_LINKS) == false) {
@@ -283,7 +279,7 @@ public class Job {
             Files.createFile(log.toPath());
             LOG.debug("job_" + _jobNumber + ".log File is created!");
         } catch (IOException ex) {
-            LOG.error("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason",ex);
+            LOG.error("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason", ex);
             //LOG.debug("job_" + _jobNumber + ".log : File already exists or the operation failed for some reason");
         }
         _printStreamToLogFile = new PrintStream(log);
@@ -402,24 +398,24 @@ public class Job {
         //if (moveTask == null) {
         moveTaskScenes = new MoveTask(getScenesRunFolderPath().toFile(), getScenesSyncFolderPath().toFile());
         //}
-        moveTaskScenes.scheduleFileMove("Scene", SCHEDULEDMOVEPERIOD); // non-blocking
+        moveTaskScenes.scheduleFileMove("Scene", Integer.parseInt(config.getProperty("SCHEDULEDMOVEPERIOD"))); // non-blocking
 
         //move plots
         moveTaskPlots = new MoveTask(getPlotsRunFolderPath().toFile(), getPlotsSyncFolderPath().toFile());
         //}
-        moveTaskPlots.scheduleFileMove("Plot", SCHEDULEDMOVEPERIOD); // non-blocking
+        moveTaskPlots.scheduleFileMove("Plot", Integer.parseInt(config.getProperty("SCHEDULEDMOVEPERIOD"))); // non-blocking
         //move plots
         moveTaskMesh = new MoveTask(getJobRunningFolderPath().toFile(), getJobSynchronisedFolderPath().toFile());
         //}
-        moveTaskMesh.scheduleFileMove("Meshed", SCHEDULEDMOVEPERIOD); // non-blocking
+        moveTaskMesh.scheduleFileMove("Meshed", Integer.parseInt(config.getProperty("SCHEDULEDMOVEPERIOD"))); // non-blocking
 
 //        moveTaskBackUp = new MoveTask(getJobRunningFolderPath().toFile(), getJobBackupPath().toFile());
 //        //}
-//        moveTaskBackUp.scheduleFileMove("TrampoBackup", SCHEDULEDMOVEPERIOD); // non-blocking
+//        moveTaskBackUp.scheduleFileMove("TrampoBackup", config.getProperty("SCHEDULEDMOVEPERIOD")); // non-blocking
 //        
         ProcessBuilder pb = new ProcessBuilder(
                 _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
-                "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
+                "-batch-report", "-on", _localHostNP, "-np", config.getProperty("_numberComputeCores"), "-power",
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", PODKEY,
                 _simulation);
 
@@ -644,7 +640,7 @@ public class Job {
                 file.createNewFile();
                 LOG.debug("ABORT.txt File is created!");
             } catch (IOException ex) {
-                LOG.error("ABORT.txt File already exists or the operation failed for some reason",ex);
+                LOG.error("ABORT.txt File already exists or the operation failed for some reason", ex);
                 //                LOG.debug("ABORT.txt File already exists or the operation failed for some reason");
             }
             _simulationProcess.waitFor(2, TimeUnit.MINUTES);
@@ -728,7 +724,7 @@ public class Job {
             LOG.debug("getRunStarViewFolderPath created " + getStarViewSyncFolderPath());
             //LOG.debug("src folder will show below as Directory copied");
         } else {
-           LOG.error(
+            LOG.error(
                     "ERROR: getRunStarViewFolderPath EXISTING !!! with Path: " + getStarViewSyncFolderPath());
             //throw new Exception("ERROR: getStarViewSyncFolderPath EXISTING !!! with Path: " + getStarViewSyncFolderPath());
         }
