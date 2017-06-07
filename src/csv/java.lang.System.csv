@@ -1,0 +1,33 @@
+WhiteListed,Modifier Type,Field,Description
+NO,static ,PrintStream,"The ""standard"" error output stream."
+NO,static,InputStream,"The ""standard"" input stream."
+NO,static ,PrintStream,"The ""standard"" output stream."
+,,,
+WhiteListed,Modifier Type,Method ,Description
+NO,static void,"arraycopy(Object src, int srcPos, Object dest, int destPos, int length)","Copies an array from the specified source array, beginning at the specified position, to the specified position of the destination array."
+NO,static String,clearProperty(String key),Removes the system property indicated by the specified key.
+NO,static Console,console(),"Returns the unique Console object associated with the current Java virtual machine, if any."
+NO,static long,currentTimeMillis(),Returns the current time in milliseconds.
+YES,static void,exit(int status),Terminates the currently running Java Virtual Machine.
+NO,static void,gc(),Runs the garbage collector.
+NO,"static Map<String,String>",getenv(),Returns an unmodifiable string map view of the current system environment.
+NO,static String,getenv(String name),Gets the value of the specified environment variable.
+NO,static Properties,getProperties(),Determines the current system properties.
+NO,static String,getProperty(String key),Gets the system property indicated by the specified key.
+NO,static String,"getProperty(String key, String def)",Gets the system property indicated by the specified key.
+NO,static SecurityManager,getSecurityManager(),Gets the system security interface.
+NO,static int,identityHashCode(Object x),"Returns the same hash code for the given object as would be returned by the default method hashCode(), whether or not the given object's class overrides hashCode()."
+NO,static Channel,inheritedChannel(),Returns the channel inherited from the entity that created this Java virtual machine.
+NO,static String,lineSeparator(),Returns the system-dependent line separator string.
+NO,static void,load(String filename),Loads the native library specified by the filename argument.
+NO,static void,loadLibrary(String libname),Loads the native library specified by the libname argument.
+NO,static String,mapLibraryName(String libname),Maps a library name into a platform-specific string representing a native library.
+NO,static long,nanoTime(),"Returns the current value of the running Java Virtual Machine's high-resolution time source, in nanoseconds."
+NO,static void,runFinalization(),Runs the finalization methods of any objects pending finalization.
+NO,static void,runFinalizersOnExit(boolean value),Deprecated. 
+NO,static void,setErr(PrintStream err),"Reassigns the ""standard"" error output stream."
+NO,static void,setIn(InputStream in),"Reassigns the ""standard"" input stream."
+NO,static void,setOut(PrintStream out),"Reassigns the ""standard"" output stream."
+NO,static void,setProperties(Properties props),Sets the system properties to the Properties argument.
+NO,static String,"setProperty(String key, String value)",Sets the system property indicated by the specified key.
+NO,static void,setSecurityManager(SecurityManager s),Sets the System security.

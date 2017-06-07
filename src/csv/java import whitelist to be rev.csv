@@ -1,0 +1,50 @@
+Packages,white listed,Comment
+star,Yes,"entirely whitelisted, safety to be checked"
+java.applet,NO,blacklist java.*
+java.awt,NO,used for colouring of output window text
+java.beans,NO,
+java.io,YES ,"Unsafe, whitelisting limited"
+java.lang,YES ,"Unsafe, whitelisting limited"
+java.math,YES,"entirely whitelisted,"
+java.net,NO,
+java.nio,NO,
+java.rmi,NO,
+java.security,NO,
+java.sql,NO,
+java.text,YES,"entirely whitelisted, check if could be used to go around paths"
+java.time,NO,
+java.util,YES ,"Unsafe, whitelisting limited"
+java.util.concurrent,NO,blacklist java.util.*
+java.util.function,NO,
+java.util.jar,NO,
+java.util.logging,NO,"if enabled, watch manualy"
+java.util.prefs,NO,
+java.util.regex,NO,
+java.util.spi,NO,
+java.util.stream,NO,
+java.util.zip,NO,
+javax.accessibility,NO,
+javax.activation,NO,
+javax.activity,NO,
+javax.annotation,NO,
+javax.crypto,NO,
+javax.imageio,NO,
+javax.jws,NO,
+javax.lang.model,NO,
+javax.management,NO,
+javax.naming,NO,
+javax.net,NO,
+javax.print,NO,
+javax.rmi,NO,
+javax.script,NO,
+javax.security,NO,
+javax.sound,NO,
+javax.sql,NO,
+javax.swing,NO,
+javax.tools,NO,
+javax.transaction,NO,
+javax.xml,NO,
+org.ietf.jgss,NO,
+org.omg,NO,
+org.w3c,NO,
+org.xml,NO,
