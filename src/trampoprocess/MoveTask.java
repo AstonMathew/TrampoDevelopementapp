@@ -7,8 +7,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MoveTask {
+    static final Logger LOG = LoggerFactory.getLogger(MoveTask.class);
+
     private Timer cron;
     private File source;
     private File destination;
@@ -23,13 +27,14 @@ public class MoveTask {
         TimerTask moveTimerTask = new MoveTimerTask(source, destination, string);
         cron.schedule(moveTimerTask, 1, TimeUnit.SECONDS.toMillis(integer));
     }
+
     public void cancelPurgeTimer() {
         cron.cancel();
         cron.purge();
     }
-    
 
     class MoveTimerTask extends TimerTask {
+
         File source;
         File destination;
         String string;
@@ -38,7 +43,7 @@ public class MoveTask {
             this.source = source;
             this.destination = destination;
             this.string = string;
-            //System.out.println(String.format("Move task for mask '%s' is scheduled to run every %d hour(s)", string, PERIOD));
+            //LOG.debug(String.format("Move task for mask '%s' is scheduled to run every %d hour(s)", string, PERIOD));
         }
 
         @Override
@@ -48,14 +53,13 @@ public class MoveTask {
                 if (directoryListing != null) {
                     for (File child : directoryListing) {
                         if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(string.toLowerCase())) {
-                            System.out.println("directoryListing child.getName = " + child.getName());
+                            LOG.debug("directoryListing child.getName = " + child.getName());
                             Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
-                            System.out.println(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));
+                            LOG.debug(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));
                         }
                     }
                 }
-            } catch (
-                    IOException ignore) {
+            } catch (IOException ignore) {
             }
         }
     }
