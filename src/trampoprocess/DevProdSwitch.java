@@ -7,7 +7,7 @@ import java.util.Properties;
 // this fil is a SWITCH between PROD and DEV settings
 public class DevProdSwitch {
   
-    public static final String environment = "PROD"; //DEV or PROD
+    public static final String environment = "DEV"; //DEV or PROD
     Properties prop;
     
     public DevProdSwitch() {
@@ -16,9 +16,10 @@ public class DevProdSwitch {
 
         try {
             if(environment.equals("DEV")){
-              input = new FileInputStream("src/DevProdSwitchSettings/dev.properties"); //text file with key,value for DEVELOPMENT settings
+                input = this.getClass().getClassLoader().getResourceAsStream("DevProdSwitchSettings/dev.properties");
+//              input = new FileInputStream("src/DevProdSwitchSettings/dev.properties"); //text file with key,value for DEVELOPMENT settings
             }else{
-              input = new FileInputStream("src/DevProdSwitchSettings/prod.properties"); //text file with key,value for PRODUCTION settings
+              input = this.getClass().getClassLoader().getResourceAsStream("DevProdSwitchSettings/prod.properties"); //text file with key,value for PRODUCTION settings
             }
             
             // load a properties file
