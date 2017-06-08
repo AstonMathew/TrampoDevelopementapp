@@ -11,7 +11,10 @@ import javax.mail.internet.MimeMessage;
 
 public class SendEmail {
 	/** Note: Only work if the setting "Access for less secure apps" is ON in gmail 
-	 * Access at https://myaccount.google.com/security */
+	 * Access at https://myaccount.google.com/security 
+         * set up dual factor authentiocation in account and generate app password. register app. put password in code.
+         */
+    
 	public static final String TO = "gui@trampocfd.com";
         private final String _username = "trampointernalnotifications@gmail.com";
         private final String _password = "izcdreavdjooopxv";

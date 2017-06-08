@@ -2,11 +2,12 @@ package constants;
 
 /**
  *
- * @author julien
- *
+ * @author julien/gui
+ * Check String[] simulationStatuses in webapp/Simulation.java and webapp/SimulationAdmin.java, 
+ * must match for webapp  to update all statuses
  */
 public class JobStatuses {
-    // Status index as per the webapp (hopefully) variable simulationStatuses,  Check String[] simulationStatuses in webapp/Simulation.java and webapp/SimulationAdmin.java
+    // 
 
     public static String SUBMITED = "Submited";
     public static String FILESUPLOADED = "Files Uploaded";

@@ -24,8 +24,17 @@ public class MoveTask {
     }
 
     public void scheduleFileMove(String string, int integer) {
+        LOG.debug("scheduleFileMove start");
         TimerTask moveTimerTask = new MoveTimerTask(source, destination, string);
-        cron.schedule(moveTimerTask, 1, TimeUnit.SECONDS.toMillis(integer));
+        LOG.debug("TimerTask moveTimerTask = new MoveTimerTask done");
+        try {
+        cron.schedule(moveTimerTask, 1, TimeUnit.SECONDS.toMillis(integer)); // this line is the issue with the installer
+             
+        }
+        catch(Exception e){
+        LOG.error("test exception",e);
+        }
+        LOG.debug("cron.schedule(moveTimerTask done");
     }
 
     public void cancelPurgeTimer() {

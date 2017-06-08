@@ -396,18 +396,23 @@ public class Job {
     private void RunJob() throws Exception { //IF process desn't run while testing, i.e. no output a,d a single STAR-CCM+ process starts, make sure you have a sim file in the right folder to run!!!
         //move scenes           
         //if (moveTask == null) {
+        LOG.debug("starting run job");
         moveTaskScenes = new MoveTask(getScenesRunFolderPath().toFile(), getScenesSyncFolderPath().toFile());
-        //}
+        LOG.debug("moveTaskScenes = new MoveTask done");
+     
         moveTaskScenes.scheduleFileMove("Scene", Integer.parseInt(config.getProperty("SCHEDULEDMOVEPERIOD"))); // non-blocking
+        LOG.debug("moveTaskScenes running");
 
         //move plots
         moveTaskPlots = new MoveTask(getPlotsRunFolderPath().toFile(), getPlotsSyncFolderPath().toFile());
         //}
         moveTaskPlots.scheduleFileMove("Plot", Integer.parseInt(config.getProperty("SCHEDULEDMOVEPERIOD"))); // non-blocking
+        LOG.debug("moveTaskPlots running");
         //move plots
         moveTaskMesh = new MoveTask(getJobRunningFolderPath().toFile(), getJobSynchronisedFolderPath().toFile());
         //}
         moveTaskMesh.scheduleFileMove("Meshed", Integer.parseInt(config.getProperty("SCHEDULEDMOVEPERIOD"))); // non-blocking
+        LOG.debug("moveTaskMesh running");
 
 //        moveTaskBackUp = new MoveTask(getJobRunningFolderPath().toFile(), getJobBackupPath().toFile());
 //        //}
@@ -519,6 +524,7 @@ public class Job {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        LOG.debug("ending run job");
     }
 
     public void updateJobActualRuntime() throws Exception {
