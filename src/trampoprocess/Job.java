@@ -664,7 +664,7 @@ public class Job {
     }
 
     private Path getCustomerSynchronisedFolder() { // the synchronised copy of the folder in which the customer pastes his files to send to Trampo
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder");
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised_Folder");
     }
 
     private Path getJobRunningFolderPath() {// the Job running folder
@@ -672,7 +672,7 @@ public class Job {
     }
 
     private Path getJobSynchronisedFolderPath() {// the Job synchronised folder where trampo send the results back live.
-        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised folder", "Job_" + _jobNumber);
+        return Paths.get(DATAROOT, getCustomerFolderRelativePath(), "Synchronised_Folder", "Job_" + _jobNumber);
     }
 
     private Path getJobLogsPath() {
