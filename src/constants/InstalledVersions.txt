@@ -1,3 +1,5 @@
 11.04.012, C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe,
+11.06.010, C:\\Program Files\\CD-adapco\\11.06.010\\STAR-CCM+11.06.010\\star\\bin\\starccm+.exe,
 11.06.011, C:\\Program Files\\CD-adapco\\11.06.011\\STAR-CCM+11.06.011\\star\\bin\\starccm+.exe,
-12.02.010, C:\\Program Files\\CD-adapco\\12.02.010\\STAR-CCM+12.02.010\\star\\bin\\starccm+.exe,
+12.02.010, C:\\Program Files\\CD-adapco\\12.02.010-R8\\STAR-CCM+12.02.010-R8\\star\\bin\\starccm+.exe,
+12.02.011, C:\\Program Files\\CD-adapco\\12.02.011\\STAR-CCM+12.02.011\\star\\bin\\starccm+.exe,
