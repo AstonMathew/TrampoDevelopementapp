@@ -7,7 +7,7 @@ import java.util.Properties;
 // this fil is a SWITCH between PROD and DEV settings
 public class DevProdSwitch {
   
-    public static final String environment = "DEV"; //DEV or PROD
+    public static final String environment = "PROD"; //DEV or PROD
     Properties prop;
     
     public DevProdSwitch() {
