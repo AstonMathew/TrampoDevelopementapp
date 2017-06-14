@@ -446,7 +446,7 @@ public class Job {
             moveTaskMesh.cancelPurgeTimer();
 
             //REMOVE POD key FROM HTML report
-            File[] directoryListing = getJobSynchronisedFolderPath().toFile().listFiles();
+            File[] directoryListing = pbWorkingDirectory.listFiles();
             if (directoryListing != null) {
                 for (File child : directoryListing) {
                     if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(".html")) {

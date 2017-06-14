@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import constants.JobStatuses;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+import static trampoprocess.Job.config;
 
 public class TrampoProcess {
 
@@ -27,6 +28,9 @@ public class TrampoProcess {
         LOG.info("Start trampo process in directory " + currentPath);
         LOG.info("Create file stop.txt in directory to stop trampo process, currently run simulaiton will finish");
         LOG.info("Create file stop_now.txt in directory to stop trampo process now...");
+        LOG.info("config.getProperty(\"test\")" + config.getProperty("test"));
+        LOG.info("config.getProperty(\"_numberComputeCores\")" + config.getProperty("_numberComputeCores"));
+        LOG.info("config.getProperty(\"SCHEDULEDMOVEPERIOD\")" + config.getProperty("SCHEDULEDMOVEPERIOD"));
         
         // Retrieve paused simulations from webapp
         {
