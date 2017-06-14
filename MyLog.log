@@ -3461,3 +3461,990 @@ STAR-CCM+ 11.04.012 (win64/intel15.0) Np=7 647.26 KB
 2017-06-14 12:06:41.023 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
 2017-06-14 12:06:41.023 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
 2017-06-14 12:06:41.148 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 12:06:45.149 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 12:06:45.149 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 12:06:45.289 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 12:06:49.290 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 12:06:49.290 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 12:06:49.415 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 12:06:53.421 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 12:06:53.421 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 12:06:53.550 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 12:06:57.550 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 12:06:57.550 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 12:06:57.691 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 12:07:01.691 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 12:07:01.691 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 12:07:01.832 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 12:07:05.832 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 12:07:05.832 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 12:07:05.973 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 12:07:09.973 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 12:07:09.973 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 12:07:10.114 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:40:32.157 [main] INFO  trampoprocess.TrampoProcess - Start trampo process in directory C:\Users\Administrator\Dropbox\Trampo\IT\BackEnd\Gui\TrampoProcess
+2017-06-14 13:40:32.157 [main] INFO  trampoprocess.TrampoProcess - Create file stop.txt in directory to stop trampo process, currently run simulaiton will finish
+2017-06-14 13:40:32.157 [main] INFO  trampoprocess.TrampoProcess - Create file stop_now.txt in directory to stop trampo process now...
+2017-06-14 13:40:32.157 [main] INFO  trampoprocess.TrampoProcess - config.getProperty("test")prod
+2017-06-14 13:40:32.157 [main] INFO  trampoprocess.TrampoProcess - config.getProperty("_numberComputeCores")24
+2017-06-14 13:40:32.157 [main] INFO  trampoprocess.TrampoProcess - config.getProperty("SCHEDULEDMOVEPERIOD")30
+2017-06-14 13:40:32.173 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status PAUSED: maintenance
+2017-06-14 13:40:33.048 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:40:36.048 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:40:36.048 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:40:36.189 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:40:40.189 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:40:40.189 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:40:40.314 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:40:44.315 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:40:44.315 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:40:44.456 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:40:48.456 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:40:48.456 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:40:48.659 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:40:52.659 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:40:52.659 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:40:52.800 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:40:56.800 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:40:56.800 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:40:56.956 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":108,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1339200,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:40:56.956 [main] INFO  trampoprocess.JobQueue - Add job 108 to queue
+2017-06-14 13:40:56.956 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:40:56.956 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:40:56.956 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\run.java
+2017-06-14 13:40:56.956 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\test.csv
+2017-06-14 13:40:56.956 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\test.txt
+2017-06-14 13:40:56.956 [main] INFO  trampoprocess.JobQueue - Files for job 108 are available, job will be processed
+2017-06-14 13:40:56.956 [main] INFO  trampoprocess.JobQueue - Adding job from 6255722124 job id: 108 with file Cube.sim
+2017-06-14 13:40:56.956 [main] DEBUG trampoprocess.Job - Simulation file Cube.sim is available
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\run.java
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\test.csv
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\test.txt
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.Job - FileFunctions.countFiles(getCustomerSynchronisedFolder()) = 4
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.Job - _fileCount = 4
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\run.java
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\test.csv
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\test.txt
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.Job - Actual file count matches nominated file count !!!
+2017-06-14 13:40:57.019 [main] DEBUG trampoprocess.WebAppGate - Check job status for job 108
+2017-06-14 13:40:57.160 [main] DEBUG trampoprocess.JobQueue - Job 108 will be treated soon 
+2017-06-14 13:40:57.160 [main] DEBUG trampoprocess.WebAppGate - Update simulation status for simulation 108
+2017-06-14 13:41:01.316 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:01.316 [main] DEBUG trampoprocess.WebAppGate - Check if job has been canceled for job 108
+2017-06-14 13:41:01.472 [main] INFO  trampoprocess.JobQueue - Start new job 108
+2017-06-14 13:41:01.472 [Thread-0] DEBUG trampoprocess.JobQueue - Running in a thread
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job - JobRunningFolder created R:\customer_6255722124\Job_108
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job - getJobSynchronisedFolderPath Folder created S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job - JobLogs isDirectory true
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job -  getJobLogsPath Folder created S:\customer_6255722124\Job_108\logs
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job -  getJobBackupPath Folder created S:\customer_6255722124\Job_108\backup
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job - HERE writing job_108.log at path= S:\customer_6255722124\Job_108\logs\job_108.log
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job - job_108.log File is created!
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job - starting CopyCustomerSyncFolderIntoJobRunFolder()
+2017-06-14 13:41:01.488 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = Cube.sim
+2017-06-14 13:41:01.504 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = R:\customer_6255722124\Job_108\Cube.sim
+2017-06-14 13:41:01.504 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = run.java
+2017-06-14 13:41:01.504 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = R:\customer_6255722124\Job_108\run.java
+2017-06-14 13:41:01.504 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = test.csv
+2017-06-14 13:41:01.504 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = R:\customer_6255722124\Job_108\test.csv
+2017-06-14 13:41:01.504 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = test.txt
+2017-06-14 13:41:01.504 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = R:\customer_6255722124\Job_108\test.txt
+2017-06-14 13:41:01.504 [Thread-0] DEBUG trampoprocess.Job - finished CopyCustomerSyncFolderIntoJobRunFolder()
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - version.log created
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - version.log=
+STAR-CCM+ 11.04.012 (win64/intel15.0) Np=7 647.26 KB  
+"C:\Program Files\CD-adapco\STAR-CCM+11.04.012\star\lib\win64\intel15.0\lib\star-ccm+.exe" -info  "Cube.sim"  Cube.sim -cpubind 
+
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - index=86
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - versionsectionstartindex=95
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - stopindex=104
+2017-06-14 13:41:01.676 [Thread-0] INFO  trampoprocess.Job - CCM+ version = 11.04.012
+2017-06-14 13:41:01.676 [Thread-0] INFO  trampoprocess.Job - finalVersionLogPath = S:\customer_6255722124\Job_108\logs\version.log
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - [[11.04.012,, C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe,], [11.06.010,, C:\\Program Files\\CD-adapco\\11.06.010\\STAR-CCM+11.06.010\\star\\bin\\starccm+.exe,], [11.06.011,, C:\\Program Files\\CD-adapco\\11.06.011\\STAR-CCM+11.06.011\\star\\bin\\starccm+.exe,], [12.02.010,, C:\\Program Files\\CD-adapco\\12.02.010-R8\\STAR-CCM+12.02.010-R8\\star\\bin\\starccm+.exe,], [12.02.011,, C:\\Program Files\\CD-adapco\\12.02.011\\STAR-CCM+12.02.011\\star\\bin\\starccm+.exe,]]
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - version is = 11.04.012
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - version is = 11.06.010
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - simulationCcmPlusVersion= 11.00.011
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - simulationCcmPlusVersion is NOT installed on compute node
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - using DEFAULT VERSION
+2017-06-14 13:41:01.676 [Thread-0] INFO  trampoprocess.Job - _StarCcmPlusDefaultVersion= 11.04.012
+2017-06-14 13:41:01.676 [Thread-0] INFO  trampoprocess.Job - _StarCcmPlusDefaultVersionPath= C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - getRunScenesFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_108\Scenes
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - getRunPlotsFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_108\Plots
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - getRunTablesFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_108\Tables
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - getRunStarViewFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_108\StarView
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - getRunPowerPointFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_108\PowerPoint
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - starting run job
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - moveTaskScenes = new MoveTask done
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - scheduleFileMove start
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - TimerTask moveTimerTask = new MoveTimerTask done
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - cron.schedule(moveTimerTask done
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - moveTaskScenes running
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - scheduleFileMove start
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - TimerTask moveTimerTask = new MoveTimerTask done
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - cron.schedule(moveTimerTask done
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - moveTaskPlots running
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - scheduleFileMove start
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - TimerTask moveTimerTask = new MoveTimerTask done
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.MoveTask - cron.schedule(moveTimerTask done
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.Job - moveTaskMesh running
+2017-06-14 13:41:01.676 [Thread-0] DEBUG trampoprocess.WebAppGate - Update simulation status for simulation 108
+2017-06-14 13:41:01.832 [Thread-0] INFO  trampoprocess.Job - Job status updated to Running
+2017-06-14 13:41:01.832 [Thread-0] INFO  trampoprocess.Job - simulation run process started
+2017-06-14 13:41:02.489 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:02.629 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:06.635 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:06.635 [main] DEBUG trampoprocess.WebAppGate - Check if job has been canceled for job 108
+2017-06-14 13:41:06.792 [main] DEBUG trampoprocess.JobQueue - cJob.maximumClocktimeInSeconds()= 1339200
+2017-06-14 13:41:06.792 [main] DEBUG trampoprocess.JobQueue - cJob._maxSeconds= 1339200
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - HTML report file name = TrampoSolved_Cube-06142017_134117.html
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - indexOf -podkey in HTML report = 7532
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - OLD content.substring(index, index + 25) in HTML report = -podkey 5v
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - NEW content.substring(index, index + 25) in HTML report = -podkey XX
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = SmartSimulationHandling.log
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_108\logs\SmartSimulationHandling.log
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = test.txt
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_108\logs\test.txt
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = test.csv
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_108\logs\test.csv
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = run.java
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_108\logs\run.java
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = Cube@TrampoBackup00001.sim
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_108\Cube@TrampoBackup00001.sim
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = TrampoSolved_Cube-06142017_134117.html
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_108\TrampoSolved_Cube-06142017_134117.html
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = TrampoSolved_Cube.sim
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_108\TrampoSolved_Cube.sim
+2017-06-14 13:41:18.694 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = trampoSolved_Cube@TrampoBackup00001.sim
+2017-06-14 13:41:18.710 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_108\trampoSolved_Cube@TrampoBackup00001.sim
+2017-06-14 13:41:18.710 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = Cube@TrampoBackup00001.sim
+2017-06-14 13:41:18.710 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_108\backup\Cube@TrampoBackup00001.sim
+2017-06-14 13:41:18.710 [Thread-0] DEBUG trampoprocess.Job - directoryListing child.getName = trampoSolved_Cube@TrampoBackup00001.sim
+2017-06-14 13:41:18.710 [Thread-0] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_108\backup\trampoSolved_Cube@TrampoBackup00001.sim
+2017-06-14 13:41:18.710 [Thread-0] DEBUG trampoprocess.WebAppGate - Update simulation run time for simulation 108
+2017-06-14 13:41:19.241 [Thread-0] DEBUG trampoprocess.WebAppGate - Update simulation status for simulation 108
+2017-06-14 13:41:20.600 [Thread-0] INFO  trampoprocess.Job - Job status updated to COMPLETED
+2017-06-14 13:41:20.600 [Thread-0] DEBUG trampoprocess.Job - ending run job
+2017-06-14 13:41:20.600 [Thread-0] DEBUG trampoprocess.Job - OUTPUTWINDOWLOGTOFILELOCATION COPIED
+2017-06-14 13:41:20.600 [Thread-0] INFO  trampoprocess.Job - End
+2017-06-14 13:41:20.600 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:20.757 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:24.760 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:24.760 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:24.900 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:28.901 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:28.901 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:29.041 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:33.042 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:33.042 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:33.245 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:37.245 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:37.245 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:37.386 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:41.386 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:41.386 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:41.527 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:45.527 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:45.527 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:45.683 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:49.684 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:49.684 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:49.824 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:53.828 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:53.828 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:53.970 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:41:57.983 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:41:57.983 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:41:58.124 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:02.134 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:02.134 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:02.286 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:06.298 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:06.298 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:06.439 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:10.439 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:10.439 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:10.580 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:14.580 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:14.580 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:14.721 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:18.721 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:18.721 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:18.877 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:22.878 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:22.878 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:23.018 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:27.019 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:27.019 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:27.159 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:31.160 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:31.160 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:31.285 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:35.286 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:35.286 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:35.427 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:39.428 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:39.428 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:39.568 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:43.569 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:43.569 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:43.709 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:47.710 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:47.710 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:47.850 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:51.851 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:51.851 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:51.991 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:42:55.992 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:42:55.992 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:42:56.132 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:00.138 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:00.138 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:00.279 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:04.279 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:04.279 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:04.420 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:08.420 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:08.420 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:08.545 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:12.546 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:12.546 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:12.687 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:16.687 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:16.687 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:16.828 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:20.828 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:20.828 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:20.953 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:24.960 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:24.960 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:25.085 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:29.085 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:29.085 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:29.210 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:33.214 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:33.214 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:33.355 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:37.355 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:37.355 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:37.480 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:41.481 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:41.481 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:41.621 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:43:45.622 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:45.622 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:45.762 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:43:45.762 [main] INFO  trampoprocess.JobQueue - Add job 109 to queue
+2017-06-14 13:43:45.762 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:43:45.762 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:43:45.762 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:43:49.763 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:49.763 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:43:49.763 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:43:49.763 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:43:49.763 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:49.903 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:43:53.904 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:53.904 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:43:53.904 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:43:53.904 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:43:53.904 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:54.044 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:43:58.050 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:43:58.050 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:43:58.050 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:43:58.050 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:43:58.050 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:43:58.175 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:02.176 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:02.176 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:02.176 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:02.176 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:02.176 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:02.316 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:06.317 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:06.317 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:06.317 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:06.317 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:06.317 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:06.457 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:10.458 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:10.458 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:10.458 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:10.458 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:10.458 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:10.598 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:14.599 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:14.599 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:14.599 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:14.599 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:14.599 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:14.755 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:18.755 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:18.755 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:18.755 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:18.755 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:18.755 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:18.896 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:22.896 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:22.896 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:22.896 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:22.896 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:22.896 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:23.037 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:27.038 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:27.038 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:27.038 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:27.038 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:27.038 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:27.178 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:31.179 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:31.179 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:31.179 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:31.179 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:31.179 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:31.319 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:35.321 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:35.321 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:35.321 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:35.321 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:35.321 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:35.446 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:39.446 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:39.446 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:39.446 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:39.446 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:39.446 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:39.586 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:43.587 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:43.587 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:43.587 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:43.587 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:43.587 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:43.727 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:47.728 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:47.728 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:47.728 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:47.728 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:47.728 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:47.868 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:51.869 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:51.869 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:51.869 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:51.869 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:51.869 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:52.009 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:44:56.010 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:44:56.010 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:44:56.010 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:44:56.010 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:44:56.010 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:44:56.150 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:00.151 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:00.151 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:00.151 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:00.151 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:00.151 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:00.291 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:04.292 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:04.292 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:04.292 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:04.292 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:04.292 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:04.417 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:08.417 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:08.417 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:08.417 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:08.417 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:08.417 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:08.558 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:12.561 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:12.561 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:12.561 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:12.561 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:12.561 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:12.686 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:16.686 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:16.686 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:16.686 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:16.686 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:16.686 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:16.827 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:20.827 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:20.827 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:20.827 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:20.827 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:20.827 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:20.983 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:24.984 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:24.984 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:24.984 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:24.984 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:24.984 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:25.124 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:29.125 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:29.125 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:29.125 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:29.125 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:29.125 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:29.281 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:33.281 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:33.281 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:33.281 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:33.281 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:33.281 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:33.422 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:37.422 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:37.422 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:37.422 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:37.422 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:37.422 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:37.547 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:41.548 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:41.548 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:41.548 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:41.548 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:41.548 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:41.688 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:45.689 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:45.689 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:45.689 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:45.689 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:45.689 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:45.814 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:49.814 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:49.814 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:49.814 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:49.814 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:49.814 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:49.955 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:53.955 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:53.955 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:53.955 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:53.955 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:53.955 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:54.111 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:45:58.111 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:45:58.111 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:45:58.111 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:45:58.111 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:45:58.111 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:45:58.268 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:02.268 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:02.268 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:02.268 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:02.268 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:02.268 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:02.409 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:06.409 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:06.409 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:06.409 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:06.409 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:06.409 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:06.550 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:10.550 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:10.550 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:10.550 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:10.550 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:10.550 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:10.675 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:14.691 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:14.691 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:14.691 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:14.691 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:14.691 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:14.816 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:18.822 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:18.822 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:18.822 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:18.822 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:18.822 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:18.947 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:22.952 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:22.952 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:22.952 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:22.952 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:22.952 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:23.093 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:27.093 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:27.093 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:27.093 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:27.093 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:27.093 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:27.234 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:31.234 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:31.234 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:31.234 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:31.234 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:31.234 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:31.359 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:35.360 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:35.360 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:35.360 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:35.360 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:35.360 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:35.485 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:39.485 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:39.485 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:39.485 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:39.485 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:39.485 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:39.625 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:43.626 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:43.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:43.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:43.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:43.626 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:43.766 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:47.767 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:47.767 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:47.767 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:47.767 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:47.767 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:47.907 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:51.913 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:51.913 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:51.913 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:51.913 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:51.913 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:52.054 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:46:56.059 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:46:56.059 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:46:56.059 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:46:56.059 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:46:56.059 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document.txt
+2017-06-14 13:46:56.059 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:46:56.199 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:47:00.203 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:47:00.203 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:47:00.203 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:47:00.203 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:47:00.203 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document.txt
+2017-06-14 13:47:00.203 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:47:00.359 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:47:04.360 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:47:04.360 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:47:04.360 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:47:04.360 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:47:04.360 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document.txt
+2017-06-14 13:47:04.360 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:47:04.485 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:47:08.485 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:47:08.485 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:47:08.485 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:47:08.485 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:47:08.485 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document - Copy.txt
+2017-06-14 13:47:08.485 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document.txt
+2017-06-14 13:47:08.485 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:47:08.626 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[{"no":109,"customer_id":"6255722124  ","sub_date":"2017-06-14","max_runtime":1335600,"file_name":"Cube.sim                                                                                                                                                                                                                                                                                                    ","file_count":4}]}
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document - Copy (2).txt
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document - Copy.txt
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document.txt
+2017-06-14 13:47:12.626 [main] INFO  trampoprocess.JobQueue - Adding job from 6255722124 job id: 109 with file Cube.sim
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.Job - Simulation file Cube.sim is available
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document - Copy (2).txt
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document - Copy.txt
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document.txt
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.Job - FileFunctions.countFiles(getCustomerSynchronisedFolder()) = 4
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.Job - _fileCount = 4
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\.sync
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Cube.sim
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\Job_108
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document - Copy (2).txt
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document - Copy.txt
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.FileFunctions - Going through file S:\customer_6255722124\Synchronised_Folder\New Text Document.txt
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.Job - Actual file count matches nominated file count !!!
+2017-06-14 13:47:12.626 [main] DEBUG trampoprocess.WebAppGate - Check job status for job 109
+2017-06-14 13:47:12.767 [main] DEBUG trampoprocess.JobQueue - Job 109 will be treated soon 
+2017-06-14 13:47:12.767 [main] DEBUG trampoprocess.WebAppGate - Update simulation status for simulation 109
+2017-06-14 13:47:12.907 [main] DEBUG trampoprocess.WebAppGate - Check if job has been canceled for job 109
+2017-06-14 13:47:13.048 [main] INFO  trampoprocess.JobQueue - Start new job 109
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.JobQueue - Running in a thread
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - JobRunningFolder created R:\customer_6255722124\Job_109
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - getJobSynchronisedFolderPath Folder created S:\customer_6255722124\Synchronised_Folder\Job_109
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - JobLogs isDirectory true
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job -  getJobLogsPath Folder created S:\customer_6255722124\Job_109\logs
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job -  getJobBackupPath Folder created S:\customer_6255722124\Job_109\backup
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - HERE writing job_109.log at path= S:\customer_6255722124\Job_109\logs\job_109.log
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - job_109.log File is created!
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - starting CopyCustomerSyncFolderIntoJobRunFolder()
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = Cube.sim
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = R:\customer_6255722124\Job_109\Cube.sim
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = New Text Document - Copy (2).txt
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = R:\customer_6255722124\Job_109\New Text Document - Copy (2).txt
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = New Text Document - Copy.txt
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = R:\customer_6255722124\Job_109\New Text Document - Copy.txt
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = New Text Document.txt
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = R:\customer_6255722124\Job_109\New Text Document.txt
+2017-06-14 13:47:13.048 [Thread-4] DEBUG trampoprocess.Job - finished CopyCustomerSyncFolderIntoJobRunFolder()
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - version.log created
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - version.log=
+STAR-CCM+ 11.04.012 (win64/intel15.0) Np=7 647.26 KB  
+"C:\Program Files\CD-adapco\STAR-CCM+11.04.012\star\lib\win64\intel15.0\lib\star-ccm+.exe" -info  "Cube.sim"  Cube.sim -cpubind 
+
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - index=86
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - versionsectionstartindex=95
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - stopindex=104
+2017-06-14 13:47:13.079 [Thread-4] INFO  trampoprocess.Job - CCM+ version = 11.04.012
+2017-06-14 13:47:13.079 [Thread-4] INFO  trampoprocess.Job - finalVersionLogPath = S:\customer_6255722124\Job_109\logs\version.log
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - [[11.04.012,, C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe,], [11.06.010,, C:\\Program Files\\CD-adapco\\11.06.010\\STAR-CCM+11.06.010\\star\\bin\\starccm+.exe,], [11.06.011,, C:\\Program Files\\CD-adapco\\11.06.011\\STAR-CCM+11.06.011\\star\\bin\\starccm+.exe,], [12.02.010,, C:\\Program Files\\CD-adapco\\12.02.010-R8\\STAR-CCM+12.02.010-R8\\star\\bin\\starccm+.exe,], [12.02.011,, C:\\Program Files\\CD-adapco\\12.02.011\\STAR-CCM+12.02.011\\star\\bin\\starccm+.exe,]]
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - version is = 11.04.012
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - version is = 11.06.010
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - simulationCcmPlusVersion= 11.00.011
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - simulationCcmPlusVersion is NOT installed on compute node
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - using DEFAULT VERSION
+2017-06-14 13:47:13.079 [Thread-4] INFO  trampoprocess.Job - _StarCcmPlusDefaultVersion= 11.04.012
+2017-06-14 13:47:13.079 [Thread-4] INFO  trampoprocess.Job - _StarCcmPlusDefaultVersionPath= C:\\Program Files\\CD-adapco\\STAR-CCM+11.04.012\\star\\bin\\starccm+.exe
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - getRunScenesFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - getRunPlotsFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_109\Plots
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - getRunTablesFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_109\Tables
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - getRunStarViewFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_109\StarView
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - getRunPowerPointFolderPath created S:\customer_6255722124\Synchronised_Folder\Job_109\PowerPoint
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - starting run job
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - moveTaskScenes = new MoveTask done
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - scheduleFileMove start
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - TimerTask moveTimerTask = new MoveTimerTask done
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - cron.schedule(moveTimerTask done
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - moveTaskScenes running
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - scheduleFileMove start
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - TimerTask moveTimerTask = new MoveTimerTask done
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - cron.schedule(moveTimerTask done
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - moveTaskPlots running
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - scheduleFileMove start
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - TimerTask moveTimerTask = new MoveTimerTask done
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.MoveTask - cron.schedule(moveTimerTask done
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.Job - moveTaskMesh running
+2017-06-14 13:47:13.079 [Thread-4] DEBUG trampoprocess.WebAppGate - Update simulation status for simulation 109
+2017-06-14 13:47:13.236 [Thread-4] INFO  trampoprocess.Job - Job status updated to Running
+2017-06-14 13:47:13.236 [Thread-4] INFO  trampoprocess.Job - simulation run process started
+2017-06-14 13:47:14.048 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:47:14.189 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:47:18.189 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:47:18.189 [main] DEBUG trampoprocess.WebAppGate - Check if job has been canceled for job 109
+2017-06-14 13:47:18.330 [main] DEBUG trampoprocess.JobQueue - cJob.maximumClocktimeInSeconds()= 1335600
+2017-06-14 13:47:18.330 [main] DEBUG trampoprocess.JobQueue - cJob._maxSeconds= 1335600
+2017-06-14 13:47:43.098 [Timer-5] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoSurfaceMeshed_Cube.sim
+2017-06-14 13:48:13.100 [Timer-5] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoSurfaceMeshed_Cube.sim
+2017-06-14 13:48:13.100 [Timer-5] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\TrampoSurfaceMeshed_Cube.sim
+2017-06-14 13:48:13.100 [Timer-5] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoVolumeMeshed_Cube.sim
+2017-06-14 13:48:18.335 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:48:18.866 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:48:22.867 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:48:22.867 [main] DEBUG trampoprocess.WebAppGate - Update simulation run time for simulation 109
+2017-06-14 13:48:23.210 [main] DEBUG trampoprocess.WebAppGate - Get Job maximum runtime for simulation 109
+2017-06-14 13:48:23.367 [main] DEBUG trampoprocess.WebAppGate - Check if job has been canceled for job 109
+2017-06-14 13:48:23.523 [main] DEBUG trampoprocess.JobQueue - cJob.maximumClocktimeInSeconds()= 1332000
+2017-06-14 13:48:23.523 [main] DEBUG trampoprocess.JobQueue - cJob._maxSeconds= 1332000
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Residuals_plot_00001.png
+2017-06-14 13:48:43.103 [Timer-5] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoVolumeMeshed_Cube.sim
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Geometry Scene 1_10s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\Residuals_plot_00001.png
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes\Geometry Scene 1_10s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Residuals_Plot_10s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Geometry Scene 1_20s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes\Geometry Scene 1_20s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Geometry_Scene_1_scene_00001.png
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\Residuals_Plot_10s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Residuals_Plot_20s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes\Geometry_Scene_1_scene_00001.png
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Scalar Scene 1_10s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\Residuals_Plot_20s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Trampo Total Solver Elapsed Time Monitor _Plot_10s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes\Scalar Scene 1_10s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Scalar Scene 1_20s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\Trampo Total Solver Elapsed Time Monitor _Plot_10s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Trampo Total Solver Elapsed Time Monitor _Plot_20s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes\Scalar Scene 1_20s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Scalar_Scene_1_scene_00001.png
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\Trampo Total Solver Elapsed Time Monitor _Plot_20s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoBackUpSaveTrigger Monitor _Plot_10s.jpg
+2017-06-14 13:48:43.103 [Timer-3] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes\Scalar_Scene_1_scene_00001.png
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\TrampoBackUpSaveTrigger Monitor _Plot_10s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoBackUpSaveTrigger Monitor _Plot_20s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\TrampoBackUpSaveTrigger Monitor _Plot_20s.jpg
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoBackUpSaveTrigger_Monitor_Plot_plot_00001.png
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\TrampoBackUpSaveTrigger_Monitor_Plot_plot_00001.png
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Trampo_Total_Solver_Elapsed_Time_Monitor_Plot_plot_00001.png
+2017-06-14 13:48:43.103 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\Trampo_Total_Solver_Elapsed_Time_Monitor_Plot_plot_00001.png
+2017-06-14 13:48:43.212 [Timer-5] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\TrampoVolumeMeshed_Cube.sim
+2017-06-14 13:48:43.212 [Timer-5] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoVolumeMeshed_Cube@TrampoBackup00001.sim
+2017-06-14 13:49:13.105 [Timer-5] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoVolumeMeshed_Cube@TrampoBackup00001.sim
+2017-06-14 13:49:13.105 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Residuals_Plot_40s.jpg
+2017-06-14 13:49:13.105 [Timer-3] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Geometry Scene 1_40s.jpg
+2017-06-14 13:49:13.105 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\Residuals_Plot_40s.jpg
+2017-06-14 13:49:13.105 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Trampo Total Solver Elapsed Time Monitor _Plot_40s.jpg
+2017-06-14 13:49:13.105 [Timer-3] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes\Geometry Scene 1_40s.jpg
+2017-06-14 13:49:13.105 [Timer-3] DEBUG trampoprocess.MoveTask - directoryListing child.getName = Scalar Scene 1_40s.jpg
+2017-06-14 13:49:13.105 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\Trampo Total Solver Elapsed Time Monitor _Plot_40s.jpg
+2017-06-14 13:49:13.105 [Timer-4] DEBUG trampoprocess.MoveTask - directoryListing child.getName = TrampoBackUpSaveTrigger Monitor _Plot_40s.jpg
+2017-06-14 13:49:13.105 [Timer-3] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Scenes\Scalar Scene 1_40s.jpg
+2017-06-14 13:49:13.105 [Timer-4] DEBUG trampoprocess.MoveTask -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\Plots\TrampoBackUpSaveTrigger Monitor _Plot_40s.jpg
+2017-06-14 13:49:23.528 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:24.075 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - HTML report file name = TrampoSolved_Cube-06142017_134925.html
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - indexOf -podkey in HTML report = 7557
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - OLD content.substring(index, index + 25) in HTML report = -podkey 5v
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - NEW content.substring(index, index + 25) in HTML report = -podkey XX
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = SmartSimulationHandling.log
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_109\logs\SmartSimulationHandling.log
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = New Text Document - Copy (2).txt
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_109\logs\New Text Document - Copy (2).txt
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = New Text Document - Copy.txt
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_109\logs\New Text Document - Copy.txt
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = New Text Document.txt
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_109\logs\New Text Document.txt
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = TrampoSolved_Cube-06142017_134925.html
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\TrampoSolved_Cube-06142017_134925.html
+2017-06-14 13:49:26.090 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = TrampoSolved_Cube.sim
+2017-06-14 13:49:26.231 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\TrampoSolved_Cube.sim
+2017-06-14 13:49:26.231 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = TrampoVolumeMeshed_Cube@TrampoBackup00001.sim
+2017-06-14 13:49:26.340 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\TrampoVolumeMeshed_Cube@TrampoBackup00001.sim
+2017-06-14 13:49:26.340 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = Geometry Scene 1.sce
+2017-06-14 13:49:26.356 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\StarView\Geometry Scene 1.sce
+2017-06-14 13:49:26.356 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = Scalar Scene 1.sce
+2017-06-14 13:49:26.356 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\StarView\Scalar Scene 1.sce
+2017-06-14 13:49:26.356 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = slideshow.ppt
+2017-06-14 13:49:26.356 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Synchronised_Folder\Job_109\PowerPoint\slideshow.ppt
+2017-06-14 13:49:26.356 [Thread-4] DEBUG trampoprocess.Job - directoryListing child.getName = TrampoVolumeMeshed_Cube@TrampoBackup00001.sim
+2017-06-14 13:49:26.356 [Thread-4] DEBUG trampoprocess.Job -  directoryListing child moved to  = S:\customer_6255722124\Job_109\backup\TrampoVolumeMeshed_Cube@TrampoBackup00001.sim
+2017-06-14 13:49:26.356 [Thread-4] DEBUG trampoprocess.WebAppGate - Update simulation run time for simulation 109
+2017-06-14 13:49:26.637 [Thread-4] DEBUG trampoprocess.WebAppGate - Update simulation status for simulation 109
+2017-06-14 13:49:27.887 [Thread-4] INFO  trampoprocess.Job - Job status updated to COMPLETED
+2017-06-14 13:49:27.887 [Thread-4] DEBUG trampoprocess.Job - ending run job
+2017-06-14 13:49:27.887 [Thread-4] DEBUG trampoprocess.Job - OUTPUTWINDOWLOGTOFILELOCATION COPIED
+2017-06-14 13:49:27.887 [Thread-4] INFO  trampoprocess.Job - End
+2017-06-14 13:49:28.075 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:49:28.075 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:28.216 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:49:32.216 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:49:32.216 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:32.356 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:49:36.365 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:49:36.365 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:36.521 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:49:40.522 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:49:40.522 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:40.678 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:49:44.679 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:49:44.679 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:44.819 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:49:48.821 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:49:48.821 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:48.962 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:49:52.962 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:49:52.962 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:53.087 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:49:57.087 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:49:57.087 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:49:57.243 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:01.244 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:01.244 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:01.400 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:05.401 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:05.401 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:05.542 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:09.542 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:09.542 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:09.667 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:13.669 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:13.669 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:13.826 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:17.826 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:17.826 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:17.982 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:21.982 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:21.982 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:22.123 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:26.126 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:26.126 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:26.267 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:30.277 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:30.277 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:30.433 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:34.433 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:34.433 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:34.558 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:38.559 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:38.559 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:38.699 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:42.700 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:42.700 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:42.872 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:46.872 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:46.872 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:47.012 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:51.013 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:51.013 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:51.153 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:55.154 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:55.154 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:55.294 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:50:59.295 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:50:59.295 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:50:59.435 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:03.436 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:03.436 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:03.576 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:07.581 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:07.581 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:07.737 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:11.737 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:11.737 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:11.862 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:15.863 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:15.863 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:16.019 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:20.019 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:20.019 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:20.175 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:24.176 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:24.176 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:24.316 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:28.317 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:28.317 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:28.457 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:32.458 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:32.458 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:32.598 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:36.599 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:36.599 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:36.739 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:40.740 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:40.740 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:40.865 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:44.865 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:44.865 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:45.005 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:49.011 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:49.011 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:49.151 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:53.152 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:53.152 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:53.292 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:51:57.293 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:51:57.293 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:51:57.449 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:01.449 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:01.449 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:01.590 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:05.590 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:05.590 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:05.731 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:09.733 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:09.733 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:09.890 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:13.890 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:13.890 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:14.031 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:18.031 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:18.031 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:18.172 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:22.172 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:22.172 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:22.328 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:26.328 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:26.328 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:26.469 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:30.469 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:30.469 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:30.610 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:34.610 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:34.610 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:34.751 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:38.751 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:38.751 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:38.892 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:42.892 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:42.892 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:43.064 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:47.064 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:47.064 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:47.205 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:51.205 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:51.205 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:51.346 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:55.346 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:55.346 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:55.487 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:52:59.487 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:52:59.487 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:52:59.644 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:03.648 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:03.648 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:03.804 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:07.810 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:07.810 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:07.966 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:11.966 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:11.966 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:12.107 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:16.112 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:16.112 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:16.253 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:20.253 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:20.253 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:20.394 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:24.394 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:24.394 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:24.535 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:28.539 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:28.539 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:28.696 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:32.696 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:32.696 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:32.837 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:36.837 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:36.837 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:36.962 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:40.962 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:40.962 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:41.103 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:45.103 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:45.103 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:45.244 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:49.244 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:49.244 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:49.385 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:53.385 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:53.385 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:53.526 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:53:57.528 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:53:57.528 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:53:57.668 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:01.669 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:01.669 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:01.794 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:05.794 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:05.794 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:05.935 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:09.935 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:09.935 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:10.076 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:14.076 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:14.076 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:14.232 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:18.233 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:18.233 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:18.373 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:22.373 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:22.373 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:22.530 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:26.530 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:26.530 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:26.686 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:30.687 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:30.687 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:30.812 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}
+2017-06-14 13:54:34.821 [main] DEBUG trampoprocess.TrampoProcess - Start main loop
+2017-06-14 13:54:34.821 [main] DEBUG trampoprocess.WebAppGate - Get simulations with status Submited
+2017-06-14 13:54:34.962 [main] DEBUG trampoprocess.WebAppGate - Response is : {"result":"success","jobs":[]}

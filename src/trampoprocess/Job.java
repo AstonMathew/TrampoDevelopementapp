@@ -468,6 +468,9 @@ public class Job {
 
             File destinationDirectory = getJobLogsPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
 
             destinationDirectory = getJobSynchronisedFolderPath().toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
