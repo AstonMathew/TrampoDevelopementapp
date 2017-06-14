@@ -301,8 +301,14 @@ public class JobTest {
         //}
         moveTaskPlots.scheduleFileMove("Plot", SCHEDULEDMOVEPERIOD); // non-blocking
 
+//        ProcessBuilder pb = new ProcessBuilder(
+//                _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
+//                "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
+//                "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", PODKEY,
+//                _simulation);
+        
         ProcessBuilder pb = new ProcessBuilder(
-                _StarCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
+                "C:\\Program Files\\CD-adapco\\11.06.011\\STAR-CCM+11.06.011\\star\\bin\\starccm+.exe", "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
                 "-batch-report", "-on", _localHostNP, "-np", _numberComputeCores, "-power",
                 "-collab", "-licpath", "1999@flex.cd-adapco.com", "-podkey", PODKEY,
                 _simulation);
@@ -517,7 +523,7 @@ public class JobTest {
 
     private boolean _isAborting = false;
 
-    public void abort() throws InterruptedException {
+    public void abortJob() throws InterruptedException {
         if (!_isAborting) {
             File file = new File(getJobRunningFolderPath() + "\\ABORT.txt");
 
@@ -534,7 +540,7 @@ public class JobTest {
         }
     }
 
-    public void abortNow() {
+    public void abortJobNow() {
         // To be implemented: hard abort NOW!!!!
         _simulationProcess.destroyForcibly();
     }
@@ -708,11 +714,13 @@ public class JobTest {
      * moves all files containing the string from the source directory to the
      * destination directory both directory need to exist!
      */
-    public void ConditionalMoveFiles(File source, File destination, String string) throws IOException {
+    public void ConditionalMoveFiles(File source, File destination, String string) throws IOException, InterruptedException {
         File[] directoryListing = source.listFiles();
         if (directoryListing != null) {
             for (File child : directoryListing) {
                 if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(string.toLowerCase())) {
+//                    TimeUnit.SECONDS.sleep(60);
+//                    System.out.println("sleep(60)");
                     System.out.println("directoryListing child.getName = " + child.getName());
                     Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
                     System.out.println(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));

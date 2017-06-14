@@ -15,7 +15,7 @@ public class DevProdSwitch {
         InputStream input = null;
 
         try {
-            if(environment.equals("DEV")){
+            if(environment.equals("PROD")){
                 input = this.getClass().getClassLoader().getResourceAsStream("DevProdSwitchSettings/dev.properties");
 //              input = new FileInputStream("src/DevProdSwitchSettings/dev.properties"); //text file with key,value for DEVELOPMENT settings
             }else{
