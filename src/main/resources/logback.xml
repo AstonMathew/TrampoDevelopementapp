@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+    </layout>
+  </appender>
+   
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>MyLog.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+        <MinIndex>1</MinIndex>
+        <MaxIndex>10</MaxIndex>
+        <fileNamePattern>MyLog.%i.log</fileNamePattern>
+    </rollingPolicy>
+
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+        <maxFileSize>100MB</maxFileSize>
+    </triggeringPolicy>
+
+    <encoder>
+        <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+    </encoder>
+  </appender> 
+
+  <appender name="FILE_SIMULATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>SimulationLog.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+        <MinIndex>1</MinIndex>
+        <MaxIndex>10</MaxIndex>
+        <fileNamePattern>SimulationLog.%i.log</fileNamePattern>
+    </rollingPolicy>
+
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+        <maxFileSize>100MB</maxFileSize>
+    </triggeringPolicy>
+
+    <encoder>
+        <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+    </encoder>
+  </appender> 
+  
+  <logger name="com.trampo.process.service.SimulationService" level="INFO">
+    <appender-ref ref="FILE_SIMULATION" />
+  </logger>
+ 
+  <root level="INFO">
+     <appender-ref ref="FILE" /> 
+     <appender-ref ref="STDOUT" />
+  </root>
+</configuration>
