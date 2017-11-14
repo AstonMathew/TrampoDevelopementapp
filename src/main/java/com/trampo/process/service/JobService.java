@@ -21,14 +21,15 @@ import com.trampo.process.domain.JobStatus;
 
 @Component
 public class JobService {
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
-  
+
   private Session session;
-    
+
   @Autowired
-  public JobService(@Value("${trampo.simulation.host}") String host, @Value("${trampo.simulation.port}") int port, 
-      @Value("${trampo.simulation.username}") String username, 
+  public JobService(@Value("${trampo.simulation.host}") String host,
+      @Value("${trampo.simulation.port}") int port,
+      @Value("${trampo.simulation.username}") String username,
       @Value("${trampo.simulation.privateKeyPath}") String privateKeyPath) {
     JSch jsch = new JSch();
     try {
@@ -41,25 +42,25 @@ public class JobService {
       session.connect();
     } catch (JSchException e) {
       LOGGER.error(e.getMessage());
-    } 
-    
+    }
+
   }
 
-  public List<Job> getCurrentJobs() throws JSchException, IOException{
+  public List<Job> getCurrentJobs() throws JSchException, IOException {
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
     BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
     channel.setCommand("qstat -u gj5914 -x;");
     channel.connect();
     List<Job> list = new ArrayList<Job>();
-    String str=null;
-    while((str=in.readLine())!=null){
+    String str = null;
+    while ((str = in.readLine()) != null) {
       LOGGER.info("current running jobs script output lne: " + str);
-      if(StringUtils.hasText(str) && !str.startsWith("r-man2") && !str.startsWith("Job ID") 
-          && !str.startsWith("----") && !str.contains("Req'd")){
+      if (StringUtils.hasText(str) && !str.startsWith("r-man2") && !str.startsWith("Job ID")
+          && !str.startsWith("----") && !str.contains("Req'd")) {
         String[] line = str.split(" ");
         int i = 0;
-        while(i < line.length){
-          LOGGER.info("line["+i+"]: " + line[i]);
+        while (i < line.length) {
+          LOGGER.info("line[" + i + "]: " + line[i]);
           i++;
         }
         String jobId = line[0];
@@ -76,10 +77,29 @@ public class JobService {
         job.setQueue(queue);
         job.setStatus(JobStatus.valueOf(status));
         job.setWalltime(walltime);
+        job.setId(jobId);
         list.add(job);
       }
     }
     return list;
   }
-  
+
+
+  public void cancelJob() {
+    // how to cancel job?
+  }
+
+  // TODO how to decide memory
+  // TODO macropath always exist
+  public void submitJob(String jobName, String cpuCount, String memory, String queueType, String scriptPath, 
+      String walltime, String root, String macroPath, String simulationPath, String podKey) throws JSchException, IOException {
+    ChannelExec channel = (ChannelExec) session.openChannel("exec");
+    LOGGER.info("submitting job ");
+    channel.setCommand("qsub -N " + jobName + " -q " + queueType + " -lncpus=" + cpuCount + " -e " + root + "/"
+        + jobName + "/out.err -o " + root + "/" + jobName + "/out.out -lmem=" + memory
+        + "GB -lwalltime=" + walltime + " -v MacroPath=" + macroPath + ",SimulationPath=" + simulationPath + 
+        ", Podkey=" + podKey + " " + scriptPath + ";");
+    channel.connect();
+    LOGGER.info("submitting job fnished");
+  }
 }

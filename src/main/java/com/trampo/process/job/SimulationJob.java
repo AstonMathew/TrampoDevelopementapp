@@ -26,12 +26,12 @@ public class SimulationJob {
   @Autowired
   SimulationService simulationService;
   
-  @Scheduled(fixedDelay = 500)
+  //@Scheduled(fixedDelay = 500)
   public void runSimulations() throws Exception{
     LOGGER.info("Run Simulations job starting");
         
     Map<String, Simulation> map = new HashMap<>();
-    // TODO: for testing purpose
+
     try{
       List<Simulation> simulations = simulationService.getByStatus(SimulationStatus.RUNNING);
       LOGGER.info("Found " + simulations.size() + " simulations in running state");
@@ -41,19 +41,19 @@ public class SimulationJob {
     }catch (Exception e) {
       LOGGER.error(e.getMessage());
     }
-    // TODO: for testing purpose
+
     try{
       List<Job> currentJobs = jobService.getCurrentJobs();
       LOGGER.info("Found " + currentJobs.size() + " currentjobs");
       for (Job job : currentJobs) {
         LOGGER.info("found job; simulationId: " + job.getSimulationId() + " job status: " + job.getStatus() );
-       // TODO: for testing purpose
+  
         try{
           if(job.getStatus().equals(JobStatus.R)){
             if(!map.containsKey(job.getSimulationId())){
               Simulation simulation = simulationService.getSimulation(job.getSimulationId());
               if(simulation.getStatus().equals(SimulationStatus.CANCELLED)){
-                simulationService.cancelSimulation();
+                jobService.cancelJob();
               }else{
                 simulationService.updateStatus(job.getSimulationId(), SimulationStatus.RUNNING);
               }
@@ -84,7 +84,7 @@ public class SimulationJob {
     }catch (Exception e) {
       LOGGER.error(e.getMessage());
     }
- // TODO: for testing purpose
+
     try{
       List<Simulation> simulationsWaitingForFiles = simulationService.getByStatus(SimulationStatus.WAITING_FOR_FILES);
       LOGGER.info("Found " + simulationsWaitingForFiles.size() + " simulations in WAITING_FOR_FILES state");
@@ -94,7 +94,7 @@ public class SimulationJob {
     }catch (Exception e) {
       LOGGER.error(e.getMessage());
     }
- // TODO: for testing purpose
+
     try{
       List<Simulation> simulationsNew = simulationService.getByStatus(SimulationStatus.NEW);
       LOGGER.info("Found " + simulationsNew.size() + " simulations in NEW state");

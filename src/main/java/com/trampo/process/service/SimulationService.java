@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -52,8 +53,6 @@ public class SimulationService {
 
   String starCcmPlusVersion = null;
   String starCcmPlusVersionPath = null;
-  String starCcmPlusDefaultVersion = null;
-  String starCcmPlusDefaultVersionPath = null;
   MoveTask moveTaskScenes;
   MoveTask moveTaskPlots;
   MoveTask moveTaskMesh;
@@ -66,12 +65,16 @@ public class SimulationService {
   private String runRoot;
   private String ccmplusversionforinfoflagrunpath;
   private TrampoConfig config;
+  private Integer maxWaitForFilesInDays;
+  private String defaultStartCcmPlusPath;
     
   @Autowired
   public SimulationService(RestTemplateBuilder builder, TrampoConfig config, @Value("${webapp.api.root}") String apiRoot, 
       @Value("${trampo.simulation.scheduleMovePeriod}") String scheduleMovePeriod, 
       @Value("${trampo.simulation.dataRoot}") String dataRoot, @Value("${trampo.simulation.runRoot}") String runRoot,
-      @Value("${trampo.simulation.ccmplusversionforinfoflagrunpath}") String ccmplusversionforinfoflagrunpath) {
+      @Value("${trampo.simulation.ccmplusversionforinfoflagrunpath}") String ccmplusversionforinfoflagrunpath, 
+      @Value("${trampo.simulation.maxWaitForFilesInDays}") Integer maxWaitForFilesInDays,
+      @Value("${trampo.simulation.defaultStartCcmPlusPath}") String defaultStartCcmPlusPath) {
     restTemplate = builder.rootUri(apiRoot).build();
     MyResponseErrorHandler errorHandler = new MyResponseErrorHandler();
     restTemplate.setErrorHandler(errorHandler);
@@ -83,6 +86,8 @@ public class SimulationService {
     this.runRoot = runRoot;
     this.ccmplusversionforinfoflagrunpath = ccmplusversionforinfoflagrunpath;
     this.config = config;
+    this.maxWaitForFilesInDays = maxWaitForFilesInDays;
+    this.defaultStartCcmPlusPath=defaultStartCcmPlusPath;
   }
   
   public Simulation getSimulation(String simulationId) throws RestException, IOException{
@@ -124,6 +129,19 @@ public class SimulationService {
     LOGGER.info("Updating simulation: " + simulationId + " to status: " + status + "is successfull");
   }
   
+  public void updateWalltime(String simulationId, long walltime) throws RestException, JsonProcessingException {
+    LOGGER.info("Updating simulation: " + simulationId + " walltime: " + walltime);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    Map<String, String> request = new HashMap<>();
+    HttpEntity<String> postEntity = new HttpEntity<String>(mapper.writeValueAsString(request), headers);
+    ResponseEntity<String> response = restTemplate.exchange("/updateWalltime/?actualWalltime="+walltime+"&id="+simulationId, 
+        HttpMethod.GET, postEntity, String.class);
+    checkError(response);
+    LOGGER.info("Updating simulation: " + simulationId + " walltime: " + walltime);
+  }
+  
   public void error(String simulationId, String errorMessage) throws RestException, JsonProcessingException {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -137,8 +155,8 @@ public class SimulationService {
   
   private void checkError(ResponseEntity<String> response) throws RestException {
     if (!response.getStatusCode().is2xxSuccessful()) {
-      LOGGER.info("Rest Exception: Status Code: " + response.getStatusCode() +" body: " + response.getBody());
-      throw new RestException();
+      LOGGER.error("Rest Exception: Status Code: " + response.getStatusCode() +" body: " + response.getBody());
+      //throw new RestException();  TODO
     }
   }
 
@@ -154,8 +172,8 @@ public class SimulationService {
       createLogAndBackupDirectories(simulation); 
       createLogHeader(simulation);
       copyCustomerSyncFolderIntoJobRunFolder(simulation);
-      getCustomerStarCCMPlusVersion(simulation);
-      selectStarCCMPlusRunVersion();
+      //getCustomerStarCCMPlusVersion(simulation); //TODO
+      selectStarCCMPlusRunVersion(simulation);
       createPostprocessingRunFolders(simulation);
       if(simulation.getStatus().equals(SimulationStatus.ERROR)){
         return;
@@ -164,8 +182,12 @@ public class SimulationService {
     }else{
       if(simulation.getStatus().equals(SimulationStatus.NEW)){
         updateStatus(simulation.getId(), SimulationStatus.WAITING_FOR_FILES);
+      }else{
+        if(simulation.getDateCreated().plusDays(maxWaitForFilesInDays).compareTo(LocalDateTime.now()) > 0){
+          LOGGER.error("files took too long to upload. simulation id: " + simulation.getId());
+          error(simulation.getId(), "files took too long to upload");
+        }
       }
-      //max waiting times TODO
     }
   }
   
@@ -364,6 +386,8 @@ public class SimulationService {
     moveTaskMesh.scheduleFileMove("Meshed", Integer.parseInt(scheduleMovePeriod)); // non-blocking
     LOGGER.info("moveTaskMesh running");
 
+    
+    //TODO update status of the simulation to queued or else it will come again in next query!!!
 /*   
     ProcessBuilder pb = new ProcessBuilder(
             starCcmPlusVersionPath, "-batch", TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java",
@@ -461,25 +485,21 @@ public class SimulationService {
     return Paths.get(getJobSynchronisedFolderPath(simulation).toString(), "Scenes");
   }
   
-  private void selectStarCCMPlusRunVersion() throws IOException, InterruptedException { //oldest install is the default version
-    starCcmPlusVersion = "11.00.011"; // caught by getStarCCMPlusVersion()
-    LOGGER.info("simulationCcmPlusVersion= " + starCcmPlusVersion);
-    for (int i = 0; i < config.getCcmpluses().size(); i++) {
-        starCcmPlusDefaultVersion = config.getCcmpluses().get(0).getVersion();
-        starCcmPlusDefaultVersionPath = config.getCcmpluses().get(0).getPath();
-
-        if (config.getCcmpluses().get(0).getVersion().equals(starCcmPlusVersion)) {
-            starCcmPlusVersionPath = config.getCcmpluses().get(i).getPath();
-            LOGGER.info("simulationCcmPlusVersionPath= " + starCcmPlusVersionPath);
-        }
-    }
+  private void selectStarCCMPlusRunVersion(Simulation simulation) throws IOException, InterruptedException { //oldest install is the default version
+//    for (int i = 0; i < config.getCcmpluses().size(); i++) { //TODO
+//       if (config.getCcmpluses().get(i).getVersion().equals(starCcmPlusVersion) 
+//            && config.getCcmpluses().get(i).getPrecision().equals(simulation.getStarCcmPrecision())) {
+//            starCcmPlusVersionPath = config.getCcmpluses().get(i).getPath();
+//            LOGGER.info("simulationCcmPlusVersionPath= " + starCcmPlusVersionPath);
+//        }
+//    }
     if (starCcmPlusVersionPath == null) {
       LOGGER.info("simulationCcmPlusVersion is NOT installed on compute node");
       LOGGER.info("using DEFAULT VERSION");
-      starCcmPlusVersion = starCcmPlusDefaultVersion;
-      LOGGER.info("starCcmPlusDefaultVersion= " + starCcmPlusDefaultVersion);
-      starCcmPlusVersionPath = starCcmPlusDefaultVersionPath;
-      LOGGER.info("starCcmPlusDefaultVersionPath= " + starCcmPlusDefaultVersionPath);
+//      starCcmPlusVersion = defaultStartCcmPlusPath;
+//      LOGGER.info("starCcmPlusDefaultVersion= " + defaultStartCcmPlusPath);
+      starCcmPlusVersionPath = defaultStartCcmPlusPath;
+      LOGGER.info("starCcmPlusDefaultVersionPath= " + defaultStartCcmPlusPath);
     } else {
       LOGGER.info("simulationCcmPlusVersion is installed on compute node");
     }
@@ -488,9 +508,9 @@ public class SimulationService {
   private void getCustomerStarCCMPlusVersion(Simulation simulation) throws IOException, InterruptedException {
     Path InitialVersionLogPath = getJobRunningFolderPath(simulation).resolve("version.log");
     Files.createFile(InitialVersionLogPath);
-    ProcessBuilder pb = new ProcessBuilder(ccmplusversionforinfoflagrunpath, "-info", "Cube.sim");//TODO change cube.sim to custmomer smulation 
+    ProcessBuilder pb = new ProcessBuilder(ccmplusversionforinfoflagrunpath, "-info", simulation.getFileName());
     pb.redirectOutput(InitialVersionLogPath.toFile());
-    File pbWorkingDirectory = getJobRunningFolderPath(simulation).toFile(); //(new File)?
+    File pbWorkingDirectory = getJobRunningFolderPath(simulation).toFile();
     pb.directory(pbWorkingDirectory);
     Process p = pb.start();
     p.waitFor();
@@ -510,34 +530,14 @@ public class SimulationService {
     LOGGER.info("finalVersionLogPath = " + finalVersionLogPath.toString());
     Files.createFile(finalVersionLogPath);
     Files.move(InitialVersionLogPath, finalVersionLogPath, StandardCopyOption.REPLACE_EXISTING);
-    //Files.delete(InitialVersionLogPath);
-  
-    //    try (PrintWriter out2 = new PrintWriter(InitialVersionLogPath.toString())) {
-    //        out2.println(starCcmPlusVersion);
-    //    }
   }
 
-  
+  //TODO clean run folder before moving if already exist something
   private void copyCustomerSyncFolderIntoJobRunFolder(Simulation simulation) throws IOException, InterruptedException {
     LOGGER.info("starting CopyCustomerSyncFolderIntoJobRunFolder()");
-    //    SimulationFolderFileVisitor visitor = new SimulationFolderFileVisitor(getCustomerSynchronisedFolder(),
-    //            getJobRunningFolderPath());
-    //    Files.walkFileTree(getCustomerSynchronisedFolder(), visitor);
-    
-        File sourceDirectory = getCustomerSynchronisedFolder(simulation.getCustomerId()).toFile();
-        File destinationDirectory = getJobRunningFolderPath(simulation).toFile();
-        ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
-    //    File[] directoryListing = dir.listFiles();
-    //    if (directoryListing != null) {
-    //        for (File child : directoryListing) {
-    //            if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)) { //we're not copying directories, just files
-    //                Files.move(child.toPath(), getJobRunningFolderPath().resolve(child.getName()), StandardCopyOption.REPLACE_EXISTING);
-    //                LOG.debug("File Copied: " + child.toString());//.replaceAll(Matcher.quoteReplacement(src.toString()), ""));
-    //            } else {
-    //                LOG.debug("File NOT Copied: " + child.toString());
-    //            }
-    //        }
-    //    }
+    File sourceDirectory = getCustomerSynchronisedFolder(simulation.getCustomerId()).toFile();
+    File destinationDirectory = getJobRunningFolderPath(simulation).toFile();
+    ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
     
     LOGGER.info("finished CopyCustomerSyncFolderIntoJobRunFolder()");
   }
@@ -558,7 +558,11 @@ public class SimulationService {
       for (File child : directoryListing) {
         if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS) && child.getName().toLowerCase().contains(string.toLowerCase())) {
           LOGGER.info("directoryListing child.getName = " + child.getName());
-          Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
+          try{
+            Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
+          }catch (Exception e) {
+            LOGGER.error("CopyCustomerSyncFolderIntoJobRunFolder failed to move the child to = " + destination.toPath().resolve(child.getName()), e);
+          }
           LOGGER.info(" directoryListing child moved to  = " + destination.toPath().resolve(child.getName()));
         }
       }
@@ -588,7 +592,7 @@ public class SimulationService {
     File log = getJobLogsPath(simulation).resolve("job_" + simulation.getId() + ".log").toFile(); // this seems t save to the C:/drive for some reason
     LOGGER.info("HERE writing job_" +  simulation.getId() + ".log at path= " + log.toString());
     try {
-      Files.createFile(log.toPath());
+      Files.createFile(log.toPath()); //TODO check if already exist
       LOGGER.info("job_" + simulation.getId() + ".log File is created!");
     } catch (IOException ex) {
       LOGGER.info("job_" + simulation.getId() + ".log : File already exists or the operation failed for some reason", ex);
@@ -608,8 +612,8 @@ public class SimulationService {
       Files.createDirectories(getJobRunningFolderPath(simulation));
       LOGGER.info("JobRunningFolder created " + getJobRunningFolderPath(simulation));
     } else {
-      error(simulation.getId(), "Job Run Folder Preexisting");
       LOGGER.error("ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath(simulation));
+      error(simulation.getId(), "Job Run Folder Preexisting");
     }
  
     if (Files.isDirectory(getJobSynchronisedFolderPath(simulation), LinkOption.NOFOLLOW_LINKS) == false) {
@@ -638,6 +642,7 @@ public class SimulationService {
     String fileName =  simulation.getFileName().replaceAll("\\s+", "");
     fileName = fileName.toLowerCase().endsWith(".sim") ? fileName : (fileName + ".sim");
     if (!FileFunctions.fileIsAvailable(getCustomerSynchronisedFolder(simulation.getCustomerId()).resolve(fileName))) {
+      LOGGER.info("File is not avaiable. Path: " + getCustomerSynchronisedFolder(simulation.getCustomerId()).resolve(fileName));
       return false;
     }
     return (FileFunctions.countFiles(getCustomerSynchronisedFolder(simulation.getCustomerId())) >= simulation.getFileCount());
@@ -649,10 +654,5 @@ public class SimulationService {
   
   private Path getCustomerSynchronisedFolder(long customerId) { // the synchronised copy of the folder in which the customer pastes his files to send to Trampo
       return Paths.get(dataRoot, getCustomerFolderRelativePath(customerId), "Synchronised_Folder");
-  }
-
-  public void cancelSimulation() {
-    // TODO cancel logic
-    
   }
 }
