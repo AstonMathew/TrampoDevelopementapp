@@ -86,20 +86,30 @@ public class JobService {
 
 
   public void cancelJob() {
-    // how to cancel job?
+    // TODO how to cancel job?
   }
 
   // TODO how to decide memory
   // TODO macropath always exist
-  public void submitJob(String jobName, String cpuCount, String memory, String queueType, String scriptPath, 
-      String walltime, String root, String macroPath, String simulationPath, String podKey) throws JSchException, IOException {
+  public void submitJob(String jobName, String cpuCount, String memory, String queueType,
+      String scriptPath, String walltime, String root, String macroPath, String simulationPath,
+      String podKey) throws JSchException, IOException {
+    //No spaces in qsub command
+    String command = "cd " + root + "; mkdir " + jobName + "; chmod 777 " + jobName + ";cd "
+        + jobName + "; qsub -N " + jobName + " -q " + queueType + " -lncpus=" + cpuCount + " -e "
+        + root + "/" + jobName + "/out.err -o " + root + "/" + jobName + "/out.out -lmem=" + memory
+        + "GB -lwalltime=" + walltime + " -v MacroPath=" + macroPath + ",SimulationPath="
+        + simulationPath + ",Podkey=" + podKey + " " + scriptPath + ";";
+    LOGGER.info("command: " + command);
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
+    BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
     LOGGER.info("submitting job ");
-    channel.setCommand("qsub -N " + jobName + " -q " + queueType + " -lncpus=" + cpuCount + " -e " + root + "/"
-        + jobName + "/out.err -o " + root + "/" + jobName + "/out.out -lmem=" + memory
-        + "GB -lwalltime=" + walltime + " -v MacroPath=" + macroPath + ",SimulationPath=" + simulationPath + 
-        ", Podkey=" + podKey + " " + scriptPath + ";");
+    channel.setCommand(command);
     channel.connect();
+    String str = null;
+    while ((str = in.readLine()) != null) {
+      LOGGER.info(str);
+    }
     LOGGER.info("submitting job fnished");
   }
 }
