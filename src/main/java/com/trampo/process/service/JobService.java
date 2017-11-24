@@ -45,7 +45,6 @@ public class JobService {
     }
   }
 
-  // TODO how should I get actual wall time
   public List<Job> getCurrentJobs() throws JSchException, IOException {
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
     BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
@@ -64,6 +63,7 @@ public class JobService {
         String queue = "";
         String simulationId = "";
         String status = "";
+        String actualWalltime = "";
         while (i < line.length) {
           LOGGER.info("line[" + i + "]: " + line[i]);
           if (StringUtils.hasText(line[i]) && fieldNumber == 0) {
@@ -78,7 +78,7 @@ public class JobService {
             queue = line[i];
             fieldNumber++;
           } else if (StringUtils.hasText(line[i]) && fieldNumber == 3) {
-            LOGGER.info("fieldNumber 3 set to jobname " + line[i]);
+            LOGGER.info("fieldNumber 3 set to simulationId " + line[i]);
             simulationId = line[i];
             fieldNumber++;
           } else if (StringUtils.hasText(line[i]) && fieldNumber == 4) {
@@ -100,6 +100,14 @@ public class JobService {
             LOGGER.info("fieldNumber 9 set to status " + line[i]);
             fieldNumber++;
             status = line[i];
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 10) {
+            LOGGER.info("fieldNumber 10 set to actualwalltime " + line[i]);
+            fieldNumber++;
+            if(line[i].contains(":")){
+              actualWalltime = line[i];
+            }else{
+              actualWalltime = "00:00:00";
+            }
           }
           i++;
         }
@@ -108,12 +116,13 @@ public class JobService {
         LOGGER.info("queue: " + queue);
         LOGGER.info("simulationId: " + simulationId);
         LOGGER.info("status: " + status);
+        LOGGER.info("actualWalltime: " + actualWalltime);
         Job job = new Job();
         job.setSimulationId(simulationId);
         job.setQueue(queue);
         job.setStatus(JobStatus.valueOf(status));
         job.setId(jobId);
-        job.setWalltime("00:01:00"); // TODO get from ?
+        job.setWalltime("00:01:00");
         list.add(job);
       }
     }

@@ -72,17 +72,24 @@ public class SimulationJob {
             }
           } else if (job.getStatus().equals(JobStatus.F)) {
             if (map.containsKey(job.getSimulationId())) {
+              Simulation simulation = map.get(job.getSimulationId());
+              if(simulationService.isFinishedWithError(simulation)){
+                simulationService.error(simulation.getId(), "Failed During Execution");
+              }
               String[] times = job.getWalltime().split(":");
               int walltime = (Integer.parseInt(times[0]) * 60) + Integer.parseInt(times[1]); 
               if(Integer.parseInt(times[2]) > 0){
                 walltime = walltime + 1;
               }
               simulationService.updateWalltime(job.getSimulationId(), walltime);
-              // if error //TODO
             } else {
               Simulation simulation = simulationService.getSimulation(job.getSimulationId());
-              if (!simulation.getStatus().equals(SimulationStatus.COMPLETED)) {
-                simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
+              if (!simulation.getStatus().equals(SimulationStatus.COMPLETED) && !simulation.getStatus().equals(SimulationStatus.ERROR)) {
+                if(simulationService.isFinishedWithError(simulation)){
+                  simulationService.error(simulation.getId(), "Failed During Execution");
+                }else{
+                  simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
+                }
               }
             }
           } else if (job.getStatus().equals(JobStatus.H)) {

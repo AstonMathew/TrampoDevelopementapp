@@ -31,6 +31,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -214,8 +215,11 @@ public class SimulationService {
       if (simulation.getStatus().equals(SimulationStatus.NEW)) {
         updateStatus(simulation.getId(), SimulationStatus.WAITING_FOR_FILES);
       } else {
+        LOGGER.info("simulation date created: " + simulation.getDateCreated());
         if (simulation.getDateCreated().plusDays(maxWaitForFilesInDays)
-            .compareTo(LocalDateTime.now()) > 0) {
+            .compareTo(LocalDateTime.now()) < 0) {
+          LOGGER.info("simulation date created plus days: " + simulation.getDateCreated().plusDays(maxWaitForFilesInDays));
+          LOGGER.info("now: " + LocalDateTime.now());
           LOGGER.error("files took too long to upload. simulation id: " + simulation.getId());
           error(simulation.getId(), "files took too long to upload");
         }
@@ -762,5 +766,18 @@ public class SimulationService {
 
   private Path getCustomerSynchronisedFolder(long customerId) {
     return Paths.get(dataRoot, getCustomerFolderRelativePath(customerId), "Synchronised_Folder");
+  }
+  
+  public boolean isFinishedWithError(Simulation simulation){
+    String errorLogFilePath = getJobRunningFolderPath(simulation).toString()  + simulation.getId() + "/out.err";
+    try {
+      List<String> lines = Files.readAllLines(Paths.get(errorLogFilePath));
+      if(lines != null && lines.size() > 0 && StringUtils.hasText(lines.get(0))){
+        return true;
+      }
+    } catch (IOException e) {
+      LOGGER.error("error while reading error log: " + e);
+    }
+    return false;
   }
 }
