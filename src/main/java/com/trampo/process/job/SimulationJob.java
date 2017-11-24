@@ -29,7 +29,7 @@ public class SimulationJob {
   SimulationService simulationService;
 
   @Scheduled(fixedDelay = 500)
-  public void runSimulations() throws Exception {
+  public void runSimulations() {
     LOGGER.info("Run Simulations job starting");
 
     Map<String, Simulation> map = new HashMap<>();
@@ -72,14 +72,22 @@ public class SimulationJob {
             }
           } else if (job.getStatus().equals(JobStatus.F)) {
             if (map.containsKey(job.getSimulationId())) {
-              // if no error
-              Long walltime = 60L; // TODO convert job.getWalltime();
+              String[] times = job.getWalltime().split(":");
+              int walltime = (Integer.parseInt(times[0]) * 60) + Integer.parseInt(times[1]); 
+              if(Integer.parseInt(times[2]) > 0){
+                walltime = walltime + 1;
+              }
               simulationService.updateWalltime(job.getSimulationId(), walltime);
               // if error //TODO
             } else {
-              // get smmulation update status if necessary
+              Simulation simulation = simulationService.getSimulation(job.getSimulationId());
+              if (!simulation.getStatus().equals(SimulationStatus.COMPLETED)) {
+                simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
+              }
             }
           } else if (job.getStatus().equals(JobStatus.H)) {
+            // TODO what?
+          }else if (job.getStatus().equals(JobStatus.E)) {
             // TODO what?
           }
         } catch (Exception e) {
@@ -89,26 +97,37 @@ public class SimulationJob {
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
     }
-
+    List<Simulation> simulationsWaitingForFiles = null;
     try {
-      List<Simulation> simulationsWaitingForFiles =
+      simulationsWaitingForFiles =
           simulationService.getByStatus(SimulationStatus.WAITING_FOR_FILES);
       LOGGER.info(
           "Found " + simulationsWaitingForFiles.size() + " simulations in WAITING_FOR_FILES state");
-      for (Simulation simulation : simulationsWaitingForFiles) {
-        simulationService.startSimulation(simulation);
-      }
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
     }
+    
+    try{
+      for (Simulation simulation : simulationsWaitingForFiles) {
+        simulationService.startSimulation(simulation);
+      }
+    }catch (Exception e) {
+      LOGGER.error(e.getMessage());
+    }
 
+    List<Simulation> simulationsNew = null;
     try {
-      List<Simulation> simulationsNew = simulationService.getByStatus(SimulationStatus.NEW);
+      simulationsNew = simulationService.getByStatus(SimulationStatus.NEW);
       LOGGER.info("Found " + simulationsNew.size() + " simulations in NEW state");
+    } catch (Exception e) {
+      LOGGER.error(e.getMessage());
+    }
+    
+    try{
       for (Simulation simulation : simulationsNew) {
         simulationService.startSimulation(simulation);
       }
-    } catch (Exception e) {
+    }catch (Exception e) {
       LOGGER.error(e.getMessage());
     }
     LOGGER.info("Run Simulations job finished");

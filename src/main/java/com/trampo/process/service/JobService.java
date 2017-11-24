@@ -43,9 +43,9 @@ public class JobService {
     } catch (JSchException e) {
       LOGGER.error(e.getMessage());
     }
-
   }
 
+  // TODO how should I get actual wall time
   public List<Job> getCurrentJobs() throws JSchException, IOException {
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
     BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
@@ -58,26 +58,62 @@ public class JobService {
       if (StringUtils.hasText(str) && !str.startsWith("r-man2") && !str.startsWith("Job ID")
           && !str.startsWith("----") && !str.contains("Req'd")) {
         String[] line = str.split(" ");
+        int fieldNumber = 0;
         int i = 0;
+        String jobId = "";
+        String queue = "";
+        String simulationId = "";
+        String status = "";
         while (i < line.length) {
           LOGGER.info("line[" + i + "]: " + line[i]);
+          if (StringUtils.hasText(line[i]) && fieldNumber == 0) {
+            LOGGER.info("fieldNumber 0 set to jobId " + line[i]);
+            jobId = line[i];
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 1) {
+            LOGGER.info("fieldNumber 1 set to nothing " + line[i]);
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 2) {
+            LOGGER.info("fieldNumber 2 set to queue " + line[i]);
+            queue = line[i];
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 3) {
+            LOGGER.info("fieldNumber 3 set to jobname " + line[i]);
+            simulationId = line[i];
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 4) {
+            LOGGER.info("fieldNumber 4 set to nothing " + line[i]);
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 5) {
+            LOGGER.info("fieldNumber 5 set to nothing " + line[i]);
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 6) {
+            LOGGER.info("fieldNumber 6 set to nothing " + line[i]);
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 7) {
+            LOGGER.info("fieldNumber 7 set to nothing " + line[i]);
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 8) {
+            LOGGER.info("fieldNumber 8 set to nothing " + line[i]);
+            fieldNumber++;
+          } else if (StringUtils.hasText(line[i]) && fieldNumber == 9) {
+            LOGGER.info("fieldNumber 9 set to status " + line[i]);
+            fieldNumber++;
+            status = line[i];
+          }
           i++;
         }
-        String jobId = line[0];
-        String queue = line[6];
-        String simulationId = line[7];
-        String status = line[19];
-        String walltime = line[20];
+
+        LOGGER.info("jobId: " + jobId);
         LOGGER.info("queue: " + queue);
         LOGGER.info("simulationId: " + simulationId);
         LOGGER.info("status: " + status);
-        LOGGER.info("walltime: " + walltime);
         Job job = new Job();
         job.setSimulationId(simulationId);
         job.setQueue(queue);
         job.setStatus(JobStatus.valueOf(status));
-        job.setWalltime(walltime);
         job.setId(jobId);
+        job.setWalltime("00:01:00"); // TODO get from ?
         list.add(job);
       }
     }
@@ -89,12 +125,10 @@ public class JobService {
     // TODO how to cancel job?
   }
 
-  // TODO how to decide memory
-  // TODO macropath always exist
   public void submitJob(String jobName, String cpuCount, String memory, String queueType,
       String scriptPath, String walltime, String root, String macroPath, String simulationPath,
       String podKey) throws JSchException, IOException {
-    //No spaces in qsub command
+    // No spaces in qsub command
     String command = "cd " + root + "; mkdir " + jobName + "; chmod 777 " + jobName + ";cd "
         + jobName + "; qsub -N " + jobName + " -q " + queueType + " -lncpus=" + cpuCount + " -e "
         + root + "/" + jobName + "/out.err -o " + root + "/" + jobName + "/out.out -lmem=" + memory

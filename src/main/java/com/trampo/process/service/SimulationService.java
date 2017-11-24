@@ -85,7 +85,8 @@ public class SimulationService {
       @Value("${trampo.simulation.maxWaitForFilesInDays}") Integer maxWaitForFilesInDays,
       @Value("${trampo.simulation.defaultStartCcmPlusPath}") String defaultStartCcmPlusPath,
       @Value("${trampo.simulation.backendScriptPath}") String backendScriptPath,
-      @Value("${trampo.simulation.podKey}") String podKey) {
+      @Value("${trampo.simulation.podKey}") String podKey,
+      @Value("${trampo.simulation.macroPath}") String macroPath) {
     restTemplate = builder.rootUri(apiRoot).build();
     MyResponseErrorHandler errorHandler = new MyResponseErrorHandler();
     restTemplate.setErrorHandler(errorHandler);
@@ -102,6 +103,7 @@ public class SimulationService {
     this.jobService = jobService;
     this.backendScriptPath = backendScriptPath;
     this.podKey = podKey;
+    this.macroPath = macroPath;
   }
 
   public Simulation getSimulation(String simulationId) throws RestException, IOException {
@@ -176,7 +178,7 @@ public class SimulationService {
     HttpEntity<String> postEntity =
         new HttpEntity<String>(mapper.writeValueAsString(request), headers);
     ResponseEntity<String> response =
-        restTemplate.exchange("/updateStatus/?errorMessage=" + errorMessage + "&id=" + simulationId,
+        restTemplate.exchange("/error/?errorMessage=" + errorMessage + "&id=" + simulationId,
             HttpMethod.GET, postEntity, String.class);
     checkError(response);
   }
@@ -185,7 +187,7 @@ public class SimulationService {
     if (!response.getStatusCode().is2xxSuccessful()) {
       LOGGER.error("Rest Exception: Status Code: " + response.getStatusCode() + " body: "
           + response.getBody());
-      // throw new RestException(); TODO
+      throw new RestException();
     }
   }
 
@@ -372,9 +374,6 @@ public class SimulationService {
           for (int i = 0; i < ValidExtensions.EXTENSIONS.length; i++) {
             if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[i])) {
               res = true;
-              if(ValidExtensions.EXTENSIONS[i] == ".java"){
-                macroPath = getCustomerSynchronisedFolder(simulation.getCustomerId()).resolve(child.getName()).toString();
-              }
             }
           }
           if (!res) {
@@ -414,11 +413,7 @@ public class SimulationService {
     }
   }
 
-  private void RunJob(Simulation simulation) throws Exception { // IF process desn't run while
-                                                                // testing, i.e. no output a,d a
-                                                                // single STAR-CCM+ process starts,
-                                                                // make sure you have a sim file in
-                                                                // the right folder to run!!!
+  private void RunJob(Simulation simulation) throws Exception {
     LOGGER.info("starting run job");
     moveTaskScenes = new MoveTask(getScenesRunFolderPath(simulation).toFile(),
         getScenesSyncFolderPath(simulation).toFile());
@@ -440,36 +435,34 @@ public class SimulationService {
     moveTaskMesh.scheduleFileMove("Meshed", Integer.parseInt(scheduleMovePeriod)); // non-blocking
     LOGGER.info("moveTaskMesh running");
 
-
-    // TODO update status of the simulation to queued or else it will come again in next query!!!
-    /*
-     * ProcessBuilder pb = new ProcessBuilder( starCcmPlusVersionPath, "-batch",
-     * TRAMPOCLUSTERUTILFOLDERPATH + "//SmartSimulationHandling.java", "-batch-report", "-on",
-     * _localHostNP, "-np", config.getProperty("_numberComputeCores"), "-power", "-collab",
-     * "-licpath", "1999@flex.cd-adapco.com", "-podkey", PODKEY, _simulation);
-     */
-    
     int cpuCount = 0;
     String queueType;
-    if(simulation.getProcessorType().equals("INSTANT") || simulation.getProcessorType().equals("FAST")){
+    int memory;
+    if(simulation.getProcessorType().equals("INSTANT")){
       cpuCount = simulation.getNumberOfCoresInstantFast();
-      queueType = "normal";
+      queueType = "expressbw";
+      memory = 125 * (cpuCount / 8);
+    }else if(simulation.getProcessorType().equals("FAST")){
+      cpuCount = simulation.getNumberOfCoresInstantFast();
+      queueType = "normalbw";
+      memory = 125 * (cpuCount / 8);
     }else{
       cpuCount = simulation.getNumberOfCoresStandardLowPriority();
-      queueType = "normal"; //TODO
+      queueType = "normal";
+      memory = 30 * (cpuCount / 16);
     }
     String walltime = "000:00:00";
-    long days = 0;
+    long hours = 0;
     long minutes = 0;
-    if(simulation.getActualWalltime() > 24 * 60){
-      days = simulation.getActualWalltime() / (24 * 60);
-      minutes = simulation.getActualWalltime() - days * 24 * 60;
+    if(simulation.getMaxWalltime() > 60){
+      hours = simulation.getMaxWalltime() / 60;
+      minutes = simulation.getMaxWalltime() - hours * 60;
     }else{
-      minutes = simulation.getActualWalltime();
+      minutes = simulation.getMaxWalltime();
     }
-    walltime = String.format("%010d", days) + ":" + String.format("%010d", minutes) + ":00" ;
+    walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00" ;
     String fileName = simulation.getFileName().replaceAll("\\s+", "");
-    jobService.submitJob(simulation.getId(), "" + cpuCount, (cpuCount * 2) + "", queueType, 
+    jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType, 
         backendScriptPath, walltime, getJobRunningFolderPath(simulation).toString(), macroPath, 
         getCustomerSynchronisedFolder(simulation.getCustomerId()).resolve(fileName).toString(), podKey);
   }
@@ -500,7 +493,6 @@ public class SimulationService {
         LinkOption.NOFOLLOW_LINKS) == false) {
       Files.createDirectories(getScenesSyncFolderPath(simulation));
       LOGGER.info("getRunScenesFolderPath created " + getScenesSyncFolderPath(simulation));
-      // LOG.debug("src folder will show below as Directory copied");
     } else {
       LOGGER.error("ERROR: getRunScenesFolderPath EXISTING !!! with Path: "
           + getScenesSyncFolderPath(simulation));
@@ -577,7 +569,7 @@ public class SimulationService {
 
   private void selectStarCCMPlusRunVersion(Simulation simulation)
       throws IOException, InterruptedException { // oldest install is the default version
-    // for (int i = 0; i < config.getCcmpluses().size(); i++) { //TODO
+    // for (int i = 0; i < config.getCcmpluses().size(); i++) {
     // if (config.getCcmpluses().get(i).getVersion().equals(starCcmPlusVersion)
     // && config.getCcmpluses().get(i).getPrecision().equals(simulation.getStarCcmPrecision())) {
     // starCcmPlusVersionPath = config.getCcmpluses().get(i).getPath();
@@ -690,16 +682,7 @@ public class SimulationService {
     Files.createDirectories(getJobBackupPath(simulation));
     LOGGER.info(" getJobBackupPath Folder created " + getJobBackupPath(simulation));
 
-    File log = getJobLogsPath(simulation).resolve("job_" + simulation.getId() + ".log").toFile(); // this
-                                                                                                  // seems
-                                                                                                  // t
-                                                                                                  // save
-                                                                                                  // to
-                                                                                                  // the
-                                                                                                  // C:/drive
-                                                                                                  // for
-                                                                                                  // some
-                                                                                                  // reason
+    File log = getJobLogsPath(simulation).resolve("job_" + simulation.getId() + ".log").toFile();
     LOGGER.info("HERE writing job_" + simulation.getId() + ".log at path= " + log.toString());
     try {
       Files.createFile(log.toPath()); // TODO check if already exist
@@ -720,14 +703,7 @@ public class SimulationService {
         "Job_" + simulation.getId(), "logs");
   }
 
-  private void createJobRunAndSyncFolders(Simulation simulation) throws IOException, Exception { // test
-                                                                                                 // the
-                                                                                                 // sim
-                                                                                                 // exits
-                                                                                                 // thye
-                                                                                                 // queue
-                                                                                                 // if
-                                                                                                 // CANCELLED_SIMULATION_FOLDER_PREEXISTING
+  private void createJobRunAndSyncFolders(Simulation simulation) throws IOException, Exception {
     if (Files.isDirectory(getJobRunningFolderPath(simulation),
         LinkOption.NOFOLLOW_LINKS) == false) {
       Files.createDirectories(getJobRunningFolderPath(simulation));
@@ -784,10 +760,7 @@ public class SimulationService {
     return "customer_" + customerId;
   }
 
-  private Path getCustomerSynchronisedFolder(long customerId) { // the synchronised copy of the
-                                                                // folder in which the customer
-                                                                // pastes his files to send to
-                                                                // Trampo
+  private Path getCustomerSynchronisedFolder(long customerId) {
     return Paths.get(dataRoot, getCustomerFolderRelativePath(customerId), "Synchronised_Folder");
   }
 }
