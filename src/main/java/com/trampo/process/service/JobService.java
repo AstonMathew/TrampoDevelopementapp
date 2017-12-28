@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,7 +124,7 @@ public class JobService {
         job.setQueue(queue);
         job.setStatus(JobStatus.valueOf(status));
         job.setId(jobId);
-        job.setWalltime("00:01:00");
+        job.setWalltime("00:01:00"); //TODO
         list.add(job);
       }
     }
@@ -130,20 +132,50 @@ public class JobService {
   }
 
 
-  public void cancelJob() {
-    // TODO how to cancel job?
+  public void cancelJob(String jobId) throws JSchException, IOException {
+    //qdel 9683726
+    String command = "qdel " + jobId;
+    LOGGER.info("cancel job command: " + command);
+    ChannelExec channel = (ChannelExec) session.openChannel("exec");
+    BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+    LOGGER.info("cancelling job ");
+    channel.setCommand(command);
+    channel.connect();
+    String str = null;
+    while ((str = in.readLine()) != null) {
+      LOGGER.info(str);
+    }
+    LOGGER.info("cancelling job fnished");
   }
 
   public void submitJob(String jobName, String cpuCount, String memory, String queueType,
-      String scriptPath, String walltime, String root, String macroPath, String simulationPath,
-      String podKey) throws JSchException, IOException {
+      String scriptPath, String walltime, String raijinLogRoot, String macroPath, String simulationPath,
+      String podKey, String root, String runRoot) throws JSchException, IOException, InterruptedException {
+//    LOGGER.info("chmod command: " + root);
+//    Process  p = Runtime.getRuntime().exec("chmod 777 " + root);
+//    p.waitFor();
+//    LOGGER.info("chmod exit status: " + p.exitValue());
+//    Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+//    String result = out.hasNext() ? out.next() : "";
+//    LOGGER.info("chmod out: " + result);
+//    out.close();
+//    Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
+//    result = error.hasNext() ? error.next() : "";
+//    LOGGER.info("chmod error: " + result);
+//    error.close();
+//    ProcessBuilder pb = new ProcessBuilder("chmod", "777", root);
+//    pb.redirectErrorStream(true);
+//    p = pb.start();
+//    p.waitFor();
+//    out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+//    result = out.hasNext() ? out.next() : "";
+//    LOGGER.info("chmod out: " + result);
     // No spaces in qsub command
-    String command = "cd " + root + "; mkdir " + jobName + "; chmod 777 " + jobName + ";cd "
-        + jobName + "; qsub -N " + jobName + " -q " + queueType + " -lncpus=" + cpuCount + " -e "
-        + root + "/" + jobName + "/out.err -o " + root + "/" + jobName + "/out.out -lmem=" + memory
+    String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus=" + cpuCount + " -e "
+        + raijinLogRoot + "/out.err -o " + raijinLogRoot + "/out.out -lmem=" + memory
         + "GB -lwalltime=" + walltime + " -v MacroPath=" + macroPath + ",SimulationPath="
         + simulationPath + ",Podkey=" + podKey + " " + scriptPath + ";";
-    LOGGER.info("command: " + command);
+    LOGGER.info("submit job command: " + command);
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
     BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
     LOGGER.info("submitting job ");

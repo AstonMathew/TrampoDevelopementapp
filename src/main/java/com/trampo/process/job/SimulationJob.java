@@ -56,7 +56,7 @@ public class SimulationJob {
             if (!map.containsKey(job.getSimulationId())) {
               Simulation simulation = simulationService.getSimulation(job.getSimulationId());
               if (simulation.getStatus().equals(SimulationStatus.CANCELLED)) {
-                jobService.cancelJob();
+                simulationService.cancelSimulation(simulation, job);
               } else {
                 simulationService.updateStatus(job.getSimulationId(), SimulationStatus.RUNNING);
               }

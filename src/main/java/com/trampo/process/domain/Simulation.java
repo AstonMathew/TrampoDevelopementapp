@@ -6,7 +6,7 @@ public class Simulation {
 
   private String id;
   private long customerId;
-  private String fileName;
+  private String folderName;
   private long maxWalltime;
   private long actualWalltime;
   private int fileCount;
@@ -35,14 +35,6 @@ public class Simulation {
 
   public void setCustomerId(long customerId) {
     this.customerId = customerId;
-  }
-
-  public String getFileName() {
-    return fileName;
-  }
-
-  public void setFileName(String fileName) {
-    this.fileName = fileName;
   }
 
   public int getFileCount() {
@@ -147,5 +139,13 @@ public class Simulation {
 
   public void setActualWalltime(long actualWalltime) {
     this.actualWalltime = actualWalltime;
+  }
+
+  public String getFolderName() {
+    return folderName;
+  }
+
+  public void setFolderName(String folderName) {
+    this.folderName = folderName;
   }
 }

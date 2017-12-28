@@ -14,12 +14,19 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +40,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jcraft.jsch.JSchException;
 import com.trampo.process.TrampoConfig;
+import com.trampo.process.domain.Job;
 import com.trampo.process.domain.Simulation;
 import com.trampo.process.domain.SimulationStatus;
 import com.trampo.process.exception.RestException;
-import com.trampo.process.util.FileFunctions;
 import com.trampo.process.util.MoveTask;
 import com.trampo.process.util.MyResponseErrorHandler;
 import com.trampo.process.util.Scan;
@@ -53,7 +60,7 @@ import com.trampo.process.util.ValidExtensions;
 public class SimulationService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SimulationService.class);
-  
+
   private JobService jobService;
 
   String starCcmPlusVersion = null;
@@ -68,6 +75,8 @@ public class SimulationService {
   private String scheduleMovePeriod;
   private String dataRoot;
   private String runRoot;
+  private String dataRootRaijin;
+  private String runRootRaijin;
   private String ccmplusversionforinfoflagrunpath;
   private TrampoConfig config;
   private Integer maxWaitForFilesInDays;
@@ -82,6 +91,8 @@ public class SimulationService {
       @Value("${trampo.simulation.scheduleMovePeriod}") String scheduleMovePeriod,
       @Value("${trampo.simulation.dataRoot}") String dataRoot,
       @Value("${trampo.simulation.runRoot}") String runRoot,
+      @Value("${trampo.simulation.dataRootRaijin}") String dataRootRaijin,
+      @Value("${trampo.simulation.runRootRaijin}") String runRootRaijin,
       @Value("${trampo.simulation.ccmplusversionforinfoflagrunpath}") String ccmplusversionforinfoflagrunpath,
       @Value("${trampo.simulation.maxWaitForFilesInDays}") Integer maxWaitForFilesInDays,
       @Value("${trampo.simulation.defaultStartCcmPlusPath}") String defaultStartCcmPlusPath,
@@ -97,6 +108,8 @@ public class SimulationService {
     this.scheduleMovePeriod = scheduleMovePeriod;
     this.dataRoot = dataRoot;
     this.runRoot = runRoot;
+    this.dataRootRaijin = dataRootRaijin;
+    this.runRootRaijin = runRootRaijin;
     this.ccmplusversionforinfoflagrunpath = ccmplusversionforinfoflagrunpath;
     this.config = config;
     this.maxWaitForFilesInDays = maxWaitForFilesInDays;
@@ -193,6 +206,10 @@ public class SimulationService {
   }
 
   public void startSimulation(Simulation simulation) throws Exception {
+    if (!simulation.getFolderName().startsWith("sim")) {
+      error(simulation.getId(), "Simulation name must start with sim!!!");
+      return;
+    }
     if (areFilesAvailable(simulation)) {
 
       checkSimName_FileCount_FileExtension_Scan4Macro(simulation);
@@ -204,6 +221,7 @@ public class SimulationService {
       createLogAndBackupDirectories(simulation);
       createLogHeader(simulation);
       copyCustomerSyncFolderIntoJobRunFolder(simulation);
+      Files.delete(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation));
       // getCustomerStarCCMPlusVersion(simulation); //TODO
       selectStarCCMPlusRunVersion(simulation);
       createPostprocessingRunFolders(simulation);
@@ -218,12 +236,38 @@ public class SimulationService {
         LOGGER.info("simulation date created: " + simulation.getDateCreated());
         if (simulation.getDateCreated().plusDays(maxWaitForFilesInDays)
             .compareTo(LocalDateTime.now()) < 0) {
-          LOGGER.info("simulation date created plus days: " + simulation.getDateCreated().plusDays(maxWaitForFilesInDays));
+          LOGGER.info("simulation date created plus days: "
+              + simulation.getDateCreated().plusDays(maxWaitForFilesInDays));
           LOGGER.info("now: " + LocalDateTime.now());
           LOGGER.error("files took too long to upload. simulation id: " + simulation.getId());
           error(simulation.getId(), "files took too long to upload");
         }
       }
+    }
+  }
+
+  public void cancelSimulation(Simulation simulation, Job job) throws Exception {
+    File file = new File(getJobRunningFolderPath(simulation) + "\\ABORT.txt");
+    try {
+      // Create the file
+      file.createNewFile();
+      LOGGER.info("ABORT.txt File is created!");
+      Runnable killJob = () -> {
+        try {
+          Thread.sleep(100 * 1000);
+          jobService.cancelJob("" + job.getId());
+        } catch (InterruptedException e) {
+          LOGGER.error("InterruptedException: ", e);
+        } catch (JSchException e) {
+          LOGGER.error("JSchException: ", e);
+        } catch (IOException e) {
+          LOGGER.error("IOException: ", e);
+        }
+      };
+      Executor executor = Executors.newSingleThreadExecutor();
+      executor.execute(killJob);
+    } catch (IOException ex) {
+      LOGGER.info("ABORT.txt File already exists or the operation failed for some reason", ex);
     }
   }
 
@@ -347,29 +391,42 @@ public class SimulationService {
 
   private void checkSimName_FileCount_FileExtension_Scan4Macro(Simulation simulation)
       throws JsonProcessingException, RestException {
-
-    String fileName = simulation.getFileName().replaceAll("\\s+", "");
-    if (fileName.isEmpty()) {
-      error(simulation.getId(), "Simulation name was not input");
-      LOGGER.error(
-          "Simulation cancelled. id: " + simulation.getId() + " Simulation name was not input");
+    if (simulation.getFolderName().isEmpty()) {
+      error(simulation.getId(), "Simulation folder name was not input");
+      LOGGER.error("Simulation cancelled. id: " + simulation.getId()
+          + " Simulation folder name was not input");
       return;
     }
+
+    // Check for folder
+    if (!Files.isDirectory(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation))) {
+      LOGGER.error("Simulation cancelled. id: " + simulation.getId() + " Simulation folder "
+          + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation) + " is NOT available");
+      error(simulation.getId(), "Simulation folder is NOT available!!!");
+      return;
+    }
+
+    LOGGER.info("Simulation folder " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation) + " is available");
 
     // Check for .sim file
-    fileName = (fileName.toLowerCase().endsWith(".sim")) ? fileName : (fileName + ".sim");
-    if (!FileFunctions.fileIsAvailable(
-        getCustomerSynchronisedFolder(simulation.getCustomerId()).resolve(fileName))) {
-      LOGGER.error("Simulation cancelled. id: " + simulation.getId() + " Simulation file "
-          + fileName + " is NOT available");
-      error(simulation.getId(), "Simulation file " + fileName + " is NOT available");
-      return;
+    boolean simFileExist = false;
+    try {
+      Iterator<Path> fileIt = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+      while (fileIt.hasNext()) {
+        Path file = fileIt.next();
+        if (file.toString().endsWith(".sim")) {
+          simFileExist = true;
+        }
+      }
+    } catch (IOException e) {
+      LOGGER.error("Unable to count files in " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
     }
-
-    LOGGER.info("Simulation file " + fileName + " is available");
-
+    if(!simFileExist){
+      error(simulation.getId(), "Simulation File Does not Exist!!!");
+    }
+    
     // check file extensions.
-    File dir = getCustomerSynchronisedFolder(simulation.getCustomerId()).toFile();
+    File dir = getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
     File[] directoryListing = dir.listFiles();
     if (directoryListing != null) {
       for (File child : directoryListing) {
@@ -403,12 +460,25 @@ public class SimulationService {
     }
 
     // Check files count
-    LOGGER.info("FileFunctions.countFiles(getCustomerSynchronisedFolder()) = "
-        + FileFunctions.countFiles(getCustomerSynchronisedFolder(simulation.getCustomerId())));
-    LOGGER.info("_fileCount = " + simulation.getFileCount());
+    int count = 0;
+    int simCount = 0;
+    try {
+      Iterator<Path> fileIt = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+      while (fileIt.hasNext()) {
+        Path file = fileIt.next();
+        if (Files.isRegularFile(file)) {
+          count++;
+        }
+        if (file.toString().endsWith(".sim")) {
+          simCount++;
+        }
+      }
+    } catch (IOException e) {
+      LOGGER.error("Unable to count files in " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+      count = 0;
+    }
 
-    if (FileFunctions.countFiles(
-        getCustomerSynchronisedFolder(simulation.getCustomerId())) != simulation.getFileCount()) {
+    if (count != simulation.getFileCount() || simCount != 1) {
       LOGGER.error("!!! Actual file count does not match nominated file count !!!");
       error(simulation.getId(), "number of files in sync folder not matching");
       return;
@@ -442,33 +512,45 @@ public class SimulationService {
     int cpuCount = 0;
     String queueType;
     int memory;
-    if(simulation.getProcessorType().equals("INSTANT")){
-      cpuCount = simulation.getNumberOfCoresInstantFast();
+    if (simulation.getProcessorType().equals("INSTANT")) {
+      cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
       queueType = "expressbw";
-      memory = 125 * (cpuCount / 8);
-    }else if(simulation.getProcessorType().equals("FAST")){
-      cpuCount = simulation.getNumberOfCoresInstantFast();
+      memory = 30 * simulation.getNumberOfCoresInstantFast();
+    } else if (simulation.getProcessorType().equals("FAST")) {
+      cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
       queueType = "normalbw";
-      memory = 125 * (cpuCount / 8);
-    }else{
-      cpuCount = simulation.getNumberOfCoresStandardLowPriority();
+      memory = 30 * simulation.getNumberOfCoresInstantFast();
+    } else {
+      cpuCount = simulation.getNumberOfCoresStandardLowPriority() * 16;
       queueType = "normal";
-      memory = 30 * (cpuCount / 16);
+      memory = 30 * simulation.getNumberOfCoresStandardLowPriority();
     }
     String walltime = "000:00:00";
     long hours = 0;
     long minutes = 0;
-    if(simulation.getMaxWalltime() > 60){
+    if (simulation.getMaxWalltime() > 60) {
       hours = simulation.getMaxWalltime() / 60;
       minutes = simulation.getMaxWalltime() - hours * 60;
-    }else{
+    } else {
       minutes = simulation.getMaxWalltime();
     }
-    walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00" ;
-    String fileName = simulation.getFileName().replaceAll("\\s+", "");
-    jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType, 
-        backendScriptPath, walltime, getJobRunningFolderPath(simulation).toString(), macroPath, 
-        getCustomerSynchronisedFolder(simulation.getCustomerId()).resolve(fileName).toString(), podKey);
+    walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
+    String simulationFileName = null;
+    try {
+      Iterator<Path> fileIt = Files.list(getJobRunningFolderPath(simulation)).iterator();
+      while (fileIt.hasNext()) {
+        Path file = fileIt.next();
+        if (file.toString().endsWith(".sim")) {
+          simulationFileName = file.toString();
+        }
+      }
+    } catch (IOException e) {
+      LOGGER.error("Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
+    }
+    jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
+        backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
+        simulationFileName, podKey, getJobPath(simulation).toString(),
+        getJobRunningFolderPathRaijin(simulation).toString());
   }
 
   private Path getPowerPointRunFolderPath(Simulation simulation) {
@@ -500,8 +582,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunScenesFolderPath EXISTING !!! with Path: "
           + getScenesSyncFolderPath(simulation));
-      error(simulation.getId(),
-          "getRunScenesFolderPath EXISTING !!!" + getScenesSyncFolderPath(simulation));
+      error(simulation.getId(), "scenes folder path EXISTING !!!");
     }
     // plots
     if (Files.isDirectory(getPlotsSyncFolderPath(simulation), LinkOption.NOFOLLOW_LINKS) == false) {
@@ -510,8 +591,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunPlotsFolderPath EXISTING !!! with Path: "
           + getPlotsSyncFolderPath(simulation));
-      error(simulation.getId(),
-          "getRunPlotsFolderPath EXISTING !!!" + getPlotsSyncFolderPath(simulation));
+      error(simulation.getId(), "plots sync folder path EXISTING !!!");
     }
 
     // tables
@@ -522,8 +602,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunTablesFolderPath EXISTING !!! with Path: "
           + getTablesSyncFolderPath(simulation));
-      error(simulation.getId(), "ERROR: getRunTablesFolderPath EXISTING !!! with Path: "
-          + getTablesSyncFolderPath(simulation));
+      error(simulation.getId(), "tables sync folder path EXISTING !!!");
     }
 
     // Starview
@@ -534,8 +613,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunStarViewFolderPath EXISTING !!! with Path: "
           + getStarViewSyncFolderPath(simulation));
-      error(simulation.getId(), "ERROR: getRunStarViewFolderPath EXISTING !!! with Path: "
-          + getStarViewSyncFolderPath(simulation));
+      error(simulation.getId(), "Star View Folder Path EXISTING!!!");
     }
 
     // PowerPoint
@@ -546,8 +624,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunPowerPointFolderPath EXISTING !!! with Path: "
           + getPowerPointSyncFolderPath(simulation));
-      error(simulation.getId(), "ERROR: getRunPowerPointFolderPath EXISTING !!! with Path: "
-          + getPowerPointSyncFolderPath(simulation));
+      error(simulation.getId(), "Power Point Folder Path EXISTING!!!");
     }
   }
 
@@ -596,8 +673,20 @@ public class SimulationService {
       throws IOException, InterruptedException {
     Path InitialVersionLogPath = getJobRunningFolderPath(simulation).resolve("version.log");
     Files.createFile(InitialVersionLogPath);
+    String simulationFileName = null;
+    try {
+      Iterator<Path> fileIt = Files.list(getRunSimulationFolderFullPath(simulation)).iterator();
+      while (fileIt.hasNext()) {
+        Path file = fileIt.next();
+        if (file.toString().endsWith(".sim")) {
+          simulationFileName = file.toString();
+        }
+      }
+    } catch (IOException e) {
+      LOGGER.error("Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
+    }
     ProcessBuilder pb =
-        new ProcessBuilder(ccmplusversionforinfoflagrunpath, "-info", simulation.getFileName());
+        new ProcessBuilder(ccmplusversionforinfoflagrunpath, "-info", simulationFileName);
     pb.redirectOutput(InitialVersionLogPath.toFile());
     File pbWorkingDirectory = getJobRunningFolderPath(simulation).toFile();
     pb.directory(pbWorkingDirectory);
@@ -621,11 +710,10 @@ public class SimulationService {
     Files.move(InitialVersionLogPath, finalVersionLogPath, StandardCopyOption.REPLACE_EXISTING);
   }
 
-  // TODO clean run folder before moving if already exist something
   private void copyCustomerSyncFolderIntoJobRunFolder(Simulation simulation)
       throws IOException, InterruptedException {
     LOGGER.info("starting CopyCustomerSyncFolderIntoJobRunFolder()");
-    File sourceDirectory = getCustomerSynchronisedFolder(simulation.getCustomerId()).toFile();
+    File sourceDirectory = getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
     File destinationDirectory = getJobRunningFolderPath(simulation).toFile();
     ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
 
@@ -670,7 +758,7 @@ public class SimulationService {
     LOGGER.info("customerNumber = " + simulation.getCustomerId());
     LOGGER.info("submissionDate = " + simulation.getDateCreated());
     LOGGER.info("maxSeconds = " + simulation.getMaxWalltime());
-    LOGGER.info("Simulation = " + simulation.getFileName());
+    LOGGER.info("Simulation = " + simulation.getFolderName());
     LOGGER.info("simulationRunningFolder = " + getJobRunningFolderPath(simulation));
     LOGGER.info(
         "HEADER END-------------------------------------------------------------------------------------------------------------------");
@@ -706,11 +794,33 @@ public class SimulationService {
     return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
         "Job_" + simulation.getId(), "logs");
   }
+  
+  private Path getJobPath(Simulation simulation) {
+    return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
+        "Job_" + simulation.getId());
+  }
+
+  private Path getJobLogsPathRaijin(Simulation simulation) {
+    return Paths.get(dataRootRaijin, getCustomerFolderRelativePath(simulation),
+        "Job_" + simulation.getId(), "logs");
+  }
 
   private void createJobRunAndSyncFolders(Simulation simulation) throws IOException, Exception {
     if (Files.isDirectory(getJobRunningFolderPath(simulation),
         LinkOption.NOFOLLOW_LINKS) == false) {
-      Files.createDirectories(getJobRunningFolderPath(simulation));
+      Set<PosixFilePermission> perms = new HashSet<>();
+      // add permission as rwxrwxrwx 777
+      perms.add(PosixFilePermission.OWNER_WRITE);
+      perms.add(PosixFilePermission.OWNER_READ);
+      perms.add(PosixFilePermission.OWNER_EXECUTE);
+      perms.add(PosixFilePermission.GROUP_READ);
+      perms.add(PosixFilePermission.GROUP_EXECUTE);
+      perms.add(PosixFilePermission.GROUP_WRITE);
+      perms.add(PosixFilePermission.OTHERS_READ);
+      perms.add(PosixFilePermission.OTHERS_WRITE);
+      perms.add(PosixFilePermission.OTHERS_EXECUTE);
+      FileAttribute<Set<PosixFilePermission>> fileAttributes = PosixFilePermissions.asFileAttribute(perms);
+      Files.createDirectories(getJobRunningFolderPath(simulation), fileAttributes);
       LOGGER.info("JobRunningFolder created " + getJobRunningFolderPath(simulation));
     } else {
       LOGGER.error(
@@ -743,36 +853,66 @@ public class SimulationService {
         "Job_" + simulation.getId());
   }
 
+  private Path getJobRunningFolderPathRaijin(Simulation simulation) {// the Job running folder from
+                                                                     // Raijin
+    return Paths.get(runRootRaijin, getCustomerFolderRelativePath(simulation),
+        "Job_" + simulation.getId());
+  }
+
   private String getCustomerFolderRelativePath(Simulation simulation) {
     return "customer_" + simulation.getCustomerId();
   }
 
+  private Path getCustomerSynchronisedFolderSimulationFolderFullPath(Simulation simulation) {
+    return getCustomerSynchronisedFolderPath(simulation.getCustomerId())
+        .resolve(simulation.getFolderName());
+  }
+  
+  private Path getRunSimulationFolderFullPath(Simulation simulation) {
+    return getCustomerSynchronisedFolderPath(simulation.getCustomerId())
+        .resolve(simulation.getFolderName());
+  }
+
   private boolean areFilesAvailable(Simulation simulation) {
-    String fileName = simulation.getFileName().replaceAll("\\s+", "");
-    fileName = fileName.toLowerCase().endsWith(".sim") ? fileName : (fileName + ".sim");
-    if (!FileFunctions.fileIsAvailable(
-        getCustomerSynchronisedFolder(simulation.getCustomerId()).resolve(fileName))) {
-      LOGGER.info("File is not avaiable. Path: "
-          + getCustomerSynchronisedFolder(simulation.getCustomerId()).resolve(fileName));
+    if (!Files.isDirectory(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation))) {
+      LOGGER.info("Folder is not avaiable. Path: " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation));
       return false;
     }
-    return (FileFunctions.countFiles(
-        getCustomerSynchronisedFolder(simulation.getCustomerId())) >= simulation.getFileCount());
+    int count = 0;
+    int simCount = 0;
+    try {
+      Iterator<Path> fileIt = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+      while (fileIt.hasNext()) {
+        Path file = fileIt.next();
+        LOGGER.info("Going through file " + file);
+        if (Files.isRegularFile(file)) {
+          count++;
+        }
+        if (file.toString().endsWith(".sim")) {
+          simCount++;
+        }
+      }
+    } catch (IOException e) {
+      LOGGER.error("Unable to count files in " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+      count = 0;
+    }
+    return (count >= simulation.getFileCount() && simCount == 1);
   }
 
   private String getCustomerFolderRelativePath(long customerId) {
     return "customer_" + customerId;
   }
 
-  private Path getCustomerSynchronisedFolder(long customerId) {
+  private Path getCustomerSynchronisedFolderPath(long customerId) {
     return Paths.get(dataRoot, getCustomerFolderRelativePath(customerId), "Synchronised_Folder");
   }
-  
-  public boolean isFinishedWithError(Simulation simulation){
-    String errorLogFilePath = getJobRunningFolderPath(simulation).toString()  + simulation.getId() + "/out.err";
+
+  public boolean isFinishedWithError(Simulation simulation) {
+    String errorLogFilePath =
+        getJobRunningFolderPath(simulation).toString() + simulation.getId() + "/out.err";
     try {
       List<String> lines = Files.readAllLines(Paths.get(errorLogFilePath));
-      if(lines != null && lines.size() > 0 && StringUtils.hasText(lines.get(0))){
+      if (lines != null && lines.size() > 0 && StringUtils.hasText(lines.get(0))) {
         return true;
       }
     } catch (IOException e) {
