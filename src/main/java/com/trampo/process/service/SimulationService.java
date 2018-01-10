@@ -821,9 +821,9 @@ public class SimulationService {
       perms.add(PosixFilePermission.GROUP_READ);
       perms.add(PosixFilePermission.GROUP_EXECUTE);
       perms.add(PosixFilePermission.GROUP_WRITE);
-      perms.add(PosixFilePermission.OTHERS_READ);
-      perms.add(PosixFilePermission.OTHERS_WRITE);
-      perms.add(PosixFilePermission.OTHERS_EXECUTE);
+//      perms.add(PosixFilePermission.OTHERS_READ);
+//      perms.add(PosixFilePermission.OTHERS_WRITE);
+//      perms.add(PosixFilePermission.OTHERS_EXECUTE);
       FileAttribute<Set<PosixFilePermission>> fileAttributes = PosixFilePermissions.asFileAttribute(perms);
       Files.createDirectories(getJobRunningFolderPath(simulation), fileAttributes);
       LOGGER.info("JobRunningFolder created " + getJobRunningFolderPath(simulation));

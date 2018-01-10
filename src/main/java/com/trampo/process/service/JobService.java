@@ -152,7 +152,7 @@ public class JobService {
       String scriptPath, String walltime, String raijinLogRoot, String macroPath, String simulationPath,
       String podKey, String customerDataRoot, String customerRunRoot, String runRoot) throws JSchException, IOException, InterruptedException {
     LOGGER.info("chmod command: " + customerDataRoot);
-    Process  p = Runtime.getRuntime().exec("chmod -R 777 " + customerDataRoot);
+    Process  p = Runtime.getRuntime().exec("chmod -R 770 " + customerDataRoot);
     p.waitFor();
     LOGGER.info("chmod exit status: " + p.exitValue());
     Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
@@ -161,7 +161,7 @@ public class JobService {
     Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
     result = error.hasNext() ? error.next() : "";
     LOGGER.info("chmod error: " + result);
-    p = Runtime.getRuntime().exec("chmod -R 777 " + customerRunRoot);
+    p = Runtime.getRuntime().exec("chmod -R 770 " + customerRunRoot);
     p.waitFor();
     LOGGER.info("chmod exit status: " + p.exitValue());
     out = new Scanner(p.getInputStream()).useDelimiter("\\A");
@@ -170,14 +170,14 @@ public class JobService {
     error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
     result = error.hasNext() ? error.next() : "";
     LOGGER.info("chmod error: " + result);
-    ProcessBuilder pb = new ProcessBuilder("chmod", "-R", "777", customerDataRoot);
+    ProcessBuilder pb = new ProcessBuilder("chmod", "-R", "770", customerDataRoot);
     pb.redirectErrorStream(true);
     p = pb.start();
     p.waitFor();
     out = new Scanner(p.getInputStream()).useDelimiter("\\A");
     result = out.hasNext() ? out.next() : "";
     LOGGER.info("chmod out: " + result);
-    pb = new ProcessBuilder("chmod", "-R", "777", customerRunRoot);
+    pb = new ProcessBuilder("chmod", "-R", "770", customerRunRoot);
     pb.redirectErrorStream(true);
     p = pb.start();
     p.waitFor();
