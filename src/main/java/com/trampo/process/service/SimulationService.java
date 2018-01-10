@@ -515,11 +515,11 @@ public class SimulationService {
     if (simulation.getProcessorType().equals("INSTANT")) {
       cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
       queueType = "expressbw";
-      memory = 30 * simulation.getNumberOfCoresInstantFast();
+      memory = 125 * simulation.getNumberOfCoresInstantFast();
     } else if (simulation.getProcessorType().equals("FAST")) {
       cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
       queueType = "normalbw";
-      memory = 30 * simulation.getNumberOfCoresInstantFast();
+      memory = 125 * simulation.getNumberOfCoresInstantFast();
     } else {
       cpuCount = simulation.getNumberOfCoresStandardLowPriority() * 16;
       queueType = "normal";
@@ -549,7 +549,7 @@ public class SimulationService {
     }
     jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
         backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
-        simulationFileName, podKey, getJobPath(simulation).toString(),
+        simulationFileName, podKey, getCustomerDataRoot(simulation).toString(), getCustomerRunRoot(simulation).toString(),
         getJobRunningFolderPathRaijin(simulation).toString());
   }
 
@@ -795,7 +795,12 @@ public class SimulationService {
         "Job_" + simulation.getId(), "logs");
   }
   
-  private Path getJobPath(Simulation simulation) {
+  private Path getCustomerDataRoot(Simulation simulation) {
+    return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
+        "Job_" + simulation.getId());
+  }
+  
+  private Path getCustomerRunRoot(Simulation simulation) {
     return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
         "Job_" + simulation.getId());
   }

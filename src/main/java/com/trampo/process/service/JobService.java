@@ -150,26 +150,40 @@ public class JobService {
 
   public void submitJob(String jobName, String cpuCount, String memory, String queueType,
       String scriptPath, String walltime, String raijinLogRoot, String macroPath, String simulationPath,
-      String podKey, String root, String runRoot) throws JSchException, IOException, InterruptedException {
-//    LOGGER.info("chmod command: " + root);
-//    Process  p = Runtime.getRuntime().exec("chmod 777 " + root);
-//    p.waitFor();
-//    LOGGER.info("chmod exit status: " + p.exitValue());
-//    Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-//    String result = out.hasNext() ? out.next() : "";
-//    LOGGER.info("chmod out: " + result);
-//    out.close();
-//    Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
-//    result = error.hasNext() ? error.next() : "";
-//    LOGGER.info("chmod error: " + result);
-//    error.close();
-//    ProcessBuilder pb = new ProcessBuilder("chmod", "777", root);
-//    pb.redirectErrorStream(true);
-//    p = pb.start();
-//    p.waitFor();
-//    out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-//    result = out.hasNext() ? out.next() : "";
-//    LOGGER.info("chmod out: " + result);
+      String podKey, String customerDataRoot, String customerRunRoot, String runRoot) throws JSchException, IOException, InterruptedException {
+    LOGGER.info("chmod command: " + customerDataRoot);
+    Process  p = Runtime.getRuntime().exec("chmod -R 777 " + customerDataRoot);
+    p.waitFor();
+    LOGGER.info("chmod exit status: " + p.exitValue());
+    Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+    String result = out.hasNext() ? out.next() : "";
+    LOGGER.info("chmod out: " + result);
+    Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
+    result = error.hasNext() ? error.next() : "";
+    LOGGER.info("chmod error: " + result);
+    p = Runtime.getRuntime().exec("chmod -R 777 " + customerRunRoot);
+    p.waitFor();
+    LOGGER.info("chmod exit status: " + p.exitValue());
+    out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+    result = out.hasNext() ? out.next() : "";
+    LOGGER.info("chmod out: " + result);
+    error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
+    result = error.hasNext() ? error.next() : "";
+    LOGGER.info("chmod error: " + result);
+    ProcessBuilder pb = new ProcessBuilder("chmod", "-R", "777", customerDataRoot);
+    pb.redirectErrorStream(true);
+    p = pb.start();
+    p.waitFor();
+    out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+    result = out.hasNext() ? out.next() : "";
+    LOGGER.info("chmod out: " + result);
+    pb = new ProcessBuilder("chmod", "-R", "777", customerRunRoot);
+    pb.redirectErrorStream(true);
+    p = pb.start();
+    p.waitFor();
+    out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+    result = out.hasNext() ? out.next() : "";
+    LOGGER.info("chmod out: " + result);
     // No spaces in qsub command
     String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus=" + cpuCount + " -e "
         + raijinLogRoot + "/out.err -o " + raijinLogRoot + "/out.out -lmem=" + memory
