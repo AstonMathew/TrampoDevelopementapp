@@ -18,6 +18,7 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -62,13 +65,10 @@ public class SimulationService {
   private static final Logger LOGGER = LoggerFactory.getLogger(SimulationService.class);
 
   private JobService jobService;
+  private Map<String, List<MoveTask>> moveTaskMap = new HashMap<>();
 
   String starCcmPlusVersion = null;
   String starCcmPlusVersionPath = null;
-  MoveTask moveTaskScenes;
-  MoveTask moveTaskPlots;
-  MoveTask moveTaskMesh;
-  MoveTask moveTaskBackUp;
 
   private RestTemplate restTemplate;
   private ObjectMapper mapper;
@@ -84,10 +84,11 @@ public class SimulationService {
   private String backendScriptPath;
   private String podKey;
   private String macroPath;
+  private SshService sshService;
 
   @Autowired
   public SimulationService(RestTemplateBuilder builder, TrampoConfig config, JobService jobService,
-      @Value("${webapp.api.root}") String apiRoot,
+      SshService sshService, @Value("${webapp.api.root}") String apiRoot,
       @Value("${trampo.simulation.scheduleMovePeriod}") String scheduleMovePeriod,
       @Value("${trampo.simulation.dataRoot}") String dataRoot,
       @Value("${trampo.simulation.runRoot}") String runRoot,
@@ -118,6 +119,7 @@ public class SimulationService {
     this.backendScriptPath = backendScriptPath;
     this.podKey = podKey;
     this.macroPath = macroPath;
+    this.sshService = sshService;
   }
 
   public Simulation getSimulation(String simulationId) throws RestException, IOException {
@@ -271,28 +273,15 @@ public class SimulationService {
     }
   }
 
-  private void finishSimulation(Simulation simulation) {
+  public void finishSimulation(Simulation simulation) {
     File pbWorkingDirectory = getJobRunningFolderPath(simulation).toFile(); // (new File)?
     // pb.directory(pbWorkingDirectory);
     try {
-      // updateJobStatus(JobStatuses.RUNNING);
-      // _startSimulationTime = LocalTime.now();
-      // _printStreamToLogFile.println("Starting simulation time: " + _startSimulationTime);
-      // _simulationProcess = pb.start();
-      // LOG.info("simulation run process started");
 
-      // Redirection of stream and loop extremely important;
-      // http://baxincc.cc/questions/216451/windows-process-execed-from-java-not-terminating
-      // if not redirected, Star-CCM+ processes hang and -batch*-report doesn't print
-      // InputStream stdout = _simulationProcess.getInputStream();
-      // while (stdout.read() >= 0) {
-      // }
-
-      // _simulationProcess.waitFor();
-      // Stop the automatic move of Scenes and Plots from run folder to sync folder
-      // moveTaskScenes.cancelPurgeTimer();
-      // moveTaskPlots.cancelPurgeTimer();
-      // moveTaskMesh.cancelPurgeTimer();
+      List<MoveTask> moveTaskList = moveTaskMap.get(simulation.getId());
+      for (MoveTask moveTask : moveTaskList) {
+        moveTask.cancelPurgeTimer();
+      }
 
       // REMOVE POD key FROM HTML report
       File[] directoryListing = pbWorkingDirectory.listFiles();
@@ -401,17 +390,20 @@ public class SimulationService {
     // Check for folder
     if (!Files.isDirectory(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation))) {
       LOGGER.error("Simulation cancelled. id: " + simulation.getId() + " Simulation folder "
-          + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation) + " is NOT available");
+          + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)
+          + " is NOT available");
       error(simulation.getId(), "Simulation folder is NOT available!!!");
       return;
     }
 
-    LOGGER.info("Simulation folder " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation) + " is available");
+    LOGGER.info("Simulation folder "
+        + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation) + " is available");
 
     // Check for .sim file
     boolean simFileExist = false;
     try {
-      Iterator<Path> fileIt = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+      Iterator<Path> fileIt =
+          Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
       while (fileIt.hasNext()) {
         Path file = fileIt.next();
         if (file.toString().endsWith(".sim")) {
@@ -419,12 +411,13 @@ public class SimulationService {
         }
       }
     } catch (IOException e) {
-      LOGGER.error("Unable to count files in " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+      LOGGER.error("Unable to count files in "
+          + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
     }
-    if(!simFileExist){
+    if (!simFileExist) {
       error(simulation.getId(), "Simulation File Does not Exist!!!");
     }
-    
+
     // check file extensions.
     File dir = getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
     File[] directoryListing = dir.listFiles();
@@ -463,7 +456,8 @@ public class SimulationService {
     int count = 0;
     int simCount = 0;
     try {
-      Iterator<Path> fileIt = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+      Iterator<Path> fileIt =
+          Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
       while (fileIt.hasNext()) {
         Path file = fileIt.next();
         if (Files.isRegularFile(file)) {
@@ -474,7 +468,8 @@ public class SimulationService {
         }
       }
     } catch (IOException e) {
-      LOGGER.error("Unable to count files in " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+      LOGGER.error("Unable to count files in "
+          + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
       count = 0;
     }
 
@@ -489,26 +484,37 @@ public class SimulationService {
 
   private void RunJob(Simulation simulation) throws Exception {
     LOGGER.info("starting run job");
-    moveTaskScenes = new MoveTask(getScenesRunFolderPath(simulation).toFile(),
-        getScenesSyncFolderPath(simulation).toFile());
+    
+    String runRoot = getJobRunningFolderPathRaijin(simulation).toString();
+    String jobName = simulation.getId();
+    
+    List<MoveTask> moveTaskList = new ArrayList<MoveTask>();
+    
+    MoveTask moveTaskScenes = new MoveTask(getScenesRunFolderPath(simulation).toFile(),
+        getScenesSyncFolderPath(simulation).toFile(), sshService, runRoot, jobName);
     LOGGER.info("moveTaskScenes = new MoveTask done");
 
     moveTaskScenes.scheduleFileMove("Scene", Integer.parseInt(scheduleMovePeriod)); // non-blocking
     LOGGER.info("moveTaskScenes running");
-
+    moveTaskList.add(moveTaskScenes);
+    
     // move plots
-    moveTaskPlots = new MoveTask(getPlotsRunFolderPath(simulation).toFile(),
-        getPlotsSyncFolderPath(simulation).toFile());
+    MoveTask moveTaskPlots = new MoveTask(getPlotsRunFolderPath(simulation).toFile(),
+        getPlotsSyncFolderPath(simulation).toFile(), sshService, runRoot, jobName);
 
     moveTaskPlots.scheduleFileMove("Plot", Integer.parseInt(scheduleMovePeriod)); // non-blocking
+    moveTaskList.add(moveTaskPlots);
     LOGGER.info("moveTaskPlots running");
     // move plots
-    moveTaskMesh = new MoveTask(getJobRunningFolderPath(simulation).toFile(),
-        getJobSynchronisedFolderPath(simulation).toFile());
+    MoveTask moveTaskMesh = new MoveTask(getJobRunningFolderPath(simulation).toFile(),
+        getJobSynchronisedFolderPath(simulation).toFile(), sshService, runRoot, jobName);
 
     moveTaskMesh.scheduleFileMove("Meshed", Integer.parseInt(scheduleMovePeriod)); // non-blocking
+    moveTaskList.add(moveTaskMesh);
     LOGGER.info("moveTaskMesh running");
 
+    moveTaskMap.put(simulation.getId(), moveTaskList);
+    
     int cpuCount = 0;
     String queueType;
     int memory;
@@ -549,7 +555,8 @@ public class SimulationService {
     }
     jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
         backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
-        simulationFileName, podKey, getCustomerDataRoot(simulation).toString(), getCustomerRunRoot(simulation).toString(),
+        simulationFileName, podKey, getCustomerDataRoot(simulation).toString(),
+        getCustomerRunRoot(simulation).toString(),
         getJobRunningFolderPathRaijin(simulation).toString());
   }
 
@@ -713,7 +720,8 @@ public class SimulationService {
   private void copyCustomerSyncFolderIntoJobRunFolder(Simulation simulation)
       throws IOException, InterruptedException {
     LOGGER.info("starting CopyCustomerSyncFolderIntoJobRunFolder()");
-    File sourceDirectory = getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
+    File sourceDirectory =
+        getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
     File destinationDirectory = getJobRunningFolderPath(simulation).toFile();
     ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
 
@@ -794,12 +802,12 @@ public class SimulationService {
     return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
         "Job_" + simulation.getId(), "logs");
   }
-  
+
   private Path getCustomerDataRoot(Simulation simulation) {
     return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
         "Job_" + simulation.getId());
   }
-  
+
   private Path getCustomerRunRoot(Simulation simulation) {
     return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
         "Job_" + simulation.getId());
@@ -821,11 +829,13 @@ public class SimulationService {
       perms.add(PosixFilePermission.GROUP_READ);
       perms.add(PosixFilePermission.GROUP_EXECUTE);
       perms.add(PosixFilePermission.GROUP_WRITE);
-//      perms.add(PosixFilePermission.OTHERS_READ);
-//      perms.add(PosixFilePermission.OTHERS_WRITE);
-//      perms.add(PosixFilePermission.OTHERS_EXECUTE);
-      FileAttribute<Set<PosixFilePermission>> fileAttributes = PosixFilePermissions.asFileAttribute(perms);
+      perms.add(PosixFilePermission.OTHERS_READ);
+      perms.add(PosixFilePermission.OTHERS_WRITE);
+      perms.add(PosixFilePermission.OTHERS_EXECUTE);
+      FileAttribute<Set<PosixFilePermission>> fileAttributes =
+          PosixFilePermissions.asFileAttribute(perms);
       Files.createDirectories(getJobRunningFolderPath(simulation), fileAttributes);
+      // Files.createDirectories(getJobRunningFolderPath(simulation));
       LOGGER.info("JobRunningFolder created " + getJobRunningFolderPath(simulation));
     } else {
       LOGGER.error(
@@ -872,7 +882,7 @@ public class SimulationService {
     return getCustomerSynchronisedFolderPath(simulation.getCustomerId())
         .resolve(simulation.getFolderName());
   }
-  
+
   private Path getRunSimulationFolderFullPath(Simulation simulation) {
     return getCustomerSynchronisedFolderPath(simulation.getCustomerId())
         .resolve(simulation.getFolderName());
@@ -880,13 +890,15 @@ public class SimulationService {
 
   private boolean areFilesAvailable(Simulation simulation) {
     if (!Files.isDirectory(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation))) {
-      LOGGER.info("Folder is not avaiable. Path: " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation));
+      LOGGER.info("Folder is not avaiable. Path: "
+          + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation));
       return false;
     }
     int count = 0;
     int simCount = 0;
     try {
-      Iterator<Path> fileIt = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+      Iterator<Path> fileIt =
+          Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
       while (fileIt.hasNext()) {
         Path file = fileIt.next();
         LOGGER.info("Going through file " + file);
@@ -898,7 +910,8 @@ public class SimulationService {
         }
       }
     } catch (IOException e) {
-      LOGGER.error("Unable to count files in " + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+      LOGGER.error("Unable to count files in "
+          + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
       count = 0;
     }
     return (count >= simulation.getFileCount() && simCount == 1);

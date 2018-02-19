@@ -1,5 +1,6 @@
 package com.trampo.process.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,22 +12,33 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.trampo.process.service.SshService;
+
 public class MoveTask {
+  
   static final Logger LOG = LoggerFactory.getLogger(MoveTask.class);
 
   private Timer cron;
   private File source;
   private File destination;
+  private SshService sshService;
+  private String runRoot; 
+  private String jobName;
 
-  public MoveTask(File source, File destination) {
+  public MoveTask(File source, File destination, SshService sshService, String runRoot, String jobName) {
     this.source = source;
     this.destination = destination;
+    this.sshService = sshService;
+    this.runRoot = runRoot;
+    this.jobName = jobName;
     cron = new Timer();
   }
 
   public void scheduleFileMove(String string, int integer) {
     LOG.debug("scheduleFileMove start");
-    TimerTask moveTimerTask = new MoveTimerTask(source, destination, string);
+    TimerTask moveTimerTask = new MoveTimerTask(source, destination, string, sshService, runRoot, jobName);
     LOG.debug("TimerTask moveTimerTask = new MoveTimerTask done");
     try {
       cron.schedule(moveTimerTask, 1, TimeUnit.SECONDS.toMillis(integer)); // this line is the issue
@@ -48,11 +60,17 @@ public class MoveTask {
     File source;
     File destination;
     String string;
+    SshService sshService;
+    private String runRoot; 
+    private String jobName;
 
-    public MoveTimerTask(File source, File destination, String string) {
+    public MoveTimerTask(File source, File destination, String string, SshService sshService, String runRoot, String jobName) {
       this.source = source;
       this.destination = destination;
       this.string = string;
+      this.sshService = sshService;
+      this.runRoot = runRoot;
+      this.jobName = jobName;
       // LOG.debug(String.format("Move task for mask '%s' is scheduled to run every %d hour(s)",
       // string, PERIOD));
     }
@@ -60,6 +78,15 @@ public class MoveTask {
     @Override
     public void run() {
       try {
+        String command = "chmod -R 770 " + runRoot + "/" + jobName;
+        LOG.info("submit command: " + command);
+        BufferedReader in = sshService.execCommand(command);
+        LOG.info("submitted");
+        String str = null;
+        while ((str = in.readLine()) != null) {
+          LOG.info(str);
+        }
+        LOG.info("submitting command fnished");
         File[] directoryListing = source.listFiles();
         if (directoryListing != null) {
           for (File child : directoryListing) {
@@ -72,7 +99,8 @@ public class MoveTask {
             }
           }
         }
-      } catch (IOException ignore) {
+      } catch (IOException | JSchException ex) {
+        LOG.error("Error while moving files", ex);
       }
     }
   }

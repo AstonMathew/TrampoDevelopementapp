@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -26,32 +27,15 @@ public class JobService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
-  private Session session;
+  private SshService sshService;
 
   @Autowired
-  public JobService(@Value("${trampo.simulation.host}") String host,
-      @Value("${trampo.simulation.port}") int port,
-      @Value("${trampo.simulation.username}") String username,
-      @Value("${trampo.simulation.privateKeyPath}") String privateKeyPath) {
-    JSch jsch = new JSch();
-    try {
-      jsch.addIdentity(privateKeyPath);
-      session = jsch.getSession(username, host, port);
-      session.setConfig("PreferredAuthentications", "publickey");
-      Properties config = new Properties();
-      config.put("StrictHostKeyChecking", "no");
-      session.setConfig(config);
-      session.connect();
-    } catch (JSchException e) {
-      LOGGER.error(e.getMessage());
-    }
+  public JobService(SshService sshService) {
+    this.sshService = sshService;
   }
 
   public List<Job> getCurrentJobs() throws JSchException, IOException {
-    ChannelExec channel = (ChannelExec) session.openChannel("exec");
-    BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
-    channel.setCommand("qstat -u gj5914 -x;");
-    channel.connect();
+    BufferedReader in = sshService.execCommand("qstat -u gj5914 -x;");
     List<Job> list = new ArrayList<Job>();
     String str = null;
     while ((str = in.readLine()) != null) {
@@ -105,9 +89,9 @@ public class JobService {
           } else if (StringUtils.hasText(line[i]) && fieldNumber == 10) {
             LOGGER.info("fieldNumber 10 set to actualwalltime " + line[i]);
             fieldNumber++;
-            if(line[i].contains(":")){
+            if (line[i].contains(":")) {
               actualWalltime = line[i];
-            }else{
+            } else {
               actualWalltime = "00:00:00";
             }
           }
@@ -124,7 +108,7 @@ public class JobService {
         job.setQueue(queue);
         job.setStatus(JobStatus.valueOf(status));
         job.setId(jobId);
-        job.setWalltime("00:01:00"); //TODO
+        job.setWalltime(actualWalltime);
         list.add(job);
       }
     }
@@ -133,14 +117,10 @@ public class JobService {
 
 
   public void cancelJob(String jobId) throws JSchException, IOException {
-    //qdel 9683726
     String command = "qdel " + jobId;
     LOGGER.info("cancel job command: " + command);
-    ChannelExec channel = (ChannelExec) session.openChannel("exec");
-    BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+    BufferedReader in = sshService.execCommand(command);
     LOGGER.info("cancelling job ");
-    channel.setCommand(command);
-    channel.connect();
     String str = null;
     while ((str = in.readLine()) != null) {
       LOGGER.info(str);
@@ -149,52 +129,51 @@ public class JobService {
   }
 
   public void submitJob(String jobName, String cpuCount, String memory, String queueType,
-      String scriptPath, String walltime, String raijinLogRoot, String macroPath, String simulationPath,
-      String podKey, String customerDataRoot, String customerRunRoot, String runRoot) throws JSchException, IOException, InterruptedException {
-    LOGGER.info("chmod command: " + customerDataRoot);
-    Process  p = Runtime.getRuntime().exec("chmod -R 770 " + customerDataRoot);
-    p.waitFor();
-    LOGGER.info("chmod exit status: " + p.exitValue());
-    Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-    String result = out.hasNext() ? out.next() : "";
-    LOGGER.info("chmod out: " + result);
-    Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
-    result = error.hasNext() ? error.next() : "";
-    LOGGER.info("chmod error: " + result);
-    p = Runtime.getRuntime().exec("chmod -R 770 " + customerRunRoot);
-    p.waitFor();
-    LOGGER.info("chmod exit status: " + p.exitValue());
-    out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-    result = out.hasNext() ? out.next() : "";
-    LOGGER.info("chmod out: " + result);
-    error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
-    result = error.hasNext() ? error.next() : "";
-    LOGGER.info("chmod error: " + result);
-    ProcessBuilder pb = new ProcessBuilder("chmod", "-R", "770", customerDataRoot);
-    pb.redirectErrorStream(true);
-    p = pb.start();
-    p.waitFor();
-    out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-    result = out.hasNext() ? out.next() : "";
-    LOGGER.info("chmod out: " + result);
-    pb = new ProcessBuilder("chmod", "-R", "770", customerRunRoot);
-    pb.redirectErrorStream(true);
-    p = pb.start();
-    p.waitFor();
-    out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-    result = out.hasNext() ? out.next() : "";
-    LOGGER.info("chmod out: " + result);
+      String scriptPath, String walltime, String raijinLogRoot, String macroPath,
+      String simulationPath, String podKey, String customerDataRoot, String customerRunRoot,
+      String runRoot) throws JSchException, IOException, InterruptedException {
+     LOGGER.info("chmod command: " + customerDataRoot);
+     Process p = Runtime.getRuntime().exec("chmod -R 770 " + customerDataRoot);
+     p.waitFor();
+     LOGGER.info("chmod exit status: " + p.exitValue());
+     Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+     String result = out.hasNext() ? out.next() : "";
+     LOGGER.info("chmod out: " + result);
+     Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
+     result = error.hasNext() ? error.next() : "";
+     LOGGER.info("chmod error: " + result);
+     p = Runtime.getRuntime().exec("chmod -R 770 " + customerRunRoot);
+     p.waitFor();
+     LOGGER.info("chmod exit status: " + p.exitValue());
+     out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+     result = out.hasNext() ? out.next() : "";
+     LOGGER.info("chmod out: " + result);
+     error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
+     result = error.hasNext() ? error.next() : "";
+     LOGGER.info("chmod error: " + result);
+     ProcessBuilder pb = new ProcessBuilder("chmod", "-R", "770", customerDataRoot);
+     pb.redirectErrorStream(true);
+     p = pb.start();
+     p.waitFor();
+     out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+     result = out.hasNext() ? out.next() : "";
+     LOGGER.info("chmod out: " + result);
+     pb = new ProcessBuilder("chmod", "-R", "770", customerRunRoot);
+     pb.redirectErrorStream(true);
+     p = pb.start();
+     p.waitFor();
+     out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+     result = out.hasNext() ? out.next() : "";
+     LOGGER.info("chmod out: " + result);
     // No spaces in qsub command
-    String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus=" + cpuCount + " -e "
-        + raijinLogRoot + "/out.err -o " + raijinLogRoot + "/out.out -lmem=" + memory
-        + "GB -lwalltime=" + walltime + " -v MacroPath=" + macroPath + ",SimulationPath="
-        + simulationPath + ",Podkey=" + podKey + " " + scriptPath + ";";
+    String command = "chmod -R 770 " + runRoot + "/" + jobName + "; cd " + runRoot + "; qsub -N " + jobName + " -q "
+        + queueType + " -lncpus=" + cpuCount + " -e " + raijinLogRoot + "/out.err -o "
+        + raijinLogRoot + "/out.out -lmem=" + memory + "GB -lwalltime=" + walltime
+        + " -v MacroPath=" + macroPath + ",SimulationPath=" + simulationPath + ",Podkey=" + podKey
+        + " " + scriptPath + ";";
     LOGGER.info("submit job command: " + command);
-    ChannelExec channel = (ChannelExec) session.openChannel("exec");
-    BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+    BufferedReader in = sshService.execCommand(command);
     LOGGER.info("submitting job ");
-    channel.setCommand(command);
-    channel.connect();
     String str = null;
     while ((str = in.readLine()) != null) {
       LOGGER.info(str);

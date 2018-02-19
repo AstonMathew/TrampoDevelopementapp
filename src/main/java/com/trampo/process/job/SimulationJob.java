@@ -82,6 +82,7 @@ public class SimulationJob {
                 walltime = walltime + 1;
               }
               simulationService.updateWalltime(job.getSimulationId(), walltime);
+              simulationService.finishSimulation(simulation);
             } else {
               Simulation simulation = simulationService.getSimulation(job.getSimulationId());
               if (!simulation.getStatus().equals(SimulationStatus.COMPLETED) && !simulation.getStatus().equals(SimulationStatus.ERROR)) {
