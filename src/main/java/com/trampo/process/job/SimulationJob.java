@@ -94,9 +94,10 @@ public class SimulationJob {
               }
             }
           } else if (job.getStatus().equals(JobStatus.H)) {
-            // TODO what?
+            // only log
+            LOGGER.warn("Job is n held state. job id: " + job.getId());
           }else if (job.getStatus().equals(JobStatus.E)) {
-            // TODO what?
+            // there is nothing to do
           }
         } catch (Exception e) {
           LOGGER.error(e.getMessage());

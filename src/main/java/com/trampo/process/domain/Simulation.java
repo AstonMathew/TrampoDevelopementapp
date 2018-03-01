@@ -18,6 +18,7 @@ public class Simulation {
   private String processorType;
   private StarCcmPrecision starCcmPrecision;
   private ByoLicensingType byoLicensingType;
+  private String podKey;
   private LocalDateTime dateCreated;
   private LocalDateTime dateUpdated;
 
@@ -147,5 +148,13 @@ public class Simulation {
 
   public void setFolderName(String folderName) {
     this.folderName = folderName;
+  }
+
+  public String getPodKey() {
+    return podKey;
+  }
+
+  public void setPodKey(String podKey) {
+    this.podKey = podKey;
   }
 }

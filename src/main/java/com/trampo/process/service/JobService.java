@@ -21,6 +21,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.trampo.process.domain.Job;
 import com.trampo.process.domain.JobStatus;
+import com.trampo.process.util.FileUtils;
 
 @Component
 public class JobService {
@@ -131,45 +132,15 @@ public class JobService {
   public void submitJob(String jobName, String cpuCount, String memory, String queueType,
       String scriptPath, String walltime, String raijinLogRoot, String macroPath,
       String simulationPath, String podKey, String customerDataRoot, String customerRunRoot,
-      String runRoot) throws JSchException, IOException, InterruptedException {
-     LOGGER.info("chmod command: " + customerDataRoot);
-     Process p = Runtime.getRuntime().exec("chmod -R 770 " + customerDataRoot);
-     p.waitFor();
-     LOGGER.info("chmod exit status: " + p.exitValue());
-     Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-     String result = out.hasNext() ? out.next() : "";
-     LOGGER.info("chmod out: " + result);
-     Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
-     result = error.hasNext() ? error.next() : "";
-     LOGGER.info("chmod error: " + result);
-     p = Runtime.getRuntime().exec("chmod -R 770 " + customerRunRoot);
-     p.waitFor();
-     LOGGER.info("chmod exit status: " + p.exitValue());
-     out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-     result = out.hasNext() ? out.next() : "";
-     LOGGER.info("chmod out: " + result);
-     error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
-     result = error.hasNext() ? error.next() : "";
-     LOGGER.info("chmod error: " + result);
-     ProcessBuilder pb = new ProcessBuilder("chmod", "-R", "770", customerDataRoot);
-     pb.redirectErrorStream(true);
-     p = pb.start();
-     p.waitFor();
-     out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-     result = out.hasNext() ? out.next() : "";
-     LOGGER.info("chmod out: " + result);
-     pb = new ProcessBuilder("chmod", "-R", "770", customerRunRoot);
-     pb.redirectErrorStream(true);
-     p = pb.start();
-     p.waitFor();
-     out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-     result = out.hasNext() ? out.next() : "";
-     LOGGER.info("chmod out: " + result);
+      String runRoot, String starCcmPlusVersion) throws JSchException, IOException, InterruptedException {
+     
+     FileUtils.runChmod(customerRunRoot);
+     FileUtils.runChmod(customerDataRoot);
     // No spaces in qsub command
-    String command = "chmod -R 770 " + runRoot + "/" + jobName + "; cd " + runRoot + "; qsub -N " + jobName + " -q "
+    String command = "cd " + runRoot + "; qsub -N " + jobName + " -q "
         + queueType + " -lncpus=" + cpuCount + " -e " + raijinLogRoot + "/out.err -o "
         + raijinLogRoot + "/out.out -lmem=" + memory + "GB -lwalltime=" + walltime
-        + " -v MacroPath=" + macroPath + ",SimulationPath=" + simulationPath + ",Podkey=" + podKey
+        + " -v StarCcmRunVersionPath=" + starCcmPlusVersion + ",MacroPath=" + macroPath + ",SimulationPath=" + simulationPath + ",Podkey=" + podKey
         + " " + scriptPath + ";";
     LOGGER.info("submit job command: " + command);
     BufferedReader in = sshService.execCommand(command);

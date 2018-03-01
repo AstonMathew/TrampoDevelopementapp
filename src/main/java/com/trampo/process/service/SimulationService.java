@@ -1,19 +1,16 @@
 package com.trampo.process.service;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -49,10 +46,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSchException;
 import com.trampo.process.TrampoConfig;
+import com.trampo.process.domain.ByoLicensingType;
+import com.trampo.process.domain.CcmPlus;
 import com.trampo.process.domain.Job;
 import com.trampo.process.domain.Simulation;
 import com.trampo.process.domain.SimulationStatus;
 import com.trampo.process.exception.RestException;
+import com.trampo.process.util.FileUtils;
 import com.trampo.process.util.MoveTask;
 import com.trampo.process.util.MyResponseErrorHandler;
 import com.trampo.process.util.Scan;
@@ -77,7 +77,6 @@ public class SimulationService {
   private String runRoot;
   private String dataRootRaijin;
   private String runRootRaijin;
-  private String ccmplusversionforinfoflagrunpath;
   private TrampoConfig config;
   private Integer maxWaitForFilesInDays;
   private String defaultStartCcmPlusPath;
@@ -85,6 +84,8 @@ public class SimulationService {
   private String podKey;
   private String macroPath;
   private SshService sshService;
+  FileAttribute<Set<PosixFilePermission>> fileAttributes = null;
+  
 
   @Autowired
   public SimulationService(RestTemplateBuilder builder, TrampoConfig config, JobService jobService,
@@ -94,7 +95,6 @@ public class SimulationService {
       @Value("${trampo.simulation.runRoot}") String runRoot,
       @Value("${trampo.simulation.dataRootRaijin}") String dataRootRaijin,
       @Value("${trampo.simulation.runRootRaijin}") String runRootRaijin,
-      @Value("${trampo.simulation.ccmplusversionforinfoflagrunpath}") String ccmplusversionforinfoflagrunpath,
       @Value("${trampo.simulation.maxWaitForFilesInDays}") Integer maxWaitForFilesInDays,
       @Value("${trampo.simulation.defaultStartCcmPlusPath}") String defaultStartCcmPlusPath,
       @Value("${trampo.simulation.backendScriptPath}") String backendScriptPath,
@@ -111,7 +111,6 @@ public class SimulationService {
     this.runRoot = runRoot;
     this.dataRootRaijin = dataRootRaijin;
     this.runRootRaijin = runRootRaijin;
-    this.ccmplusversionforinfoflagrunpath = ccmplusversionforinfoflagrunpath;
     this.config = config;
     this.maxWaitForFilesInDays = maxWaitForFilesInDays;
     this.defaultStartCcmPlusPath = defaultStartCcmPlusPath;
@@ -120,6 +119,18 @@ public class SimulationService {
     this.podKey = podKey;
     this.macroPath = macroPath;
     this.sshService = sshService;
+    // add permission as rwxrwxrwx 770
+    Set<PosixFilePermission> perms = new HashSet<>();
+    perms.add(PosixFilePermission.OWNER_WRITE);
+    perms.add(PosixFilePermission.OWNER_READ);
+    perms.add(PosixFilePermission.OWNER_EXECUTE);
+    perms.add(PosixFilePermission.GROUP_READ);
+    perms.add(PosixFilePermission.GROUP_EXECUTE);
+    perms.add(PosixFilePermission.GROUP_WRITE);
+    // perms.add(PosixFilePermission.OTHERS_READ);
+    // perms.add(PosixFilePermission.OTHERS_WRITE);
+    // perms.add(PosixFilePermission.OTHERS_EXECUTE);
+    fileAttributes = PosixFilePermissions.asFileAttribute(perms);
   }
 
   public Simulation getSimulation(String simulationId) throws RestException, IOException {
@@ -224,7 +235,7 @@ public class SimulationService {
       createLogHeader(simulation);
       copyCustomerSyncFolderIntoJobRunFolder(simulation);
       Files.delete(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation));
-      // getCustomerStarCCMPlusVersion(simulation); //TODO
+      getCustomerStarCCMPlusVersion(simulation);
       selectStarCCMPlusRunVersion(simulation);
       createPostprocessingRunFolders(simulation);
       if (simulation.getStatus().equals(SimulationStatus.ERROR)) {
@@ -335,33 +346,9 @@ public class SimulationService {
       destinationDirectory = getJobBackupPath(simulation).toFile();
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
 
-      // delete anything left in the run/customer directory. for symlink handling see
-      // http://stackoverflow.com/questions/779519/delete-directories-recursively-in-java/27917071#27917071
-      Files.walkFileTree(getJobRunningFolderPath(simulation), new SimpleFileVisitor<Path>() {
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-          Files.delete(file);
-          return FileVisitResult.CONTINUE;
-        }
 
-        @Override
-        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-          Files.delete(dir);
-
-          return FileVisitResult.CONTINUE;
-        }
-      });
-
-      Files.walkFileTree(Paths.get(runRoot, getCustomerFolderRelativePath(simulation)),
-          new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                throws IOException {
-              Files.delete(dir);
-              // Files.delete(Paths.get(RUNROOT, getCustomerFolderRelativePath()));
-              return FileVisitResult.CONTINUE;
-            }
-          });
+      //deletes run folder
+      org.apache.tomcat.util.http.fileupload.FileUtils.deleteDirectory(getJobRunningFolderPath(simulation).toFile());
 
       // All below
       // _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't
@@ -484,43 +471,42 @@ public class SimulationService {
 
   private void RunJob(Simulation simulation) throws Exception {
     LOGGER.info("starting run job");
-    
+
     String runRoot = getJobRunningFolderPathRaijin(simulation).toString();
-    String jobName = simulation.getId();
-    
+
     List<MoveTask> moveTaskList = new ArrayList<MoveTask>();
-    
+
     MoveTask moveTaskScenes = new MoveTask(getScenesRunFolderPath(simulation).toFile(),
-        getScenesSyncFolderPath(simulation).toFile(), sshService, runRoot, jobName);
+        getScenesSyncFolderPath(simulation).toFile(), sshService, runRoot);
     LOGGER.info("moveTaskScenes = new MoveTask done");
 
     moveTaskScenes.scheduleFileMove("Scene", Integer.parseInt(scheduleMovePeriod)); // non-blocking
     LOGGER.info("moveTaskScenes running");
     moveTaskList.add(moveTaskScenes);
-    
+
     // move plots
     MoveTask moveTaskPlots = new MoveTask(getPlotsRunFolderPath(simulation).toFile(),
-        getPlotsSyncFolderPath(simulation).toFile(), sshService, runRoot, jobName);
+        getPlotsSyncFolderPath(simulation).toFile(), sshService, runRoot);
 
     moveTaskPlots.scheduleFileMove("Plot", Integer.parseInt(scheduleMovePeriod)); // non-blocking
     moveTaskList.add(moveTaskPlots);
     LOGGER.info("moveTaskPlots running");
     // move plots
     MoveTask moveTaskMesh = new MoveTask(getJobRunningFolderPath(simulation).toFile(),
-        getJobSynchronisedFolderPath(simulation).toFile(), sshService, runRoot, jobName);
+        getJobSynchronisedFolderPath(simulation).toFile(), sshService, runRoot);
 
     moveTaskMesh.scheduleFileMove("Meshed", Integer.parseInt(scheduleMovePeriod)); // non-blocking
     moveTaskList.add(moveTaskMesh);
     LOGGER.info("moveTaskMesh running");
 
     moveTaskMap.put(simulation.getId(), moveTaskList);
-    
+
     int cpuCount = 0;
     String queueType;
     int memory;
     if (simulation.getProcessorType().equals("INSTANT")) {
       cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
-      queueType = "expressbw";
+      queueType = "expressbw"; //TODO check later
       memory = 125 * simulation.getNumberOfCoresInstantFast();
     } else if (simulation.getProcessorType().equals("FAST")) {
       cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
@@ -541,25 +527,33 @@ public class SimulationService {
       minutes = simulation.getMaxWalltime();
     }
     walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
-    String simulationFileName = null;
+    String simulationFileName = getCustomerSimulationFilePathRaijin(simulation);
+    String podKeyToSubmit = podKey;
+    if(simulation.getByoLicensingType().equals(ByoLicensingType.POD)){
+      podKeyToSubmit = simulation.getPodKey();
+    }
+    jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
+        backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
+        simulationFileName, podKeyToSubmit, getCustomerDataRoot(simulation).toString(),
+        getJobRunningFolderPath(simulation).toString(), getJobRunningFolderPathRaijin(simulation).toString(), 
+        starCcmPlusVersion);
+  }
+
+  private String getCustomerSimulationFilePathRaijin(Simulation simulation){
     try {
       Iterator<Path> fileIt = Files.list(getJobRunningFolderPath(simulation)).iterator();
       while (fileIt.hasNext()) {
         Path file = fileIt.next();
         if (file.toString().endsWith(".sim")) {
-          simulationFileName = file.toString();
+          return getJobRunningFolderPathRaijin(simulation).resolve(file.getFileName()).toString();
         }
       }
     } catch (IOException e) {
       LOGGER.error("Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
     }
-    jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
-        backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
-        simulationFileName, podKey, getCustomerDataRoot(simulation).toString(),
-        getCustomerRunRoot(simulation).toString(),
-        getJobRunningFolderPathRaijin(simulation).toString());
+    return null;
   }
-
+  
   private Path getPowerPointRunFolderPath(Simulation simulation) {
     return Paths.get(getJobRunningFolderPath(simulation).toString(), "PowerPoint");
   }
@@ -581,10 +575,13 @@ public class SimulationService {
   }
 
   private void createPostprocessingRunFolders(Simulation simulation) throws IOException, Exception {
+    FileUtils.runChmod(getJobSynchronisedFolderPath(simulation).toString());
     // scenes
     if (Files.isDirectory(getScenesSyncFolderPath(simulation),
         LinkOption.NOFOLLOW_LINKS) == false) {
-      Files.createDirectories(getScenesSyncFolderPath(simulation));
+      Files.createDirectories(getScenesSyncFolderPath(simulation), fileAttributes);
+      FileUtils.runChmod(getScenesSyncFolderPath(simulation).toString());
+      FileUtils.logFilePermissions(getScenesSyncFolderPath(simulation));
       LOGGER.info("getRunScenesFolderPath created " + getScenesSyncFolderPath(simulation));
     } else {
       LOGGER.error("ERROR: getRunScenesFolderPath EXISTING !!! with Path: "
@@ -593,7 +590,9 @@ public class SimulationService {
     }
     // plots
     if (Files.isDirectory(getPlotsSyncFolderPath(simulation), LinkOption.NOFOLLOW_LINKS) == false) {
-      Files.createDirectories(getPlotsSyncFolderPath(simulation));
+      Files.createDirectories(getPlotsSyncFolderPath(simulation), fileAttributes);
+      FileUtils.runChmod(getPlotsSyncFolderPath(simulation).toString());
+      FileUtils.logFilePermissions(getPlotsSyncFolderPath(simulation));
       LOGGER.info("getRunPlotsFolderPath created " + getPlotsSyncFolderPath(simulation));
     } else {
       LOGGER.error("ERROR: getRunPlotsFolderPath EXISTING !!! with Path: "
@@ -604,7 +603,9 @@ public class SimulationService {
     // tables
     if (Files.isDirectory(getTablesSyncFolderPath(simulation),
         LinkOption.NOFOLLOW_LINKS) == false) {
-      Files.createDirectories(getTablesSyncFolderPath(simulation));
+      Files.createDirectories(getTablesSyncFolderPath(simulation), fileAttributes);
+      FileUtils.runChmod(getTablesSyncFolderPath(simulation).toString());
+      FileUtils.logFilePermissions(getTablesSyncFolderPath(simulation));
       LOGGER.info("getRunTablesFolderPath created " + getTablesSyncFolderPath(simulation));
     } else {
       LOGGER.error("ERROR: getRunTablesFolderPath EXISTING !!! with Path: "
@@ -615,7 +616,9 @@ public class SimulationService {
     // Starview
     if (Files.isDirectory(getStarViewSyncFolderPath(simulation),
         LinkOption.NOFOLLOW_LINKS) == false) {
-      Files.createDirectories(getStarViewSyncFolderPath(simulation));
+      Files.createDirectories(getStarViewSyncFolderPath(simulation), fileAttributes);
+      FileUtils.runChmod(getStarViewSyncFolderPath(simulation).toString());
+      FileUtils.logFilePermissions(getStarViewSyncFolderPath(simulation));
       LOGGER.info("getRunStarViewFolderPath created " + getStarViewSyncFolderPath(simulation));
     } else {
       LOGGER.error("ERROR: getRunStarViewFolderPath EXISTING !!! with Path: "
@@ -626,7 +629,9 @@ public class SimulationService {
     // PowerPoint
     if (Files.isDirectory(getPowerPointSyncFolderPath(simulation),
         LinkOption.NOFOLLOW_LINKS) == false) {
-      Files.createDirectories(getPowerPointSyncFolderPath(simulation));
+      Files.createDirectories(getPowerPointSyncFolderPath(simulation), fileAttributes);
+      FileUtils.runChmod(getPowerPointSyncFolderPath(simulation).toString());
+      FileUtils.logFilePermissions(getPowerPointSyncFolderPath(simulation));
       LOGGER.info("getRunPowerPointFolderPath created " + getPowerPointSyncFolderPath(simulation));
     } else {
       LOGGER.error("ERROR: getRunPowerPointFolderPath EXISTING !!! with Path: "
@@ -677,44 +682,24 @@ public class SimulationService {
   }
 
   private void getCustomerStarCCMPlusVersion(Simulation simulation)
-      throws IOException, InterruptedException {
-    Path InitialVersionLogPath = getJobRunningFolderPath(simulation).resolve("version.log");
-    Files.createFile(InitialVersionLogPath);
-    String simulationFileName = null;
-    try {
-      Iterator<Path> fileIt = Files.list(getRunSimulationFolderFullPath(simulation)).iterator();
-      while (fileIt.hasNext()) {
-        Path file = fileIt.next();
-        if (file.toString().endsWith(".sim")) {
-          simulationFileName = file.toString();
+      throws IOException, InterruptedException, JSchException {
+    String command = defaultStartCcmPlusPath + " -info " + getCustomerSimulationFilePathRaijin(simulation);
+    LOGGER.info("submit command: " + command);
+    BufferedReader in = sshService.execCommand(command);
+    LOGGER.info("submitted");
+    String str = null;
+    while ((str = in.readLine()) != null) {
+      LOGGER.info(str);
+      List<CcmPlus> list = config.getCcmpluses();
+      for (CcmPlus ccmPlus : list) {
+        if(str.contains(ccmPlus.getVersion())){
+          starCcmPlusVersionPath = ccmPlus.getPath();
+          starCcmPlusVersion = ccmPlus.getVersion();
+          LOGGER.info("starCcmPlusVersionPath selected: " + starCcmPlusVersionPath);
         }
       }
-    } catch (IOException e) {
-      LOGGER.error("Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
     }
-    ProcessBuilder pb =
-        new ProcessBuilder(ccmplusversionforinfoflagrunpath, "-info", simulationFileName);
-    pb.redirectOutput(InitialVersionLogPath.toFile());
-    File pbWorkingDirectory = getJobRunningFolderPath(simulation).toFile();
-    pb.directory(pbWorkingDirectory);
-    Process p = pb.start();
-    p.waitFor();
-    LOGGER.info("version.log created");
-    String content = new String(Files.readAllBytes(InitialVersionLogPath));
-    LOGGER.info("version.log=" + content);
-    int index = content.lastIndexOf("STAR-CCM+");
-    LOGGER.info("index=" + index);
-    int startindex = index + 9;
-    LOGGER.info("versionsectionstartindex=" + startindex);
-    int stopindex = startindex + 9;
-    LOGGER.info("stopindex=" + stopindex);
-    String ccmplusversion = content.substring(startindex, stopindex);
-    LOGGER.info("CCM+ version = " + ccmplusversion);
-    starCcmPlusVersion = ccmplusversion.replace(" ", "");
-    Path finalVersionLogPath = getJobLogsPath(simulation).resolve("version.log");
-    LOGGER.info("finalVersionLogPath = " + finalVersionLogPath.toString());
-    Files.createFile(finalVersionLogPath);
-    Files.move(InitialVersionLogPath, finalVersionLogPath, StandardCopyOption.REPLACE_EXISTING);
+    LOGGER.info("submitting command fnished");
   }
 
   private void copyCustomerSyncFolderIntoJobRunFolder(Simulation simulation)
@@ -748,6 +733,8 @@ public class SimulationService {
           LOGGER.info("directoryListing child.getName = " + child.getName());
           try {
             Files.move(child.toPath(), destination.toPath().resolve(child.getName()));
+            FileUtils.runChmod(destination.toString());
+            FileUtils.logFilePermissions(destination.toPath());
           } catch (Exception e) {
             LOGGER.error("CopyCustomerSyncFolderIntoJobRunFolder failed to move the child to = "
                 + destination.toPath().resolve(child.getName()), e);
@@ -774,18 +761,20 @@ public class SimulationService {
 
   private void createLogAndBackupDirectories(Simulation simulation)
       throws FileNotFoundException, IOException {
-    Files.createDirectories(getJobLogsPath(simulation));
+    Files.createDirectories(getJobLogsPath(simulation), fileAttributes);
     boolean JobLogs = Files.isDirectory(getJobLogsPath(simulation), LinkOption.NOFOLLOW_LINKS);
     LOGGER.info("JobLogs isDirectory " + JobLogs);
     LOGGER.info(" getJobLogsPath Folder created " + getJobLogsPath(simulation));
-
-    Files.createDirectories(getJobBackupPath(simulation));
+    FileUtils.logFilePermissions(getJobLogsPath(simulation));
+    
+    Files.createDirectories(getJobBackupPath(simulation), fileAttributes);
     LOGGER.info(" getJobBackupPath Folder created " + getJobBackupPath(simulation));
+    FileUtils.logFilePermissions(getJobBackupPath(simulation));
 
     File log = getJobLogsPath(simulation).resolve("job_" + simulation.getId() + ".log").toFile();
     LOGGER.info("HERE writing job_" + simulation.getId() + ".log at path= " + log.toString());
     try {
-      Files.createFile(log.toPath()); // TODO check if already exist
+      Files.createFile(log.toPath(), fileAttributes); // TODO check if already exist
       LOGGER.info("job_" + simulation.getId() + ".log File is created!");
     } catch (IOException ex) {
       LOGGER.info("job_" + simulation.getId()
@@ -808,11 +797,6 @@ public class SimulationService {
         "Job_" + simulation.getId());
   }
 
-  private Path getCustomerRunRoot(Simulation simulation) {
-    return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
-        "Job_" + simulation.getId());
-  }
-
   private Path getJobLogsPathRaijin(Simulation simulation) {
     return Paths.get(dataRootRaijin, getCustomerFolderRelativePath(simulation),
         "Job_" + simulation.getId(), "logs");
@@ -821,22 +805,10 @@ public class SimulationService {
   private void createJobRunAndSyncFolders(Simulation simulation) throws IOException, Exception {
     if (Files.isDirectory(getJobRunningFolderPath(simulation),
         LinkOption.NOFOLLOW_LINKS) == false) {
-      Set<PosixFilePermission> perms = new HashSet<>();
-      // add permission as rwxrwxrwx 777
-      perms.add(PosixFilePermission.OWNER_WRITE);
-      perms.add(PosixFilePermission.OWNER_READ);
-      perms.add(PosixFilePermission.OWNER_EXECUTE);
-      perms.add(PosixFilePermission.GROUP_READ);
-      perms.add(PosixFilePermission.GROUP_EXECUTE);
-      perms.add(PosixFilePermission.GROUP_WRITE);
-      perms.add(PosixFilePermission.OTHERS_READ);
-      perms.add(PosixFilePermission.OTHERS_WRITE);
-      perms.add(PosixFilePermission.OTHERS_EXECUTE);
-      FileAttribute<Set<PosixFilePermission>> fileAttributes =
-          PosixFilePermissions.asFileAttribute(perms);
       Files.createDirectories(getJobRunningFolderPath(simulation), fileAttributes);
       // Files.createDirectories(getJobRunningFolderPath(simulation));
       LOGGER.info("JobRunningFolder created " + getJobRunningFolderPath(simulation));
+      FileUtils.logFilePermissions(getJobRunningFolderPath(simulation));
     } else {
       LOGGER.error(
           "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath(simulation));
@@ -845,9 +817,11 @@ public class SimulationService {
 
     if (Files.isDirectory(getJobSynchronisedFolderPath(simulation),
         LinkOption.NOFOLLOW_LINKS) == false) {
-      Files.createDirectories(getJobSynchronisedFolderPath(simulation));
+      Files.createDirectories(getJobSynchronisedFolderPath(simulation), fileAttributes);
       LOGGER.debug("getJobSynchronisedFolderPath Folder created "
           + getJobSynchronisedFolderPath(simulation));
+      FileUtils.runChmod(getJobSynchronisedFolderPath(simulation).toString());
+      FileUtils.logFilePermissions(getJobSynchronisedFolderPath(simulation));
     } else {
       LOGGER.error("ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: "
           + getJobSynchronisedFolderPath(simulation));
