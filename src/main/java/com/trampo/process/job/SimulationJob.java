@@ -15,6 +15,7 @@ import com.trampo.process.domain.JobStatus;
 import com.trampo.process.domain.Simulation;
 import com.trampo.process.domain.SimulationStatus;
 import com.trampo.process.service.JobService;
+import com.trampo.process.service.MailService;
 import com.trampo.process.service.SimulationService;
 
 @Component
@@ -27,6 +28,9 @@ public class SimulationJob {
 
   @Autowired
   SimulationService simulationService;
+  
+  @Autowired
+  MailService mailService;
 
   @Scheduled(fixedDelay = 500)
   public void runSimulations() {
@@ -59,6 +63,17 @@ public class SimulationJob {
                 simulationService.cancelSimulation(simulation, job);
               } else {
                 simulationService.updateStatus(job.getSimulationId(), SimulationStatus.RUNNING);
+                try {
+                  String customerEmail = simulationService.getCustomerEmail(simulation.getCustomerId());
+                  mailService.send(customerEmail, "Simulation started to run!!",
+                      "Your simulation started to run", "externalnotification@trampocfd.com");
+                  mailService.send("gui@trampocfd.com", "File upload completed!!",
+                      "Simulation started to run completed for customer: " + customerEmail, "internalnotification@trampocfd.com");
+                  mailService.send("yeldanumit@gmail.com", "File upload completed!!",
+                      "Simulation started to run completed for customer: " + customerEmail, "internalnotification@trampocfd.com");
+                } catch (Exception e) {
+                  LOGGER.error("Error while sending file upload completed email!!!", e);
+                }
               }
             }
           } else if (job.getStatus().equals(JobStatus.S)) {
@@ -74,7 +89,7 @@ public class SimulationJob {
             if (map.containsKey(job.getSimulationId())) {
               Simulation simulation = map.get(job.getSimulationId());
               if(simulationService.isFinishedWithError(simulation)){
-                simulationService.error(simulation.getId(), "Failed During Execution");
+                simulationService.error(simulation, "Failed During Execution");
               }
               String[] times = job.getWalltime().split(":");
               int walltime = (Integer.parseInt(times[0]) * 60) + Integer.parseInt(times[1]); 
@@ -87,9 +102,20 @@ public class SimulationJob {
               Simulation simulation = simulationService.getSimulation(job.getSimulationId());
               if (!simulation.getStatus().equals(SimulationStatus.COMPLETED) && !simulation.getStatus().equals(SimulationStatus.ERROR)) {
                 if(simulationService.isFinishedWithError(simulation)){
-                  simulationService.error(simulation.getId(), "Failed During Execution");
+                  simulationService.error(simulation, "Failed During Execution");
                 }else{
                   simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
+                  try {
+                    String customerEmail = simulationService.getCustomerEmail(simulation.getCustomerId());
+                    mailService.send(customerEmail, "Simulation completed successfully!!",
+                        "Your simulation completed successfully!!", "externalnotification@trampocfd.com");
+                    mailService.send("gui@trampocfd.com", "File upload completed!!",
+                        "Simulation completed successfully for customer: " + customerEmail, "internalnotification@trampocfd.com");
+                    mailService.send("yeldanumit@gmail.com", "File upload completed!!",
+                        "Simulation completed successfully for customer: " + customerEmail, "internalnotification@trampocfd.com");
+                  } catch (Exception e) {
+                    LOGGER.error("Error while sending file upload completed email!!!", e);
+                  }
                 }
               }
             }

@@ -84,12 +84,13 @@ public class SimulationService {
   private String podKey;
   private String macroPath;
   private SshService sshService;
+  private MailService mailService;
   FileAttribute<Set<PosixFilePermission>> fileAttributes = null;
-  
+
 
   @Autowired
   public SimulationService(RestTemplateBuilder builder, TrampoConfig config, JobService jobService,
-      SshService sshService, @Value("${webapp.api.root}") String apiRoot,
+      SshService sshService, MailService mailService, @Value("${webapp.api.root}") String apiRoot,
       @Value("${trampo.simulation.scheduleMovePeriod}") String scheduleMovePeriod,
       @Value("${trampo.simulation.dataRoot}") String dataRoot,
       @Value("${trampo.simulation.runRoot}") String runRoot,
@@ -119,6 +120,7 @@ public class SimulationService {
     this.podKey = podKey;
     this.macroPath = macroPath;
     this.sshService = sshService;
+    this.mailService = mailService;
     // add permission as rwxrwxrwx 770
     Set<PosixFilePermission> perms = new HashSet<>();
     perms.add(PosixFilePermission.OWNER_WRITE);
@@ -133,6 +135,19 @@ public class SimulationService {
     fileAttributes = PosixFilePermissions.asFileAttribute(perms);
   }
 
+  public String getCustomerEmail(long customerId) throws RestException, IOException {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    Map<String, String> request = new HashMap<>();
+    HttpEntity<String> postEntity =
+        new HttpEntity<String>(mapper.writeValueAsString(request), headers);
+    ResponseEntity<String> response = restTemplate.exchange("/customers/email/" + customerId,
+        HttpMethod.GET, postEntity, String.class);
+    checkError(response);
+    return response.getBody();
+  }
+
   public Simulation getSimulation(String simulationId) throws RestException, IOException {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -140,8 +155,8 @@ public class SimulationService {
     Map<String, String> request = new HashMap<>();
     HttpEntity<String> postEntity =
         new HttpEntity<String>(mapper.writeValueAsString(request), headers);
-    ResponseEntity<String> response =
-        restTemplate.exchange("/" + simulationId, HttpMethod.GET, postEntity, String.class);
+    ResponseEntity<String> response = restTemplate.exchange("/simulations/" + simulationId,
+        HttpMethod.GET, postEntity, String.class);
     checkError(response);
     return mapper.readValue(response.getBody(), Simulation.class);
   }
@@ -154,8 +169,8 @@ public class SimulationService {
     Map<String, String> request = new HashMap<>();
     HttpEntity<String> postEntity =
         new HttpEntity<String>(mapper.writeValueAsString(request), headers);
-    ResponseEntity<String> response = restTemplate.exchange("/getByStatus/?status=" + status,
-        HttpMethod.GET, postEntity, String.class);
+    ResponseEntity<String> response = restTemplate.exchange(
+        "/simulations/getByStatus/?status=" + status, HttpMethod.GET, postEntity, String.class);
     checkError(response);
     List<Simulation> list =
         mapper.readValue(response.getBody(), new TypeReference<List<Simulation>>() {});
@@ -173,7 +188,7 @@ public class SimulationService {
     HttpEntity<String> postEntity =
         new HttpEntity<String>(mapper.writeValueAsString(request), headers);
     ResponseEntity<String> response =
-        restTemplate.exchange("/updateStatus/?status=" + status + "&id=" + simulationId,
+        restTemplate.exchange("/simulations/updateStatus/?status=" + status + "&id=" + simulationId,
             HttpMethod.GET, postEntity, String.class);
     checkError(response);
     LOGGER
@@ -189,14 +204,14 @@ public class SimulationService {
     Map<String, String> request = new HashMap<>();
     HttpEntity<String> postEntity =
         new HttpEntity<String>(mapper.writeValueAsString(request), headers);
-    ResponseEntity<String> response =
-        restTemplate.exchange("/updateWalltime/?actualWalltime=" + walltime + "&id=" + simulationId,
-            HttpMethod.GET, postEntity, String.class);
+    ResponseEntity<String> response = restTemplate.exchange(
+        "/simulations/updateWalltime/?actualWalltime=" + walltime + "&id=" + simulationId,
+        HttpMethod.GET, postEntity, String.class);
     checkError(response);
     LOGGER.info("Updated simulation: " + simulationId + " walltime: " + walltime);
   }
 
-  public void error(String simulationId, String errorMessage)
+  public void error(Simulation simulation, String errorMessage)
       throws RestException, JsonProcessingException {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -204,10 +219,21 @@ public class SimulationService {
     Map<String, String> request = new HashMap<>();
     HttpEntity<String> postEntity =
         new HttpEntity<String>(mapper.writeValueAsString(request), headers);
-    ResponseEntity<String> response =
-        restTemplate.exchange("/error/?errorMessage=" + errorMessage + "&id=" + simulationId,
-            HttpMethod.GET, postEntity, String.class);
+    ResponseEntity<String> response = restTemplate.exchange(
+        "/simulations/error/?errorMessage=" + errorMessage + "&id=" + simulation.getId(), HttpMethod.GET,
+        postEntity, String.class);
     checkError(response);
+    try {
+      String customerEmail = getCustomerEmail(simulation.getCustomerId());
+      mailService.send(customerEmail, "Simulation in error!!",
+          "Your simulation finished with error message: " + errorMessage, "externalnotification@trampocfd.com");
+      mailService.send("gui@trampocfd.com", "File upload completed!!",
+          "Simulation finished with error message: " + errorMessage + " for customer: " + customerEmail, "internalnotification@trampocfd.com");
+      mailService.send("yeldanumit@gmail.com", "File upload completed!!",
+          "Simulation finished with error message: " + errorMessage + " for customer: " + customerEmail, "internalnotification@trampocfd.com");
+    } catch (Exception e) {
+      LOGGER.error("Error while sending file upload completed email!!!", e);
+    }
   }
 
   private void checkError(ResponseEntity<String> response) throws RestException {
@@ -220,10 +246,22 @@ public class SimulationService {
 
   public void startSimulation(Simulation simulation) throws Exception {
     if (!simulation.getFolderName().startsWith("sim")) {
-      error(simulation.getId(), "Simulation name must start with sim!!!");
+      error(simulation, "Simulation name must start with sim!!!");
       return;
     }
     if (areFilesAvailable(simulation)) {
+
+      try {
+        String customerEmail = getCustomerEmail(simulation.getCustomerId());
+        mailService.send(customerEmail, "File upload completed!!",
+            "File upload completed for your simulation", "externalnotification@trampocfd.com");
+        mailService.send("gui@trampocfd.com", "File upload completed!!",
+            "File upload completed for customer: " + customerEmail, "internalnotification@trampocfd.com");
+        mailService.send("yeldanumit@gmail.com", "File upload completed!!",
+            "File upload completed for customer: " + customerEmail, "internalnotification@trampocfd.com");
+      } catch (Exception e) {
+        LOGGER.error("Error while sending file upload completed email!!!", e);
+      }
 
       checkSimName_FileCount_FileExtension_Scan4Macro(simulation);
 
@@ -253,7 +291,7 @@ public class SimulationService {
               + simulation.getDateCreated().plusDays(maxWaitForFilesInDays));
           LOGGER.info("now: " + LocalDateTime.now());
           LOGGER.error("files took too long to upload. simulation id: " + simulation.getId());
-          error(simulation.getId(), "files took too long to upload");
+          error(simulation, "files took too long to upload");
         }
       }
     }
@@ -347,8 +385,9 @@ public class SimulationService {
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
 
 
-      //deletes run folder
-      org.apache.tomcat.util.http.fileupload.FileUtils.deleteDirectory(getJobRunningFolderPath(simulation).toFile());
+      // deletes run folder
+      org.apache.tomcat.util.http.fileupload.FileUtils
+          .deleteDirectory(getJobRunningFolderPath(simulation).toFile());
 
       // All below
       // _printStreamToLogFile.println("End simulation time: " + LocalTime.now()); // this doesn't
@@ -368,7 +407,7 @@ public class SimulationService {
   private void checkSimName_FileCount_FileExtension_Scan4Macro(Simulation simulation)
       throws JsonProcessingException, RestException {
     if (simulation.getFolderName().isEmpty()) {
-      error(simulation.getId(), "Simulation folder name was not input");
+      error(simulation, "Simulation folder name was not input");
       LOGGER.error("Simulation cancelled. id: " + simulation.getId()
           + " Simulation folder name was not input");
       return;
@@ -379,7 +418,7 @@ public class SimulationService {
       LOGGER.error("Simulation cancelled. id: " + simulation.getId() + " Simulation folder "
           + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)
           + " is NOT available");
-      error(simulation.getId(), "Simulation folder is NOT available!!!");
+      error(simulation, "Simulation folder is NOT available!!!");
       return;
     }
 
@@ -402,7 +441,7 @@ public class SimulationService {
           + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
     }
     if (!simFileExist) {
-      error(simulation.getId(), "Simulation File Does not Exist!!!");
+      error(simulation, "Simulation File Does not Exist!!!");
     }
 
     // check file extensions.
@@ -419,7 +458,7 @@ public class SimulationService {
           }
           if (!res) {
             LOGGER.error("File " + child.getName() + " extension is not supported");
-            error(simulation.getId(), "Unsafe uploaded files extension");
+            error(simulation, "Unsafe uploaded files extension");
           } else {
             if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[3])) { //
               Scan scan = new Scan(child);
@@ -430,7 +469,7 @@ public class SimulationService {
                     + child.getName());
                 new SendEmail().send(SendEmail.TO, "scan4maco returned unsafe operation",
                     "customer = " + simulation.getCustomerId() + " job = " + simulation.getId());
-                error(simulation.getId(), "Scan4Macro detected an unsafe operation");
+                error(simulation, "Scan4Macro detected an unsafe operation");
                 return;
               }
             }
@@ -462,7 +501,7 @@ public class SimulationService {
 
     if (count != simulation.getFileCount() || simCount != 1) {
       LOGGER.error("!!! Actual file count does not match nominated file count !!!");
-      error(simulation.getId(), "number of files in sync folder not matching");
+      error(simulation, "number of files in sync folder not matching");
       return;
     } else {
       LOGGER.info("Actual file count matches nominated file count !!!");
@@ -506,7 +545,7 @@ public class SimulationService {
     int memory;
     if (simulation.getProcessorType().equals("INSTANT")) {
       cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
-      queueType = "expressbw"; //TODO check later
+      queueType = "expressbw"; // TODO check later
       memory = 125 * simulation.getNumberOfCoresInstantFast();
     } else if (simulation.getProcessorType().equals("FAST")) {
       cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
@@ -529,17 +568,17 @@ public class SimulationService {
     walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
     String simulationFileName = getCustomerSimulationFilePathRaijin(simulation);
     String podKeyToSubmit = podKey;
-    if(simulation.getByoLicensingType().equals(ByoLicensingType.POD)){
+    if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
       podKeyToSubmit = simulation.getPodKey();
     }
     jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
         backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
         simulationFileName, podKeyToSubmit, getCustomerDataRoot(simulation).toString(),
-        getJobRunningFolderPath(simulation).toString(), getJobRunningFolderPathRaijin(simulation).toString(), 
-        starCcmPlusVersion);
+        getJobRunningFolderPath(simulation).toString(),
+        getJobRunningFolderPathRaijin(simulation).toString(), starCcmPlusVersion);
   }
 
-  private String getCustomerSimulationFilePathRaijin(Simulation simulation){
+  private String getCustomerSimulationFilePathRaijin(Simulation simulation) {
     try {
       Iterator<Path> fileIt = Files.list(getJobRunningFolderPath(simulation)).iterator();
       while (fileIt.hasNext()) {
@@ -553,7 +592,7 @@ public class SimulationService {
     }
     return null;
   }
-  
+
   private Path getPowerPointRunFolderPath(Simulation simulation) {
     return Paths.get(getJobRunningFolderPath(simulation).toString(), "PowerPoint");
   }
@@ -586,7 +625,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunScenesFolderPath EXISTING !!! with Path: "
           + getScenesSyncFolderPath(simulation));
-      error(simulation.getId(), "scenes folder path EXISTING !!!");
+      error(simulation, "scenes folder path EXISTING !!!");
     }
     // plots
     if (Files.isDirectory(getPlotsSyncFolderPath(simulation), LinkOption.NOFOLLOW_LINKS) == false) {
@@ -597,7 +636,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunPlotsFolderPath EXISTING !!! with Path: "
           + getPlotsSyncFolderPath(simulation));
-      error(simulation.getId(), "plots sync folder path EXISTING !!!");
+      error(simulation, "plots sync folder path EXISTING !!!");
     }
 
     // tables
@@ -610,7 +649,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunTablesFolderPath EXISTING !!! with Path: "
           + getTablesSyncFolderPath(simulation));
-      error(simulation.getId(), "tables sync folder path EXISTING !!!");
+      error(simulation, "tables sync folder path EXISTING !!!");
     }
 
     // Starview
@@ -623,7 +662,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunStarViewFolderPath EXISTING !!! with Path: "
           + getStarViewSyncFolderPath(simulation));
-      error(simulation.getId(), "Star View Folder Path EXISTING!!!");
+      error(simulation, "Star View Folder Path EXISTING!!!");
     }
 
     // PowerPoint
@@ -636,7 +675,7 @@ public class SimulationService {
     } else {
       LOGGER.error("ERROR: getRunPowerPointFolderPath EXISTING !!! with Path: "
           + getPowerPointSyncFolderPath(simulation));
-      error(simulation.getId(), "Power Point Folder Path EXISTING!!!");
+      error(simulation, "Power Point Folder Path EXISTING!!!");
     }
   }
 
@@ -683,7 +722,8 @@ public class SimulationService {
 
   private void getCustomerStarCCMPlusVersion(Simulation simulation)
       throws IOException, InterruptedException, JSchException {
-    String command = defaultStartCcmPlusPath + " -info " + getCustomerSimulationFilePathRaijin(simulation);
+    String command =
+        defaultStartCcmPlusPath + " -info " + getCustomerSimulationFilePathRaijin(simulation);
     LOGGER.info("submit command: " + command);
     BufferedReader in = sshService.execCommand(command);
     LOGGER.info("submitted");
@@ -692,7 +732,7 @@ public class SimulationService {
       LOGGER.info(str);
       List<CcmPlus> list = config.getCcmpluses();
       for (CcmPlus ccmPlus : list) {
-        if(str.contains(ccmPlus.getVersion())){
+        if (str.contains(ccmPlus.getVersion())) {
           starCcmPlusVersionPath = ccmPlus.getPath();
           starCcmPlusVersion = ccmPlus.getVersion();
           LOGGER.info("starCcmPlusVersionPath selected: " + starCcmPlusVersionPath);
@@ -766,7 +806,7 @@ public class SimulationService {
     LOGGER.info("JobLogs isDirectory " + JobLogs);
     LOGGER.info(" getJobLogsPath Folder created " + getJobLogsPath(simulation));
     FileUtils.logFilePermissions(getJobLogsPath(simulation));
-    
+
     Files.createDirectories(getJobBackupPath(simulation), fileAttributes);
     LOGGER.info(" getJobBackupPath Folder created " + getJobBackupPath(simulation));
     FileUtils.logFilePermissions(getJobBackupPath(simulation));
@@ -812,7 +852,7 @@ public class SimulationService {
     } else {
       LOGGER.error(
           "ERROR: JOBRUNNINGFOLDER EXISTING !!! with Path: " + getJobRunningFolderPath(simulation));
-      error(simulation.getId(), "Job Run Folder Preexisting");
+      error(simulation, "Job Run Folder Preexisting");
     }
 
     if (Files.isDirectory(getJobSynchronisedFolderPath(simulation),
@@ -826,7 +866,7 @@ public class SimulationService {
       LOGGER.error("ERROR: getJobSynchronisedFolderPath EXISTING !!! with Path: "
           + getJobSynchronisedFolderPath(simulation));
       // this needs to make the simulation exist the queue as it indicates a major problem
-      error(simulation.getId(), "Job Sync Folder Preexisting");
+      error(simulation, "Job Sync Folder Preexisting");
     }
   }
 
