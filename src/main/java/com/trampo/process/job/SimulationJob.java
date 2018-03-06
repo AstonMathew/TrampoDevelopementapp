@@ -32,7 +32,7 @@ public class SimulationJob {
   @Autowired
   MailService mailService;
 
-  @Scheduled(fixedDelay = 500)
+  @Scheduled(fixedDelay = 15000)
   public void runSimulations() {
     LOGGER.info("Run Simulations job starting");
 
@@ -54,7 +54,11 @@ public class SimulationJob {
       for (Job job : currentJobs) {
         LOGGER.info("found job; simulationId: " + job.getSimulationId() + " job status: "
             + job.getStatus());
-
+        try{
+          Long.parseLong(job.getSimulationId());
+        }catch (Exception e) {
+          continue;
+        }
         try {
           if (job.getStatus().equals(JobStatus.R)) {
             if (!map.containsKey(job.getSimulationId())) {
@@ -121,7 +125,7 @@ public class SimulationJob {
             }
           } else if (job.getStatus().equals(JobStatus.H)) {
             // only log
-            LOGGER.warn("Job is n held state. job id: " + job.getId());
+            LOGGER.warn("Job is in held state. job id: " + job.getId());
           }else if (job.getStatus().equals(JobStatus.E)) {
             // there is nothing to do
           }

@@ -132,16 +132,17 @@ public class JobService {
   public void submitJob(String jobName, String cpuCount, String memory, String queueType,
       String scriptPath, String walltime, String raijinLogRoot, String macroPath,
       String simulationPath, String podKey, String customerDataRoot, String customerRunRoot,
-      String runRoot, String starCcmPlusVersion) throws JSchException, IOException, InterruptedException {
-     
-     FileUtils.runChmod(customerRunRoot);
-     FileUtils.runChmod(customerDataRoot);
+      String runRoot, String starCcmPlusVersion, Boolean meshOnly, Boolean runOnly)
+      throws JSchException, IOException, InterruptedException {
+
+    FileUtils.runChmod(customerRunRoot);
+    FileUtils.runChmod(customerDataRoot);
     // No spaces in qsub command
-    String command = "cd " + runRoot + "; qsub -N " + jobName + " -q "
-        + queueType + " -lncpus=" + cpuCount + " -e " + raijinLogRoot + "/out.err -o "
-        + raijinLogRoot + "/out.out -lmem=" + memory + "GB -lwalltime=" + walltime
-        + " -v StarCcmRunVersionPath=" + starCcmPlusVersion + ",MacroPath=" + macroPath + ",SimulationPath=" + simulationPath + ",Podkey=" + podKey
-        + " " + scriptPath + ";";
+    String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus="
+        + cpuCount + " -e " + raijinLogRoot + "/out.err -o " + raijinLogRoot + "/out.out -lmem="
+        + memory + "GB -lwalltime=" + walltime + " -v StarCcmRunVersionPath=" + starCcmPlusVersion
+        + ",MacroPath=" + macroPath + ",SimulationPath=" + simulationPath + ",Podkey=" + podKey
+        + ",meshOnly=" + meshOnly + ",runOnly=" + runOnly + " " + scriptPath + ";";
     LOGGER.info("submit job command: " + command);
     BufferedReader in = sshService.execCommand(command);
     LOGGER.info("submitting job ");

@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.JSchException;
 import com.trampo.process.service.SshService;
 
 public class MoveTask {
@@ -72,7 +71,7 @@ public class MoveTask {
 
     @Override
     public void run() {
-      try {
+      try{
         String command = "chmod -R 770 " + runRoot; // + "/" + jobName;
         LOG.info("submit command: " + command);
         BufferedReader in = sshService.execCommand(command);
@@ -82,6 +81,11 @@ public class MoveTask {
           LOG.info(str);
         }
         LOG.info("submitting command fnished");
+      }catch (Exception e) {
+        LOG.error("Error while moving files", e);
+      }
+      
+      try {        
         File[] directoryListing = source.listFiles();
         if (directoryListing != null) {
           for (File child : directoryListing) {
@@ -94,7 +98,7 @@ public class MoveTask {
             }
           }
         }
-      } catch (IOException | JSchException ex) {
+      } catch (IOException ex) {
         LOG.error("Error while moving files", ex);
       }
     }

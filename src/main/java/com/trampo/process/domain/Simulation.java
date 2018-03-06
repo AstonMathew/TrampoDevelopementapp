@@ -19,6 +19,8 @@ public class Simulation {
   private StarCcmPrecision starCcmPrecision;
   private ByoLicensingType byoLicensingType;
   private String podKey;
+  private Boolean mesh;
+  private Boolean run;
   private LocalDateTime dateCreated;
   private LocalDateTime dateUpdated;
 
@@ -156,5 +158,21 @@ public class Simulation {
 
   public void setPodKey(String podKey) {
     this.podKey = podKey;
+  }
+
+  public Boolean getMesh() {
+    return mesh;
+  }
+
+  public void setMesh(Boolean mesh) {
+    this.mesh = mesh;
+  }
+
+  public Boolean getRun() {
+    return run;
+  }
+
+  public void setRun(Boolean run) {
+    this.run = run;
   }
 }

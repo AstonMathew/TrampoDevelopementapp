@@ -9,13 +9,13 @@ import com.trampo.process.domain.CcmPlus;
 @ConfigurationProperties("trampo")
 public class TrampoConfig {
 
-  private List<CcmPlus> ccmpluses;
+  private List<CcmPlus> ccmplus;
 
-  public List<CcmPlus> getCcmpluses() {
-    return ccmpluses;
+  public List<CcmPlus> getCcmplus() {
+    return ccmplus;
   }
 
-  public void setCcmpluses(List<CcmPlus> ccmpluses) {
-    this.ccmpluses = ccmpluses;
+  public void setCcmplus(List<CcmPlus> ccmplus) {
+    this.ccmplus = ccmplus;
   }
 }

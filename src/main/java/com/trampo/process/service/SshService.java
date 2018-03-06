@@ -9,11 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 @Component
 public class SshService {
@@ -47,5 +48,15 @@ public class SshService {
     channel.setCommand(command);
     channel.connect();
     return in;
+  }
+  
+  public void copyRemoteFile(String remoteFile, String localFile){
+    try {
+      ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
+      channel.connect();
+      channel.get(remoteFile, localFile);
+    } catch (JSchException | SftpException e) {
+      LOGGER.error(e.getMessage());
+    }
   }
 }

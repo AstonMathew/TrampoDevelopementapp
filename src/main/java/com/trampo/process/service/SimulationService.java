@@ -51,6 +51,7 @@ import com.trampo.process.domain.CcmPlus;
 import com.trampo.process.domain.Job;
 import com.trampo.process.domain.Simulation;
 import com.trampo.process.domain.SimulationStatus;
+import com.trampo.process.domain.StarCcmPrecision;
 import com.trampo.process.exception.RestException;
 import com.trampo.process.util.FileUtils;
 import com.trampo.process.util.MoveTask;
@@ -220,17 +221,22 @@ public class SimulationService {
     HttpEntity<String> postEntity =
         new HttpEntity<String>(mapper.writeValueAsString(request), headers);
     ResponseEntity<String> response = restTemplate.exchange(
-        "/simulations/error/?errorMessage=" + errorMessage + "&id=" + simulation.getId(), HttpMethod.GET,
-        postEntity, String.class);
+        "/simulations/error/?errorMessage=" + errorMessage + "&id=" + simulation.getId(),
+        HttpMethod.GET, postEntity, String.class);
     checkError(response);
     try {
       String customerEmail = getCustomerEmail(simulation.getCustomerId());
       mailService.send(customerEmail, "Simulation in error!!",
-          "Your simulation finished with error message: " + errorMessage, "externalnotification@trampocfd.com");
-      mailService.send("gui@trampocfd.com", "File upload completed!!",
-          "Simulation finished with error message: " + errorMessage + " for customer: " + customerEmail, "internalnotification@trampocfd.com");
+          "Your simulation finished with error message: " + errorMessage,
+          "externalnotification@trampocfd.com");
+      mailService.send(
+          "gui@trampocfd.com", "File upload completed!!", "Simulation finished with error message: "
+              + errorMessage + " for customer: " + customerEmail,
+          "internalnotification@trampocfd.com");
       mailService.send("yeldanumit@gmail.com", "File upload completed!!",
-          "Simulation finished with error message: " + errorMessage + " for customer: " + customerEmail, "internalnotification@trampocfd.com");
+          "Simulation finished with error message: " + errorMessage + " for customer: "
+              + customerEmail,
+          "internalnotification@trampocfd.com");
     } catch (Exception e) {
       LOGGER.error("Error while sending file upload completed email!!!", e);
     }
@@ -256,9 +262,11 @@ public class SimulationService {
         mailService.send(customerEmail, "File upload completed!!",
             "File upload completed for your simulation", "externalnotification@trampocfd.com");
         mailService.send("gui@trampocfd.com", "File upload completed!!",
-            "File upload completed for customer: " + customerEmail, "internalnotification@trampocfd.com");
+            "File upload completed for customer: " + customerEmail,
+            "internalnotification@trampocfd.com");
         mailService.send("yeldanumit@gmail.com", "File upload completed!!",
-            "File upload completed for customer: " + customerEmail, "internalnotification@trampocfd.com");
+            "File upload completed for customer: " + customerEmail,
+            "internalnotification@trampocfd.com");
       } catch (Exception e) {
         LOGGER.error("Error while sending file upload completed email!!!", e);
       }
@@ -571,11 +579,20 @@ public class SimulationService {
     if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
       podKeyToSubmit = simulation.getPodKey();
     }
+    boolean meshOnly = false;
+    if (simulation.getMesh() != null) {
+      meshOnly = simulation.getMesh();
+    }
+    boolean runOnly = false;
+    if (simulation.getRun() != null) {
+      runOnly = simulation.getRun();
+    }
     jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
         backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
         simulationFileName, podKeyToSubmit, getCustomerDataRoot(simulation).toString(),
         getJobRunningFolderPath(simulation).toString(),
-        getJobRunningFolderPathRaijin(simulation).toString(), starCcmPlusVersion);
+        getJobRunningFolderPathRaijin(simulation).toString(), starCcmPlusVersionPath, meshOnly,
+        runOnly);
   }
 
   private String getCustomerSimulationFilePathRaijin(Simulation simulation) {
@@ -724,22 +741,27 @@ public class SimulationService {
       throws IOException, InterruptedException, JSchException {
     String command =
         defaultStartCcmPlusPath + " -info " + getCustomerSimulationFilePathRaijin(simulation);
-    LOGGER.info("submit command: " + command);
+    LOGGER.info("info command: " + command);
     BufferedReader in = sshService.execCommand(command);
-    LOGGER.info("submitted");
-    String str = null;
-    while ((str = in.readLine()) != null) {
-      LOGGER.info(str);
-      List<CcmPlus> list = config.getCcmpluses();
-      for (CcmPlus ccmPlus : list) {
-        if (str.contains(ccmPlus.getVersion())) {
-          starCcmPlusVersionPath = ccmPlus.getPath();
-          starCcmPlusVersion = ccmPlus.getVersion();
-          LOGGER.info("starCcmPlusVersionPath selected: " + starCcmPlusVersionPath);
+    LOGGER.info("info command sumitted");
+    try {
+      String str = null;
+      while ((str = in.readLine()) != null) {
+        LOGGER.info(str);
+        List<CcmPlus> list = config.getCcmplus();
+        for (CcmPlus ccmPlus : list) {
+          if (ccmPlus.getPrecision().equals(StarCcmPrecision.MIXED)
+              && str.contains(ccmPlus.getVersion())) {
+            starCcmPlusVersionPath = ccmPlus.getPath();
+            starCcmPlusVersion = ccmPlus.getVersion();
+            LOGGER.info("starCcmPlusVersionPath selected: " + starCcmPlusVersionPath);
+          }
         }
       }
+    } catch (Exception e) {
+      LOGGER.error("Error while trying to read info command response", e);
     }
-    LOGGER.info("submitting command fnished");
+    LOGGER.info("submitting info command fnished");
   }
 
   private void copyCustomerSyncFolderIntoJobRunFolder(Simulation simulation)
@@ -940,8 +962,8 @@ public class SimulationService {
   }
 
   public boolean isFinishedWithError(Simulation simulation) {
-    String errorLogFilePath =
-        getJobRunningFolderPath(simulation).toString() + simulation.getId() + "/out.err";
+    String errorLogFilePath =  getJobLogsPath(simulation).toString() + "/copy_out.err";
+    sshService.copyRemoteFile(getJobLogsPathRaijin(simulation)+ "/out.err", errorLogFilePath);    
     try {
       List<String> lines = Files.readAllLines(Paths.get(errorLogFilePath));
       if (lines != null && lines.size() > 0 && StringUtils.hasText(lines.get(0))) {

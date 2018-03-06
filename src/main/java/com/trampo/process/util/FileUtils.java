@@ -24,7 +24,7 @@ public class FileUtils {
     Runnable filePermissionLog = () -> {
       while (true) {
         try {
-          Thread.sleep(1000);
+          Thread.sleep(30000);
         } catch (InterruptedException e) {
           LOGGER.error("Error while logging file permissions", e);
         }
