@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -74,11 +75,10 @@ public class MoveTask {
       try{
         String command = "chmod -R 770 " + runRoot; // + "/" + jobName;
         LOG.info("submit command: " + command);
-        BufferedReader in = sshService.execCommand(command);
+        List<String> result = sshService.execCommand(command);
         LOG.info("submitted");
-        String str = null;
-        while ((str = in.readLine()) != null) {
-          LOG.info(str);
+        for (String string : result) {
+          LOG.info(string);
         }
         LOG.info("submitting command fnished");
       }catch (Exception e) {

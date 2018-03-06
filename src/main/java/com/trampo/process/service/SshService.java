@@ -3,12 +3,16 @@ package com.trampo.process.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -42,12 +46,18 @@ public class SshService {
     }
   }
   
-  public BufferedReader execCommand(String command) throws JSchException, IOException{
+  public List<String> execCommand(String command) throws JSchException, IOException{
     ChannelExec channel = (ChannelExec) session.openChannel("exec");
     BufferedReader in = new BufferedReader(new InputStreamReader(channel.getInputStream()));
     channel.setCommand(command);
     channel.connect();
-    return in;
+    List<String> result = new ArrayList<>();
+    String str = null;
+    while ((str = in.readLine()) != null) {
+      result.add(str);
+    }
+    channel.disconnect();
+    return result;
   }
   
   public void copyRemoteFile(String remoteFile, String localFile){
@@ -55,6 +65,7 @@ public class SshService {
       ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
       channel.connect();
       channel.get(remoteFile, localFile);
+      channel.disconnect();
     } catch (JSchException | SftpException e) {
       LOGGER.error(e.getMessage());
     }

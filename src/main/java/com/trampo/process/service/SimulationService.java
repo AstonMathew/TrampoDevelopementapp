@@ -742,16 +742,15 @@ public class SimulationService {
     String command =
         defaultStartCcmPlusPath + " -info " + getCustomerSimulationFilePathRaijin(simulation);
     LOGGER.info("info command: " + command);
-    BufferedReader in = sshService.execCommand(command);
+    List<String> result = sshService.execCommand(command);
     LOGGER.info("info command sumitted");
     try {
-      String str = null;
-      while ((str = in.readLine()) != null) {
-        LOGGER.info(str);
+      for (String string : result) {
+        LOGGER.info(string);
         List<CcmPlus> list = config.getCcmplus();
         for (CcmPlus ccmPlus : list) {
           if (ccmPlus.getPrecision().equals(StarCcmPrecision.MIXED)
-              && str.contains(ccmPlus.getVersion())) {
+              && string.contains(ccmPlus.getVersion())) {
             starCcmPlusVersionPath = ccmPlus.getPath();
             starCcmPlusVersion = ccmPlus.getVersion();
             LOGGER.info("starCcmPlusVersionPath selected: " + starCcmPlusVersionPath);

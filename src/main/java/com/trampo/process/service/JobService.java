@@ -36,14 +36,13 @@ public class JobService {
   }
 
   public List<Job> getCurrentJobs() throws JSchException, IOException {
-    BufferedReader in = sshService.execCommand("qstat -u gj5914 -x;");
+    List<String> result = sshService.execCommand("qstat -u gj5914 -x;");
     List<Job> list = new ArrayList<Job>();
-    String str = null;
-    while ((str = in.readLine()) != null) {
-      LOGGER.info("current running jobs script output lne: " + str);
-      if (StringUtils.hasText(str) && !str.startsWith("r-man2") && !str.startsWith("Job ID")
-          && !str.startsWith("----") && !str.contains("Req'd")) {
-        String[] line = str.split(" ");
+    for (String string : result) {
+      LOGGER.info("current running jobs script output lne: " + string);
+      if (StringUtils.hasText(string) && !string.startsWith("r-man2") && !string.startsWith("Job ID")
+          && !string.startsWith("----") && !string.contains("Req'd")) {
+        String[] line = string.split(" ");
         int fieldNumber = 0;
         int i = 0;
         String jobId = "";
@@ -120,11 +119,10 @@ public class JobService {
   public void cancelJob(String jobId) throws JSchException, IOException {
     String command = "qdel " + jobId;
     LOGGER.info("cancel job command: " + command);
-    BufferedReader in = sshService.execCommand(command);
+    List<String> result = sshService.execCommand(command);
     LOGGER.info("cancelling job ");
-    String str = null;
-    while ((str = in.readLine()) != null) {
-      LOGGER.info(str);
+    for (String string : result) {
+      LOGGER.info(string);
     }
     LOGGER.info("cancelling job fnished");
   }
@@ -144,11 +142,10 @@ public class JobService {
         + ",MacroPath=" + macroPath + ",SimulationPath=" + simulationPath + ",Podkey=" + podKey
         + ",meshOnly=" + meshOnly + ",runOnly=" + runOnly + " " + scriptPath + ";";
     LOGGER.info("submit job command: " + command);
-    BufferedReader in = sshService.execCommand(command);
+    List<String> result = sshService.execCommand(command);
     LOGGER.info("submitting job ");
-    String str = null;
-    while ((str = in.readLine()) != null) {
-      LOGGER.info(str);
+    for (String string : result) {
+      LOGGER.info(string);
     }
     LOGGER.info("submitting job fnished");
   }
