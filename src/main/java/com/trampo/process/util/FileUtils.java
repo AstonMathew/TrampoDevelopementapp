@@ -21,38 +21,38 @@ public class FileUtils {
   static ExecutorService executor = Executors.newFixedThreadPool(20);
 
   public static void logFilePermissions(Path path) {
-    Runnable filePermissionLog = () -> {
-      while (true) {
-        try {
-          Thread.sleep(30000);
-        } catch (InterruptedException e) {
-          LOGGER.error("Error while logging file permissions", e);
-        }
-        Iterator<Path> fileIt = null;
-        try {
-          fileIt = Files.list(path).iterator();
-        } catch (IOException e) {
-          LOGGER.error("Error while logging file permissions", e);
-        }
-        while (fileIt.hasNext()) {
-          Path file = fileIt.next();
-          try {
-            LOGGER.info(
-                "File path: " + file.toString() + " - Permissions: " + getOctalPosixFilePermissions(
-                    Files.getPosixFilePermissions(file, LinkOption.NOFOLLOW_LINKS)));
-          } catch (IOException e) {
-            LOGGER.error("Error while logging file permissions", e);
-          }
-        }
-        try {
-          LOGGER.info("File path: " + path + " - Permissions: " + getOctalPosixFilePermissions(
-              Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)));
-        } catch (IOException e) {
-          LOGGER.error("Error while logging file permissions", e);
-        }
-      }
-    };
-    executor.submit(filePermissionLog);
+//    Runnable filePermissionLog = () -> {
+//      while (true) {
+//        try {
+//          Thread.sleep(30000);
+//        } catch (InterruptedException e) {
+//          LOGGER.error("Error while logging file permissions", e);
+//        }
+//        Iterator<Path> fileIt = null;
+//        try {
+//          fileIt = Files.list(path).iterator();
+//        } catch (IOException e) {
+//          LOGGER.error("Error while logging file permissions", e);
+//        }
+//        while (fileIt.hasNext()) {
+//          Path file = fileIt.next();
+//          try {
+//            LOGGER.info(
+//                "File path: " + file.toString() + " - Permissions: " + getOctalPosixFilePermissions(
+//                    Files.getPosixFilePermissions(file, LinkOption.NOFOLLOW_LINKS)));
+//          } catch (IOException e) {
+//            LOGGER.error("Error while logging file permissions", e);
+//          }
+//        }
+//        try {
+//          LOGGER.info("File path: " + path + " - Permissions: " + getOctalPosixFilePermissions(
+//              Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)));
+//        } catch (IOException e) {
+//          LOGGER.error("Error while logging file permissions", e);
+//        }
+//      }
+//    };
+//    executor.submit(filePermissionLog);
   }
 
   public static String getOctalPosixFilePermissions(Set<PosixFilePermission> permissions) {
@@ -93,16 +93,20 @@ public class FileUtils {
     return "" + owner + group + other;
   }
 
-  public static void runChmod(String path) throws InterruptedException, IOException {
+  public static void runChmod(String path) {
     LOGGER.info("chmod command: " + path);
-    Process p = Runtime.getRuntime().exec("chmod -R 770 " + path);
-    p.waitFor();
-    LOGGER.info("chmod exit status: " + p.exitValue());
-    Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
-    String result = out.hasNext() ? out.next() : "";
-    LOGGER.info("chmod out: " + result);
-    Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
-    result = error.hasNext() ? error.next() : "";
-    LOGGER.info("chmod error: " + result);
+    try{
+      Process p = Runtime.getRuntime().exec("chmod -R 770 " + path);
+      p.waitFor();
+      LOGGER.info("chmod exit status: " + p.exitValue());
+      Scanner out = new Scanner(p.getInputStream()).useDelimiter("\\A");
+      String result = out.hasNext() ? out.next() : "";
+      LOGGER.info("chmod out: " + result);
+      Scanner error = new Scanner(p.getErrorStream()).useDelimiter("\\A");
+      result = error.hasNext() ? error.next() : "";
+      LOGGER.info("chmod error: " + result);
+    }catch (Exception e) {
+      LOGGER.error("Error while running chmod", e);
+    }
   }
 }
