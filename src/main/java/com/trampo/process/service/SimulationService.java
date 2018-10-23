@@ -68,6 +68,7 @@ public class SimulationService {
   String starCcmPlusVersion = null;
   String starCcmPlusVersionPath = null;
 
+  private String productionOrTestingSwitch;
   private RestTemplate restTemplate;
   private ObjectMapper mapper;
   private String scheduleMovePeriod;
@@ -88,6 +89,7 @@ public class SimulationService {
   @Autowired
   public SimulationService(RestTemplateBuilder builder, JobService jobService,
       SshService sshService, MailService mailService,
+      @Value("${trampo.simulation.productionOrTestingSwitch}") String productionOrTestingSwitch,
       @Value("${webapp.api.root}") String apiRoot,
       @Value("${trampo.simulation.scheduleMovePeriod}") String scheduleMovePeriod,
       @Value("${trampo.simulation.dataRoot}") String dataRoot,
@@ -105,6 +107,7 @@ public class SimulationService {
     mapper = new ObjectMapper();
     mapper.findAndRegisterModules();
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    this.productionOrTestingSwitch = productionOrTestingSwitch;
     this.scheduleMovePeriod = scheduleMovePeriod;
     this.dataRoot = dataRoot;
     this.runRoot = runRoot;
@@ -580,12 +583,15 @@ public class SimulationService {
       queueType = "normal";
       memory = 30 * simulation.getNumberOfCoresStandardLowPriority();
     }
-    cpuCount = 1; // TODO for testing purposes
+    if (productionOrTestingSwitch.equals("test")){
+    cpuCount = 1;
     if (simulation.getProcessorType().equals("FAST")) {
-      memory = 125;// TODO for testing purposes
+      memory = 125;
     } else {
-      memory = 30;// TODO for testing purposes
+      memory = 30;
     }
+    }
+    
     String walltime = "000:00:00";
     long hours = 0;
     long minutes = 0;
