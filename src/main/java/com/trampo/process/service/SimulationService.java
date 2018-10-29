@@ -366,9 +366,11 @@ public class SimulationService {
 
       File destinationDirectory = getJobLogsPath(simulation).toFile();
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
       destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
@@ -396,6 +398,10 @@ public class SimulationService {
 
       LOGGER.info("Finished condional move files");
 
+      // list all files before deleting run folder
+      Files.walk(getJobRunningFolderPath(simulation))
+            .forEach(p -> LOGGER.info(p.toString()));
+      
       // deletes run folder
       org.apache.tomcat.util.http.fileupload.FileUtils
           .deleteDirectory(getJobRunningFolderPath(simulation).toFile());
