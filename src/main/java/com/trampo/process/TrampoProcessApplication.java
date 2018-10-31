@@ -44,22 +44,26 @@ public class TrampoProcessApplication {
     private ExecutorService executor;
     private long timeout = 5;
     private MailService mailService;
+    private String productionOrTestingSwitch;
 
     @Autowired
     public Runner(SshService sshService, @Value("${trampo.simulation.logFile}") String logFile, 
-        @Value("${trampo.simulation.timeout}") String timeout, MailService mailService) {
+        @Value("${trampo.simulation.timeout}") String timeout, MailService mailService, 
+        @Value("${trampo.simulation.productionOrTestingSwitch}") String productionOrTestingSwitch) {
       this.sshService = sshService;
       ccmPlusList = new HashSet<>();
       this.logFile = logFile;
       executor = Executors.newCachedThreadPool();
       this.timeout = Long.parseLong(timeout);
       this.mailService = mailService;
+      this.productionOrTestingSwitch= productionOrTestingSwitch;
     }
 
     @Override
     public void run(String... args) throws Exception {
       LOGGER.warn("---------------------START-UP start-------------------");
       LOGGER.warn("logging path: " + logFile);
+      LOGGER.warn("productionOrTestingSwitch: " + productionOrTestingSwitch);
       LOGGER.warn("started to search installed versions of STAR-CCM+");
 
       String command =
