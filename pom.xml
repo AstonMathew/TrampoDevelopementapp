@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.trampo</groupId>
 	<artifactId>TrampoProcess</artifactId>
-	<version>1.0.48</version>
+	<version>1.0.50</version>
 	<packaging>jar</packaging>
 
 	<name>TrampoProcess</name>
@@ -15,7 +16,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.5.7.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
 	<properties>
@@ -34,23 +35,35 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-mail</artifactId>
-    	</dependency>
-	    <dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-databind</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
-	    <dependency>
-	        <groupId>com.fasterxml.jackson.datatype</groupId>
-	        <artifactId>jackson-datatype-jsr310</artifactId>
-	    </dependency>	
-		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
 		<dependency>
-		    <groupId>com.jcraft</groupId>
-		    <artifactId>jsch</artifactId>
-		    <version>0.1.54</version>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.54</version>
+		</dependency>
+
+		<dependency>
+			<groupId>scan4macro</groupId>
+			<artifactId>scan4macro</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>javaparser-core</groupId>
+			<artifactId>javaparser-core</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 
 		<dependency>
@@ -64,9 +77,9 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-        	<groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-mail</artifactId>
-    	</dependency>	
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -78,5 +91,11 @@
 		</plugins>
 	</build>
 
-
+	<repositories>
+		<repository>
+			<id>project.local</id>
+			<name>project-local maven repo</name>
+			<url>file:${project.basedir}/repo</url>
+		</repository>
+	</repositories>
 </project>

@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -366,14 +364,14 @@ public class SimulationService {
 
       File destinationDirectory = getJobLogsPath(simulation).toFile();
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
       destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
       sourceDirectory = getTablesRunFolderPath(simulation).toFile();
       destinationDirectory = getTablesSyncFolderPath(simulation).toFile();
@@ -390,6 +388,8 @@ public class SimulationService {
       sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
       destinationDirectory = getJobBackupPath(simulation).toFile();
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
       sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
       destinationDirectory =
@@ -783,7 +783,7 @@ public class SimulationService {
       try {
         for (String string : result) {
           LOGGER.info(string);
-          List<CcmPlus> list = StarCcmPlusUtil.getInstalledCcmPluses();
+          Set<CcmPlus> list = StarCcmPlusUtil.getInstalledCcmPluses();
           for (CcmPlus ccmPlus : list) {
             if (ccmPlus.getPrecision().equals(StarCcmPrecision.MIXED)
                 && string.contains(ccmPlus.getVersion())) {

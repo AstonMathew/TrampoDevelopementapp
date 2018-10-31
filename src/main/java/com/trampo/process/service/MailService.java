@@ -138,7 +138,16 @@ public class MailService {
       send("gui@trampocfd.com", "Job is held!!", body, "internalnotification@trampocfd.com");
       send("yeldanumit@gmail.com", "Job is held!!", body, "internalnotification@trampocfd.com");
     } catch (Exception e) {
-      LOGGER.error("Error while sending simulation completed email!!!", e);
+      LOGGER.error("Error while sendJobHeldEmails!!!", e);
+    }
+  }
+  
+  public void sendErrorEmails(String body) {
+    try {
+      send("gui@trampocfd.com", "Error!!", body, "internalnotification@trampocfd.com");
+      send("yeldanumit@gmail.com", "Error!!", body, "internalnotification@trampocfd.com");
+    } catch (Exception e) {
+      LOGGER.error("Error while sendErrorEmails!!!", e);
     }
   }
 }
