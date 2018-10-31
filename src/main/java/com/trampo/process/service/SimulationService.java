@@ -576,7 +576,7 @@ public class SimulationService {
     int memory;
     if (simulation.getProcessorType().equals("INSTANT")) {
       cpuCount = simulation.getNumberOfCoresStandardLowPriority() * 16;
-      queueType = "expressbw"; // TODO check later
+      queueType = "express";
       memory = 30 * simulation.getNumberOfCoresStandardLowPriority();
     } else if (simulation.getProcessorType().equals("FAST")) {
       cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
