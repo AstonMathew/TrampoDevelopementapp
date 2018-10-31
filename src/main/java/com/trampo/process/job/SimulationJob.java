@@ -152,7 +152,7 @@ public class SimulationJob {
               }
             }
           } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("error while trying to get job status", e);
           }
         };
         threadPool.execute(r);
