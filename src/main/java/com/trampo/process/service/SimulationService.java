@@ -399,9 +399,8 @@ public class SimulationService {
       LOGGER.info("Finished condional move files");
 
       // list all files before deleting run folder
-      Files.walk(getJobRunningFolderPath(simulation))
-            .forEach(p -> LOGGER.info(p.toString()));
-      
+      Files.walk(getJobRunningFolderPath(simulation)).forEach(p -> LOGGER.info(p.toString()));
+
       // deletes run folder
       org.apache.tomcat.util.http.fileupload.FileUtils
           .deleteDirectory(getJobRunningFolderPath(simulation).toFile());
@@ -589,15 +588,15 @@ public class SimulationService {
       queueType = "normal";
       memory = 30 * simulation.getNumberOfCoresStandardLowPriority();
     }
-    if (productionOrTestingSwitch.equals("test")){
-    cpuCount = 1;
+    if (productionOrTestingSwitch.equals("test")) {
+      cpuCount = 1;
+    }
     if (simulation.getProcessorType().equals("FAST")) {
       memory = 125;
     } else {
       memory = 30;
     }
-    }
-    
+
     String walltime = "000:00:00";
     long hours = 0;
     long minutes = 0;
@@ -622,9 +621,11 @@ public class SimulationService {
       runOnly = simulation.getRun();
     }
     jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
-        backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
-        meshAndRunMacroPath, simulationFileName, podKeyToSubmit,
-        getCustomerDataRoot(simulation).toString(), getJobRunningFolderPath(simulation).toString(),
+        backendScriptPath, walltime,
+
+        getJobLogsPathRaijin(simulation).toString(), macroPath, meshAndRunMacroPath,
+        simulationFileName, podKeyToSubmit, getCustomerDataRoot(simulation).toString(),
+        getJobRunningFolderPath(simulation).toString(),
         getJobRunningFolderPathRaijin(simulation).toString(), starCcmPlusVersionPath, meshOnly,
         runOnly, corePerNode);
     updateStatus(simulation.getId(), SimulationStatus.SUBMITTED);
