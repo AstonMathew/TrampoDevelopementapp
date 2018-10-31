@@ -158,7 +158,7 @@ public class SimulationJob {
         threadPool.execute(r);
       }
     } catch (Exception e) {
-      LOGGER.error(e.getMessage());
+      LOGGER.error("error while trying to get job status", e);
     }
     List<Simulation> simulationsWaitingForFiles = null;
     try {
