@@ -6,7 +6,7 @@
 
 	<groupId>com.trampo</groupId>
 	<artifactId>TrampoProcess</artifactId>
-	<version>1.0.53</version>
+	<version>1.0.54</version>
 	<packaging>jar</packaging>
 
 	<name>TrampoProcess</name>
@@ -79,6 +79,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.3</version>
 		</dependency>
 	</dependencies>
 
