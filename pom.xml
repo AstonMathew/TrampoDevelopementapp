@@ -6,7 +6,7 @@
 
 	<groupId>com.trampo</groupId>
 	<artifactId>TrampoProcess</artifactId>
-	<version>1.0.54</version>
+	<version>1.0.56</version>
 	<packaging>jar</packaging>
 
 	<name>TrampoProcess</name>
