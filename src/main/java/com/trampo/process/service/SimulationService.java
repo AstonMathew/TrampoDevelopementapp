@@ -286,13 +286,23 @@ public class SimulationService {
 
   public void cancelSimulation(Simulation simulation, Job job) {
     File file = new File(getJobRunningFolderPath(simulation) + "/ABORT");
-    try {
+        try {
       // Create the file
       file.createNewFile();
-      LOGGER.info("ABORT File is created! " + file.getAbsolutePath());
+      LOGGER.info("ABORT File are created! " + file.getAbsolutePath());
     } catch (IOException ex) {
       LOGGER.error("ABORT File already exists or the operation failed for some reason", ex);
     }
+        
+    File file1 = new File(getJobRunningFolderPath(simulation) + "/LOOPABORT");
+    try {
+      // Create the file
+      file1.createNewFile();
+      LOGGER.info("LOOPABORT File are created! " + file1.getAbsolutePath());
+    } catch (IOException ex) {
+      LOGGER.error("LOOPABORT File already exists or the operation failed for some reason", ex);
+    }
+
 
     Runnable r = () -> {
       try {
@@ -359,53 +369,45 @@ public class SimulationService {
       // end of the run file move
 
       LOGGER.info("Starting to move logs and stuff");
-      
+
       File sourceDirectory = pbWorkingDirectory;
-      
-      if(simulation.getMesh() || simulation.getRun()) {
-    	  org.apache.commons.io.FileUtils.copyDirectory(getJobRunningFolderPath(simulation).toFile(), 
-    			  getJobSynchronisedFolderPath(simulation).toFile());
-    	  org.apache.commons.io.FileUtils.copyDirectory(getJobRunningFolderPath(simulation).toFile(), 
-    			  getJobBackupPath(simulation).toFile());
-      } else {
-          File destinationDirectory = getJobLogsPath(simulation).toFile();
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
 
-          destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
+      File destinationDirectory = getJobLogsPath(simulation).toFile();
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
 
-          sourceDirectory = getTablesRunFolderPath(simulation).toFile();
-          destinationDirectory = getTablesSyncFolderPath(simulation).toFile();
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+      destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
-          sourceDirectory = getStarViewRunFolderPath(simulation).toFile();
-          destinationDirectory = getStarViewSyncFolderPath(simulation).toFile();
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+      sourceDirectory = getTablesRunFolderPath(simulation).toFile();
+      destinationDirectory = getTablesSyncFolderPath(simulation).toFile();
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
 
-          sourceDirectory = getPowerPointRunFolderPath(simulation).toFile();
-          destinationDirectory = getPowerPointSyncFolderPath(simulation).toFile();
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+      sourceDirectory = getStarViewRunFolderPath(simulation).toFile();
+      destinationDirectory = getStarViewSyncFolderPath(simulation).toFile();
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
 
-          sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
-          destinationDirectory = getJobBackupPath(simulation).toFile();
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
+      sourceDirectory = getPowerPointRunFolderPath(simulation).toFile();
+      destinationDirectory = getPowerPointSyncFolderPath(simulation).toFile();
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
 
-          sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
-          destinationDirectory =
-              getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
-          ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
+      sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
+      destinationDirectory = getJobBackupPath(simulation).toFile();
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
-          LOGGER.info("Finished condional move files");
-      }
+      sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
+      destinationDirectory =
+          getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
 
-      
+      LOGGER.info("Finished condional move files");
+
       // list all files before deleting run folder
       Files.walk(getJobRunningFolderPath(simulation)).forEach(p -> LOGGER.info(p.toString()));
 
