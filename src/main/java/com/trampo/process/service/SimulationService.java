@@ -370,18 +370,19 @@ public class SimulationService {
 
       LOGGER.info("Starting to move logs and stuff");
 
-      File sourceDirectory = pbWorkingDirectory;
+      File sourceDirectory = pbWorkingDirectory; //JobRunningFolder
 
       File destinationDirectory = getJobLogsPath(simulation).toFile();
       ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
 
       destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
       sourceDirectory = getTablesRunFolderPath(simulation).toFile();
       destinationDirectory = getTablesSyncFolderPath(simulation).toFile();
@@ -397,14 +398,14 @@ public class SimulationService {
 
       sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
       destinationDirectory = getJobBackupPath(simulation).toFile();
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
+      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
-      sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
-      destinationDirectory =
-          getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
+//      sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
+//      destinationDirectory = getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
+//      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
 
       LOGGER.info("Finished condional move files");
 

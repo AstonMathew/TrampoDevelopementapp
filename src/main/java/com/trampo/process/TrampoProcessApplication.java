@@ -146,7 +146,7 @@ public class TrampoProcessApplication {
             LOGGER.warn("info command response: " + infoResponse + " for path: " + ccmPlus.getPath());
             boolean working = false;
             for (String info : infoResponse) {
-              if (info.contains("11.04.012")) {
+              if (info.contains("11.04.012")) { //what is this for ?
                 LOGGER.info(
                     "working installation. precision: " + ccmPlus.getPrecision() 
                     + "version: " + ccmPlus.getVersion() + " path: " + ccmPlus.getPath());
