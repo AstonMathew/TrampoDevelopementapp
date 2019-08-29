@@ -338,9 +338,12 @@ public class SimulationService {
 
             LOGGER.info("Sleeping finished");
 
-            List<MoveTask> moveTaskList = moveTaskMap.get(simulation.getId());
-            for (MoveTask moveTask : moveTaskList) {
-                moveTask.cancelPurgeTimer();
+            if ((simulation.getMesh() == null || !simulation.getMesh())
+                && (simulation.getRun() == null || !simulation.getRun())) {
+              List<MoveTask> moveTaskList = moveTaskMap.get(simulation.getId());
+              for (MoveTask moveTask : moveTaskList) {
+                  moveTask.cancelPurgeTimer();
+              }
             }
 
             LOGGER.info("Move task purge finished");
