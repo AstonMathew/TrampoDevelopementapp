@@ -259,7 +259,7 @@ public class SimulationService {
         Files.delete(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation));
         getCustomerStarCCMPlusVersion(simulation);
         selectStarCCMPlusRunVersion(simulation);
-        createPostprocessingRunFolders(simulation);
+        createPostprocessingRunFolders(simulation); // should be done only when using Smart Simulation Handling
         if (simulation.getStatus().equals(SimulationStatus.ERROR)) {
           return;
         }
@@ -340,7 +340,7 @@ public class SimulationService {
         moveTask.cancelPurgeTimer();
       }
 
-      LOGGER.info("Move task purge finshed");
+      LOGGER.info("Move task purge finished");
 
       // REMOVE POD key FROM HTML report
       File[] directoryListing = pbWorkingDirectory.listFiles();
