@@ -25,7 +25,7 @@ public class StarCcmPlusUtil {
           || ccmPlus.getVersion().compareTo(defaultDoublePrecisionVersion.getVersion()) > 0)){
         defaultDoublePrecisionVersion = ccmPlus;
       }else if(ccmPlus.getPrecision().equals(StarCcmPrecision.MIXED) 
-          && (defaultDoublePrecisionVersion == null 
+          && (defaultMixedPrecisionVersion == null 
           || ccmPlus.getVersion().compareTo(defaultMixedPrecisionVersion.getVersion()) > 0)){
         defaultMixedPrecisionVersion = ccmPlus;
       }
