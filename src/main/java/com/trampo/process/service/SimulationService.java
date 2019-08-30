@@ -436,7 +436,7 @@ public class SimulationService {
       // updateJobStatus(JobStatuses.COMPLETED);
       // _printStreamToLogFile.println("Simulation complete...");
     } catch (IOException | NumberFormatException | InterruptedException e) {
-      LOGGER.error("Error while finishing simulaton", e.getMessage());
+      LOGGER.error("Error while finishing simulaton", e);
     }
     LOGGER.info("ending run job");
   }
