@@ -406,7 +406,7 @@ public class SimulationService {
 
       sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
       destinationDirectory = getJobBackupPath(simulation).toFile();
-      ConditionalMoveFiles(sourceDirectory, destinationDirectory, "");
+      ConditionalCopyFiles(sourceDirectory, destinationDirectory);
       // ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
       // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
       // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
@@ -861,7 +861,7 @@ public class SimulationService {
             // FileUtils.runChmod(destination.toString());
             // FileUtils.logFilePermissions(destination.toPath());
           } catch (Exception e) {
-            LOGGER.error("CopyCustomerSyncFolderIntoJobRunFolder failed to move the child to = "
+            LOGGER.error("ConditionalMoveFiles failed to move the child to = "
                 + destination.toPath().resolve(child.getName()), e);
           }
           LOGGER.info(" directoryListing child moved to  = "
@@ -882,7 +882,28 @@ public class SimulationService {
             // FileUtils.runChmod(destination.toString());
             // FileUtils.logFilePermissions(destination.toPath());
           } catch (Exception e) {
-            LOGGER.error("CopyCustomerSyncFolderIntoJobRunFolder failed to move the child to = "
+            LOGGER.error("ConditionalMoveFiles failed to move the child to = "
+                + destination.toPath().resolve(child.getName()), e);
+          }
+          LOGGER.info(" directoryListing child moved to  = "
+              + destination.toPath().resolve(child.getName()));
+        }
+      }
+    }
+  }
+  
+  public void ConditionalCopyFiles(File source, File destination) throws IOException {
+    File[] directoryListing = source.listFiles();
+    if (directoryListing != null) {
+      for (File child : directoryListing) {
+        if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)) {
+          LOGGER.info("directoryListing child.getName = " + child.getName());
+          try {
+            Files.copy(child.toPath(), destination.toPath().resolve(child.getName()));
+            // FileUtils.runChmod(destination.toString());
+            // FileUtils.logFilePermissions(destination.toPath());
+          } catch (Exception e) {
+            LOGGER.error("ConditionalCopyFiles failed to move the child to = "
                 + destination.toPath().resolve(child.getName()), e);
           }
           LOGGER.info(" directoryListing child moved to  = "
