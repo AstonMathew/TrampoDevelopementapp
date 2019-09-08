@@ -246,7 +246,7 @@ public class SimulationService {
       updateStatus(simulation.getId(), SimulationStatus.MOVING_FILES);
       mailService.sendFileUploadCompletedEmails(simulation);
       try {
-        checkSimName_FileCount_FileExtension_Scan4Macro(simulation);
+        //checkSimName_FileCount_FileExtension_Scan4Macro(simulation);
 
         createJobRunAndSyncFolders(simulation);
         if (simulation.getStatus().equals(SimulationStatus.ERROR)) {
@@ -497,17 +497,17 @@ public class SimulationService {
             error(simulation, null, "Unsafe uploaded files extension");
           } else {
             if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[3])) { //
-              Scan scan = new Scan(child);
-              if (!scan.scan()) {
-                LOGGER.error("!scan.scan()=" + !scan.scan());
-                LOGGER.error("scan4maco returned unsafe operation" + " customer = "
-                    + simulation.getCustomerId() + " job = " + simulation.getId() + " File = "
-                    + child.getName());
-                new SendEmail().send(SendEmail.TO, "scan4maco returned unsafe operation",
-                    "customer = " + simulation.getCustomerId() + " job = " + simulation.getId());
-                error(simulation, null, "Scan4Macro detected an unsafe operation");
-                return;
-              }
+//              Scan scan = new Scan(child);
+//              if (!scan.scan()) {
+//                LOGGER.error("!scan.scan()=" + !scan.scan());
+//                LOGGER.error("scan4maco returned unsafe operation" + " customer = "
+//                    + simulation.getCustomerId() + " job = " + simulation.getId() + " File = "
+//                    + child.getName());
+//                new SendEmail().send(SendEmail.TO, "scan4maco returned unsafe operation",
+//                    "customer = " + simulation.getCustomerId() + " job = " + simulation.getId());
+//                error(simulation, null, "Scan4Macro detected an unsafe operation");
+//                return;
+//              }
             }
           }
         }
