@@ -327,6 +327,10 @@ public class SimulationService {
   }
 
   public void finishSimulation(Simulation simulation) {
+    String command = "chmod -R 770 " + getJobRunningFolderPathRaijin(simulation);
+    System.err.println("finish command ");
+    sshService.execCommand(command);
+    
     File pbWorkingDirectory = getJobRunningFolderPath(simulation).toFile();
     try {
 
