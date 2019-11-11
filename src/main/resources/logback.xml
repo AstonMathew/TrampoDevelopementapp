@@ -7,11 +7,11 @@
   </appender>
    
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>/home/guillaume/test/connect-trampo-tenjin-umit/MyLog.log</file>
+    <file>/root/Trampo/Backend/Logs/DetailedLog.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
         <MinIndex>1</MinIndex>
         <MaxIndex>10</MaxIndex>
-        <fileNamePattern>MyLog.%i.log</fileNamePattern>
+        <fileNamePattern>DetailedLog.%i.log</fileNamePattern>
     </rollingPolicy>
 
     <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
