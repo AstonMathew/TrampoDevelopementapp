@@ -72,8 +72,8 @@ public class SimulationService {
     private String scheduleMovePeriod;
     private String dataRoot;
     private String runRoot;
-    private String dataRootRaijin;
-    private String runRootRaijin;
+    private String dataRootGadi;
+    private String runRootGadi;
     private Integer maxWaitForFilesInDays;
     private String backendScriptPath;
     private String podKey;
@@ -91,8 +91,8 @@ public class SimulationService {
             @Value("${trampo.simulation.scheduleMovePeriod}") String scheduleMovePeriod,
             @Value("${trampo.simulation.dataRoot}") String dataRoot,
             @Value("${trampo.simulation.runRoot}") String runRoot,
-            @Value("${trampo.simulation.dataRootRaijin}") String dataRootRaijin,
-            @Value("${trampo.simulation.runRootRaijin}") String runRootRaijin,
+            @Value("${trampo.simulation.dataRootGadi}") String dataRootGadi,
+            @Value("${trampo.simulation.runRootGadi}") String runRootGadi,
             @Value("${trampo.simulation.maxWaitForFilesInDays}") Integer maxWaitForFilesInDays,
             @Value("${trampo.simulation.backendScriptPath}") String backendScriptPath,
             @Value("${trampo.simulation.podKey}") String podKey,
@@ -108,8 +108,8 @@ public class SimulationService {
         this.scheduleMovePeriod = scheduleMovePeriod;
         this.dataRoot = dataRoot;
         this.runRoot = runRoot;
-        this.dataRootRaijin = dataRootRaijin;
-        this.runRootRaijin = runRootRaijin;
+        this.dataRootGadi = dataRootGadi;
+        this.runRootGadi = runRootGadi;
         this.maxWaitForFilesInDays = maxWaitForFilesInDays;
         this.jobService = jobService;
         this.backendScriptPath = backendScriptPath;
@@ -328,7 +328,7 @@ public class SimulationService {
     }
 
     public void finishSimulation(Simulation simulation) {
-        String command = "chmod -R 770 " + getJobRunningFolderPathRaijin(simulation);
+        String command = "chmod -R 770 " + getJobRunningFolderPathGadi(simulation);
         System.err.println("finish command ");
         sshService.execCommand(command);
 
@@ -551,7 +551,7 @@ public class SimulationService {
     private void RunJob(Simulation simulation) {
         LOGGER.info("starting run job");
 
-        String runRoot = getJobRunningFolderPathRaijin(simulation).toString();
+        String runRoot = getJobRunningFolderPathGadi(simulation).toString();
 
         if ((simulation.getMesh() == null || !simulation.getMesh())
                 && (simulation.getRun() == null || !simulation.getRun())) {
@@ -635,7 +635,7 @@ public class SimulationService {
             minutes = simulation.getMaxWalltime();
         }
         walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
-        String simulationFileName = getCustomerSimulationFilePathRaijin(simulation);
+        String simulationFileName = getCustomerSimulationFilePathGadi(simulation);
         String podKeyToSubmit = podKey;
         if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
             podKeyToSubmit = simulation.getPodKey();
@@ -649,21 +649,21 @@ public class SimulationService {
             runOnly = simulation.getRun();
         }
         jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
-                backendScriptPath, walltime, getJobLogsPathRaijin(simulation).toString(), macroPath,
+                backendScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
                 meshAndRunMacroPath, simulationFileName, podKeyToSubmit,
                 getCustomerDataRoot(simulation).toString(), getJobRunningFolderPath(simulation).toString(),
-                getJobRunningFolderPathRaijin(simulation).toString(), starCcmPlusVersionPath, meshOnly,
+                getJobRunningFolderPathGadi(simulation).toString(), starCcmPlusVersionPath, meshOnly,
                 runOnly, corePerNode);
         updateStatus(simulation.getId(), SimulationStatus.SUBMITTED);
     }
 
-    private String getCustomerSimulationFilePathRaijin(Simulation simulation) {
+    private String getCustomerSimulationFilePathGadi(Simulation simulation) {
         try {
             Iterator<Path> fileIt = Files.list(getJobRunningFolderPath(simulation)).iterator();
             while (fileIt.hasNext()) {
                 Path file = fileIt.next();
                 if (file.toString().endsWith(".sim")) {
-                    return getJobRunningFolderPathRaijin(simulation).resolve(file.getFileName()).toString();
+                    return getJobRunningFolderPathGadi(simulation).resolve(file.getFileName()).toString();
                 }
             }
         } catch (IOException e) {
@@ -803,7 +803,7 @@ public class SimulationService {
     private void getCustomerStarCCMPlusVersion(Simulation simulation) {
         if (StarCcmPlusUtil.getDefaultMixedPrecisionVersion() != null) {
             String command = StarCcmPlusUtil.getDefaultMixedPrecisionVersion().getPath() + " -info "
-                    + getCustomerSimulationFilePathRaijin(simulation);
+                    + getCustomerSimulationFilePathGadi(simulation);
             LOGGER.info("info command: " + command);
             List<String> result = sshService.execCommand(command);
             LOGGER.info("info command sumitted");
@@ -977,8 +977,8 @@ public class SimulationService {
                 "Job_" + simulation.getId());
     }
 
-    private Path getJobLogsPathRaijin(Simulation simulation) {
-        return Paths.get(dataRootRaijin, getCustomerFolderRelativePath(simulation),
+    private Path getJobLogsPathGadi(Simulation simulation) {
+        return Paths.get(dataRootGadi, getCustomerFolderRelativePath(simulation),
                 "Job_" + simulation.getId(), "logs");
     }
 
@@ -1035,9 +1035,9 @@ public class SimulationService {
                 "Job_" + simulation.getId());
     }
 
-    private Path getJobRunningFolderPathRaijin(Simulation simulation) {// the Job running folder from
+    private Path getJobRunningFolderPathGadi(Simulation simulation) {// the Job running folder from
         // Raijin
-        return Paths.get(runRootRaijin, getCustomerFolderRelativePath(simulation),
+        return Paths.get(runRootGadi, getCustomerFolderRelativePath(simulation),
                 "Job_" + simulation.getId());
     }
 
@@ -1094,9 +1094,9 @@ public class SimulationService {
 
     public boolean isFinishedWithError(Simulation simulation) {
         String errorLogFilePath = getJobLogsPath(simulation).toString() + "/error.txt";
-        String command = "chmod -R 770 " + getJobLogsPathRaijin(simulation);
+        String command = "chmod -R 770 " + getJobLogsPathGadi(simulation);
         sshService.execCommand(command);
-        // sshService.copyRemoteFile(getJobLogsPathRaijin(simulation)+ "/out.err", errorLogFilePath);
+        // sshService.copyRemoteFile(getJobLogsPathGadi(simulation)+ "/out.err", errorLogFilePath);
         try {
             List<String> lines = Files.readAllLines(Paths.get(errorLogFilePath));
             if (lines != null && lines.size() > 0 && StringUtils.hasText(lines.get(0))) {

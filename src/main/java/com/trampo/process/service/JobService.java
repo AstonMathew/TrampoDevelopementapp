@@ -118,7 +118,7 @@ public class JobService {
   }
 
   public void submitJob(String jobName, String cpuCount, String memory, String queueType,
-      String scriptPath, String walltime, String raijinLogRoot, String macroPath, String meshAndRunMacroPath,
+      String scriptPath, String walltime, String gadiLogRoot, String macroPath, String meshAndRunMacroPath,
       String simulationPath, String podKey, String customerDataRoot, String customerRunRoot,
       String runRoot, String starCcmPlusVersion, Boolean meshOnly, Boolean runOnly, int corePerNode) {
 
@@ -136,7 +136,7 @@ public class JobService {
     
     // No spaces in qsub command
     String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus="
-        + cpuCount + " -e " + raijinLogRoot + "/error.txt -o " + raijinLogRoot + "/output.txt -lmem="
+        + cpuCount + " -e " + gadiLogRoot + "/error.txt -o " + gadiLogRoot + "/output.txt -lmem="
         + memory + "GB -lwalltime=" + walltime + " -v StarCcmRunVersionPath=" + starCcmPlusVersion
         + ",BatchFlagCommand=" + batchFlagCommand + ",SimulationPath=" + simulationPath + ",Podkey=" + podKey
         + ",CorePerNode=" + corePerNode + " " + scriptPath + ";";

@@ -67,7 +67,7 @@ public class TrampoProcessApplication {
       LOGGER.warn("started to search installed versions of STAR-CCM+");
 
       String command =
-          "cd /short/uo95/gj5914/starccm/mixed/;ls -d $PWD/* | grep -E -w -o \"[0-9]{2}.[0-9]{2}.[0-9]{3}\" | sort";
+          "cd /scratch/uo95/gj5914/starccm/mixed/;ls -d $PWD/* | grep -E -w -o \"[0-9]{2}.[0-9]{2}.[0-9]{3}\" | sort";
       LOGGER.warn("command for mixed precision versions of STAR-CCM+ :" + command);
       List<String> mixedVersions = sshService.execCommand(command);
       LOGGER.warn("installed mixed precision versions: " + mixedVersions);
@@ -78,7 +78,7 @@ public class TrampoProcessApplication {
       }
 
       command =
-          "cd /short/uo95/gj5914/starccm/double/;ls -d $PWD/* | grep -E -w -o \"[0-9]{2}.[0-9]{2}.[0-9]{3}\" | sort";
+          "cd /scratch/uo95/gj5914/starccm/double/;ls -d $PWD/* | grep -E -w -o \"[0-9]{2}.[0-9]{2}.[0-9]{3}\" | sort";
       LOGGER.warn("command for double precision versions of STAR-CCM+ :" + command);
       List<String> doubleVersions = sshService.execCommand(command);
       LOGGER.warn("installed double precision versions: " + doubleVersions);
@@ -88,7 +88,7 @@ public class TrampoProcessApplication {
         mailService.sendErrorEmails("there is no installed double precision versions");
       }
 
-      command = "find /short/uo95/gj5914/starccm/mixed/ -maxdepth 5 -name starccm+ | sort";
+      command = "find /scratch/uo95/gj5914/starccm/mixed/ -maxdepth 5 -name starccm+ | sort";
       LOGGER.warn("command for paths of mixed precision executables: " + command);
       List<String> mixedPaths = sshService.execCommand(command);
       LOGGER.warn("installed mixed precision executables :" + mixedPaths);
@@ -98,7 +98,7 @@ public class TrampoProcessApplication {
         mailService.sendErrorEmails("there is no installed mixed precision executables");
       }
 
-      command = "find /short/uo95/gj5914/starccm/double/ -maxdepth 5 -name starccm+ | sort";
+      command = "find /scratch/uo95/gj5914/starccm/double/ -maxdepth 5 -name starccm+ | sort";
       LOGGER.warn("command for paths of double precision executables: " + command);
       List<String> doublePaths = sshService.execCommand(command);
       LOGGER.warn("installed double precision executables :" + doublePaths);
@@ -140,7 +140,7 @@ public class TrampoProcessApplication {
       Runnable main = () -> {        
         for(CcmPlus ccmPlus : StarCcmPlusUtil.getInstalledCcmPluses()) {
           Callable<Boolean> c = () -> { 
-            String commandText = ccmPlus.getPath() + " -info /short/uo95/gj5914/infotest/Cube.sim";
+            String commandText = ccmPlus.getPath() + " -info /scratch/uo95/gj5914/infotest/Cube.sim";
             LOGGER.warn("info command: " + commandText);
             List<String> infoResponse = sshService.execCommand(commandText);
             LOGGER.warn("info command response: " + infoResponse + " for path: " + ccmPlus.getPath());
