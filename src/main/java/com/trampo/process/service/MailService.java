@@ -55,6 +55,19 @@ public class MailService {
               + customer.getEmail() + " simulation folder name: " + simulation.getFolderName()
               + " job id: " + job.getId(),
           "internalnotification@trampocfd.com");
+      
+      send("ajesh@trampocfd.com", "Simulation started to run!!",
+          "Simulation started to run for customer id: " + customer.getId() + " email: "
+              + customer.getEmail() + " simulation folder name: " + simulation.getFolderName()
+              + " job id: " + job.getId(),
+          "internalnotification@trampocfd.com");
+      
+      send("aston@trampocfd.com", "Simulation started to run!!",
+          "Simulation started to run for customer id: " + customer.getId() + " email: "
+              + customer.getEmail() + " simulation folder name: " + simulation.getFolderName()
+              + " job id: " + job.getId(),
+          "internalnotification@trampocfd.com");
+      
     } catch (Exception e) {
       LOGGER.error("Error while sending simulation started email!!!", e);
     }
@@ -80,6 +93,19 @@ public class MailService {
               + customer.getEmail() + " simulation folder name: " + simulation.getFolderName()
               + " job id: " + job.getId(),
           "internalnotification@trampocfd.com");
+      
+      send("ajesh@trampocfd.com", "Simulation completed successfully!!",
+          "Simulation completed successfully for customer id: " + customer.getId() + " email: "
+              + customer.getEmail() + " simulation folder name: " + simulation.getFolderName()
+              + " job id: " + job.getId(),
+          "internalnotification@trampocfd.com");
+      
+      send("aston@trampocfd.com", "Simulation completed successfully!!",
+          "Simulation completed successfully for customer id: " + customer.getId() + " email: "
+              + customer.getEmail() + " simulation folder name: " + simulation.getFolderName()
+              + " job id: " + job.getId(),
+          "internalnotification@trampocfd.com");
+      
     } catch (Exception e) {
       LOGGER.error("Error while sending simulation completed email!!!", e);
     }
@@ -103,6 +129,17 @@ public class MailService {
           "File upload completed for customer id: " + customer.getId() + " email: "
               + customer.getEmail() + " simulation folder name: " + simulation.getFolderName(),
           "internalnotification@trampocfd.com");
+      
+      send("ajesh@trampocfd.com", "File upload completed!!",
+          "File upload completed for customer id: " + customer.getId() + " email: "
+              + customer.getEmail() + " simulation folder name: " + simulation.getFolderName(),
+          "internalnotification@trampocfd.com");
+      
+      send("aston@trampocfd.com", "File upload completed!!",
+          "File upload completed for customer id: " + customer.getId() + " email: "
+              + customer.getEmail() + " simulation folder name: " + simulation.getFolderName(),
+          "internalnotification@trampocfd.com");
+      
     } catch (Exception e) {
       LOGGER.error("Error while sending simulation completed email!!!", e);
     }
@@ -127,6 +164,14 @@ public class MailService {
 
       send("yeldanumit@gmail.com", "Simulation in error!!", body,
           "internalnotification@trampocfd.com");
+      
+      send("ajesh@trampocfd.com", "Simulation in error!!", body,
+          "internalnotification@trampocfd.com");
+      
+      send("aston@trampocfd.com", "Simulation in error!!", body,
+          "internalnotification@trampocfd.com");
+      
+      
     } catch (Exception e) {
       LOGGER.error("Error while sending simulation completed email!!!", e);
     }
@@ -137,6 +182,8 @@ public class MailService {
       String body = "Job is held. Job Id: " + job.getId();
       send("gui@trampocfd.com", "Job is held!!", body, "internalnotification@trampocfd.com");
       send("yeldanumit@gmail.com", "Job is held!!", body, "internalnotification@trampocfd.com");
+      send("ajesh@trampocfd.com", "Job is held!!", body, "internalnotification@trampocfd.com");
+      send("aston@trampocfd.com", "Job is held!!", body, "internalnotification@trampocfd.com");
     } catch (Exception e) {
       LOGGER.error("Error while sendJobHeldEmails!!!", e);
     }
@@ -146,6 +193,8 @@ public class MailService {
     try {
       send("gui@trampocfd.com", "Error!!", body, "internalnotification@trampocfd.com");
       send("yeldanumit@gmail.com", "Error!!", body, "internalnotification@trampocfd.com");
+      send("aston@trampocfd.com", "Job is held!!", body, "internalnotification@trampocfd.com");
+      send("ajesh@trampocfd.com", "Job is held!!", body, "internalnotification@trampocfd.com");
     } catch (Exception e) {
       LOGGER.error("Error while sendErrorEmails!!!", e);
     }
