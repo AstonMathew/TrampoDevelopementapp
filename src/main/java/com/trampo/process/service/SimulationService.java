@@ -603,18 +603,18 @@ public class SimulationService {
         String queueType;
         int memory;
         if (simulation.getProcessorType().equals("INSTANT")) {
-            cpuCount = simulation.getNumberOfCoresStandardLowPriority() * 16;
+            cpuCount = simulation.getNumberOfNodesStandardLowPriority() * 16;
             queueType = "express";
-            memory = 30 * simulation.getNumberOfCoresStandardLowPriority();
+            memory = 30 * simulation.getNumberOfNodesStandardLowPriority();
         } else if (simulation.getProcessorType().equals("FAST")) {
-            cpuCount = simulation.getNumberOfCoresInstantFast() * 28;
-            queueType = "normalbw";
-            memory = 125 * simulation.getNumberOfCoresInstantFast();
+            cpuCount = simulation.getNumberOfNodesInstantFast() * 48;
+            queueType = "normal";
+            memory = 190 * simulation.getNumberOfNodesInstantFast();
             corePerNode = 28;
         } else {
-            cpuCount = simulation.getNumberOfCoresStandardLowPriority() * 16;
+            cpuCount = simulation.getNumberOfNodesStandardLowPriority() * 16;
             queueType = "normal";
-            memory = 30 * simulation.getNumberOfCoresStandardLowPriority();
+            memory = 30 * simulation.getNumberOfNodesStandardLowPriority();
         }
         if (productionOrTestingSwitch.equals("test")) {
             cpuCount = 1;
