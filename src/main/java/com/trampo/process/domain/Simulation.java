@@ -72,7 +72,7 @@ public class Simulation {
     this.dateUpdated = dateUpdated;
   }
 
-  public Integer getNumberOfCoresStandardLowPriority() {
+  public Integer getNumberOfNodesStandardLowPriority() {
     return numberOfCoresStandardLowPriority;
   }
 
@@ -80,7 +80,7 @@ public class Simulation {
     this.numberOfCoresStandardLowPriority = numberOfCoresStandardLowPriority;
   }
 
-  public Integer getNumberOfCoresInstantFast() {
+  public Integer getNumberOfNodesInstantFast() {
     return numberOfCoresInstantFast;
   }
 

@@ -30,7 +30,7 @@ public class JobService {
     List<Job> list = new ArrayList<Job>();
     for (String string : result) {
 //      LOGGER.info("current running jobs script output lne: " + string);
-      if (StringUtils.hasText(string) && !string.startsWith("r-man2") && !string.startsWith("Job ID")
+      if (StringUtils.hasText(string) && !string.startsWith("gadi-pbs:") && !string.startsWith("Job ID")
           && !string.startsWith("----") && !string.contains("Req'd")) {
         String[] line = string.split(" ");
         int fieldNumber = 0;

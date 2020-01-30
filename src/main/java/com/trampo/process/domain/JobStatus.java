@@ -7,7 +7,7 @@ public enum JobStatus {
   H, // Job is held. A job is put into a held state by the server or by a user or administrator. A
      // job stays in a held state until it is released by a user or administrator.
      // You can view the reason a job has been held with qstat -s jobid (Job IDs on Raijin look like
-     // 1234.r-man2)
+     // 1234.r-man2, 1234.gadi-pbs on gadi)
   Q, // Job is queued, eligible to run.
   R, // Job is running
   S; // Job is suspended by server. A job is put into the suspended state when a higher priority job
