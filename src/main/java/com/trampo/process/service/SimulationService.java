@@ -598,33 +598,33 @@ public class SimulationService {
 
         } // should be done only when using Smart Simulation Handling
 
-        int corePerNode = 16;
-        int cpuCount = 0;
+        int corePerNode = 0;
+        int coreCount = 0;
         String queueType;
         int memory;
         if (simulation.getProcessorType().equals("INSTANT")) {
-            cpuCount = simulation.getNumberOfNodesStandardLowPriority() * 16;
+            coreCount = simulation.getNumberOfNodesStandardLowPriority() * 16;
             queueType = "express";
             memory = 30 * simulation.getNumberOfNodesStandardLowPriority();
         } else if (simulation.getProcessorType().equals("FAST")) {
-            cpuCount = simulation.getNumberOfNodesInstantFast() * 48;
+            coreCount = simulation.getNumberOfNodesInstantFast() * 48;
             queueType = "normal";
             memory = 190 * simulation.getNumberOfNodesInstantFast();
-            corePerNode = 28;
+            corePerNode = 48;
         } else {
-            cpuCount = simulation.getNumberOfNodesStandardLowPriority() * 16;
+            coreCount = simulation.getNumberOfNodesStandardLowPriority() * 16;
             queueType = "normal";
             memory = 30 * simulation.getNumberOfNodesStandardLowPriority();
         }
         if (productionOrTestingSwitch.equals("test")) {
-            cpuCount = 1;
+            coreCount = 1;
+        
+                if (simulation.getProcessorType().equals("FAST")) {
+                memory = 4;
+                } else {
+                memory = 3;
+                }
         }
-        if (simulation.getProcessorType().equals("FAST")) {
-            memory = 125;
-        } else {
-            memory = 30;
-        }
-
         String walltime = "000:00:00";
         long hours = 0;
         long minutes = 0;
@@ -648,7 +648,7 @@ public class SimulationService {
         if (simulation.getRun() != null) {
             runOnly = simulation.getRun();
         }
-        jobService.submitJob(simulation.getId(), "" + cpuCount, memory + "", queueType,
+        jobService.submitJob(simulation.getId(), "" + coreCount, memory + "", queueType,
                 backendScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
                 meshAndRunMacroPath, simulationFileName, podKeyToSubmit,
                 getCustomerDataRoot(simulation).toString(), getJobRunningFolderPath(simulation).toString(),
