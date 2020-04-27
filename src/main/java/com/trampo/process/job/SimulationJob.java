@@ -128,9 +128,9 @@ public class SimulationJob {
                       walltime = walltime + 1;
                     }
                     simulationService.updateWalltime(job.getSimulationId(), 7);
+                    simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
                   }
-                  simulationService.finishSimulation(simulation);
-                  simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
+                  simulationService.finishSimulation(simulation); 
                 }
               }
             } else if (job.getStatus().equals(JobStatus.H)) {
