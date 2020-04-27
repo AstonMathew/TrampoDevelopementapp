@@ -92,8 +92,9 @@ public class SimulationJob {
                 }
               }
             } else if (job.getStatus().equals(JobStatus.F)) {
-              if (runningSimulations.containsKey(job.getSimulationId())) {
                 Simulation simulation = runningSimulations.get(job.getSimulationId());
+              if (runningSimulations.containsKey(job.getSimulationId())) {
+//                Simulation simulation = runningSimulations.get(job.getSimulationId());
                 if (simulationService.isFinishedWithError(simulation)) {
                   simulationService.error(simulation, job, "Failed During Execution");
                 } else {
@@ -110,10 +111,11 @@ public class SimulationJob {
                 }
                 simulationService.finishSimulation(simulation);
               } else {
-                Simulation simulation = simulationService.getSimulation(job.getSimulationId());
+//                Simulation simulation = simulationService.getSimulation(job.getSimulationId());
                 if (!simulation.getStatus().equals(SimulationStatus.COMPLETED)
                     && !simulation.getStatus().equals(SimulationStatus.ERROR)
-                    && !simulation.getStatus().equals(SimulationStatus.CANCELLED)) {
+                    && !simulation.getStatus().equals(SimulationStatus.CANCELLED)
+                    && !simulation.getStatus().equals(SimulationStatus.CANCELREFUNDED)) {
                   if (simulationService.isFinishedWithError(simulation)) {
                     simulationService.error(simulation, job, "Failed During Execution");
                   } else {
@@ -128,11 +130,13 @@ public class SimulationJob {
                       walltime = walltime + 1;
                     }
                     simulationService.updateWalltime(job.getSimulationId(), 7);
-                    simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
+                    simulationService.updateStatus(job.getSimulationId(), SimulationStatus.CANCELREFUNDED);
                   }
                   simulationService.finishSimulation(simulation); 
                 }
+                simulationService.finishSimulation(simulation);
               }
+              simulationService.finishSimulation(simulation);
             } else if (job.getStatus().equals(JobStatus.H)) {
               LOGGER.warn("Job is in held state. job id: " + job.getId());
 //              LocalDateTime lastEmailSentDate = heldMap.getOrDefault(job.getId(), LocalDateTime.MIN);
