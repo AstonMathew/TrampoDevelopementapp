@@ -106,7 +106,7 @@ public class SimulationJob {
                   if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
                     walltime = walltime + 1;
                   }
-                  simulationService.updateWalltime(job.getSimulationId(), walltime);
+                  simulationService.updateWalltime(job.getSimulationId(), 6);
                 }
                 simulationService.finishSimulation(simulation);
               } else {
@@ -117,8 +117,7 @@ public class SimulationJob {
                   if (simulationService.isFinishedWithError(simulation)) {
                     simulationService.error(simulation, job, "Failed During Execution");
                   } else {
-                    simulationService.updateStatus(job.getSimulationId(),
-                        SimulationStatus.COMPLETED);
+                    simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
                     mailService.sendSimulationCompletedEmails(simulation, job);
                   }
                 } else if (simulation.getStatus().equals(SimulationStatus.CANCELLED)) {
@@ -128,9 +127,10 @@ public class SimulationJob {
                     if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
                       walltime = walltime + 1;
                     }
-                    simulationService.updateWalltime(job.getSimulationId(), walltime);
+                    simulationService.updateWalltime(job.getSimulationId(), 7);
                   }
                   simulationService.finishSimulation(simulation);
+                  simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
                 }
               }
             } else if (job.getStatus().equals(JobStatus.H)) {
