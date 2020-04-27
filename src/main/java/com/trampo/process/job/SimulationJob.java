@@ -92,7 +92,6 @@ public class SimulationJob {
                 }
               }
             } else if (job.getStatus().equals(JobStatus.F)) {
-//                Simulation simulation = runningSimulations.get(job.getSimulationId());
               if (runningSimulations.containsKey(job.getSimulationId())) {
                 Simulation simulation = runningSimulations.get(job.getSimulationId());
                 if (simulationService.isFinishedWithError(simulation)) {
@@ -107,7 +106,7 @@ public class SimulationJob {
                   if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
                     walltime = walltime + 1;
                   }
-                  simulationService.updateWalltime(job.getSimulationId(), 6);
+                  simulationService.updateWalltime(job.getSimulationId(), walltime);
                 }
                 simulationService.finishSimulation(simulation);
               } else {
@@ -129,14 +128,13 @@ public class SimulationJob {
                     if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
                       walltime = walltime + 1;
                     }
-                    simulationService.updateWalltime(job.getSimulationId(), 7);
+                    simulationService.updateWalltime(job.getSimulationId(), walltime);
                     simulationService.updateStatus(job.getSimulationId(), SimulationStatus.CANCELREFUNDED);
                   }
                   simulationService.finishSimulation(simulation); 
                 }
                 simulationService.finishSimulation(simulation);
               }
-//              simulationService.finishSimulation(simulation);
             } else if (job.getStatus().equals(JobStatus.H)) {
               LOGGER.warn("Job is in held state. job id: " + job.getId());
 //              LocalDateTime lastEmailSentDate = heldMap.getOrDefault(job.getId(), LocalDateTime.MIN);
