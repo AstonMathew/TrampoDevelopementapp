@@ -127,11 +127,11 @@ public class JobService {
     
     String batchFlagCommand = macroPath;
     if(meshOnly && runOnly){
-      batchFlagCommand = meshAndRunMacroPath;
+      batchFlagCommand = "-batch mesh, run";
     }else if(meshOnly){
-      batchFlagCommand = "mesh";
+      batchFlagCommand = "-batch mesh";
     }else if(runOnly){
-      batchFlagCommand = "run";
+      batchFlagCommand = "-batch";
     }
     
     // No spaces in qsub command
