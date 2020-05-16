@@ -127,9 +127,9 @@ public class JobService {
     
     String batchFlagCommand = meshAndRunMacroPath;
     if(meshOnly && runOnly){
-      batchFlagCommand =meshAndRunMacroPath;
+      batchFlagCommand ="meshrun";
     }else if(meshOnly){
-      batchFlagCommand = "mesh";
+      batchFlagCommand ="mesh";
     }else if(runOnly){
       batchFlagCommand = "";
     }
