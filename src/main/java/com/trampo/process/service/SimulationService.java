@@ -77,6 +77,7 @@ public class SimulationService {
     private Integer maxWaitForFilesInDays;
     private String backendScriptPath;
     private String podKey;
+    private String trampoLicensePath;
     private String macroPath;
     private String meshAndRunMacroPath;
     private SshService sshService;
@@ -96,6 +97,7 @@ public class SimulationService {
             @Value("${trampo.simulation.maxWaitForFilesInDays}") Integer maxWaitForFilesInDays,
             @Value("${trampo.simulation.backendScriptPath}") String backendScriptPath,
             @Value("${trampo.simulation.podKey}") String podKey,
+             @Value("${trampo.simulation.trampoLicensePath}") String trampoLicensePath,
             @Value("${trampo.simulation.macroPath}") String macroPath,
             @Value("${trampo.simulation.meshAndRunMacroPath}") String meshAndRunMacroPath) {
         restTemplate = builder.rootUri(apiRoot).build();
@@ -114,6 +116,7 @@ public class SimulationService {
         this.jobService = jobService;
         this.backendScriptPath = backendScriptPath;
         this.podKey = podKey;
+        this.trampoLicensePath= trampoLicensePath;
         this.macroPath = macroPath;
         this.meshAndRunMacroPath = meshAndRunMacroPath;
         this.sshService = sshService;
@@ -637,7 +640,9 @@ public class SimulationService {
         walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
         String simulationFileName = getCustomerSimulationFilePathGadi(simulation);
         String podKeyToSubmit = podKey;
+        String licensePath = trampoLicensePath;
         if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
+            licensePath=trampoLicensePath;
             podKeyToSubmit = simulation.getPodKey();
         }
         boolean meshOnly = false;
@@ -650,7 +655,7 @@ public class SimulationService {
         }
         jobService.submitJob(simulation.getId(), "" + coreCount, memory + "", queueType,
                 backendScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
-                meshAndRunMacroPath, simulationFileName, podKeyToSubmit,
+                meshAndRunMacroPath, simulationFileName,licensePath, podKeyToSubmit,
                 getCustomerDataRoot(simulation).toString(), getJobRunningFolderPath(simulation).toString(),
                 getJobRunningFolderPathGadi(simulation).toString(), starCcmPlusVersionPath, meshOnly,
                 runOnly, corePerNode);
