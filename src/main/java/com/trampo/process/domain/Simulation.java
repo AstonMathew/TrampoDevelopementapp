@@ -11,7 +11,7 @@ public class Simulation {
   private long actualWalltime;
   private int fileCount;
   private Integer numberOfCoresStandardLowPriority;
-  private Integer numberOfCoresInstantFast;
+  private Integer numberOfCoresFast;
   private String errorMessage;
   private SimulationStatus status;
   private SimulationFileTransferMethod fileTransferMethod;
@@ -80,12 +80,12 @@ public class Simulation {
     this.numberOfCoresStandardLowPriority = numberOfCoresStandardLowPriority;
   }
 
-  public Integer getNumberOfNodesInstantFast() {
-    return numberOfCoresInstantFast;
+  public Integer getNumberOfNodesFast() {
+    return numberOfCoresFast;
   }
 
-  public void setNumberOfCoresInstantFast(Integer numberOfCoresInstantFast) {
-    this.numberOfCoresInstantFast = numberOfCoresInstantFast;
+  public void setNumberOfCoresFast(Integer numberOfCoresFast) {
+    this.numberOfCoresFast = numberOfCoresFast;
   }
 
   public SimulationFileTransferMethod getFileTransferMethod() {
