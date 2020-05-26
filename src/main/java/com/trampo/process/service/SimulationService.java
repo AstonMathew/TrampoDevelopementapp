@@ -77,6 +77,7 @@ public class SimulationService {
     private Integer maxWaitForFilesInDays;
     private String backendScriptPath;
     private String podKey;
+    private String trampoLicensePath;
     private String macroPath;
     private String meshAndRunMacroPath;
     private SshService sshService;
@@ -96,6 +97,7 @@ public class SimulationService {
             @Value("${trampo.simulation.maxWaitForFilesInDays}") Integer maxWaitForFilesInDays,
             @Value("${trampo.simulation.backendScriptPath}") String backendScriptPath,
             @Value("${trampo.simulation.podKey}") String podKey,
+            @Value("${trampo.simulation.trampoLicensePath}") String trampoLicensePath,
             @Value("${trampo.simulation.macroPath}") String macroPath,
             @Value("${trampo.simulation.meshAndRunMacroPath}") String meshAndRunMacroPath) {
         restTemplate = builder.rootUri(apiRoot).build();
@@ -114,6 +116,7 @@ public class SimulationService {
         this.jobService = jobService;
         this.backendScriptPath = backendScriptPath;
         this.podKey = podKey;
+        this.trampoLicensePath= trampoLicensePath;
         this.macroPath = macroPath;
         this.meshAndRunMacroPath = meshAndRunMacroPath;
         this.sshService = sshService;
@@ -382,12 +385,14 @@ public class SimulationService {
             File sourceDirectory = pbWorkingDirectory; // JobRunningFolder
 
             File destinationDirectory = getJobLogsPath(simulation).toFile();
+            LOGGER.info("end of the run file move sourceDirectory=" +sourceDirectory);
             ConditionalMoveFiles(sourceDirectory, destinationDirectory, "log");
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
 
             destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
+            LOGGER.info("end of the run file moveJobSynchronisedFolder destination directory=" +destinationDirectory);
             ConditionalMoveFiles(sourceDirectory, destinationDirectory);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
@@ -411,6 +416,8 @@ public class SimulationService {
             LOGGER.info("Finished condional move files");
             sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
             destinationDirectory = getJobBackupPath(simulation).toFile();
+            LOGGER.info("Finished condional move files source directory=" +sourceDirectory);
+            LOGGER.info("Finished condional move files destinationDirectory=" +destinationDirectory);
             ConditionalCopyFiles(sourceDirectory, destinationDirectory);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
@@ -607,9 +614,9 @@ public class SimulationService {
             queueType = "express";
             memory = 30 * simulation.getNumberOfNodesStandardLowPriority();
         } else if (simulation.getProcessorType().equals("FAST")) {
-            coreCount = simulation.getNumberOfNodesInstantFast() * 48;
+            coreCount = simulation.getNumberOfNodesFast() * 48;
             queueType = "normal";
-            memory = 190 * simulation.getNumberOfNodesInstantFast();
+            memory = 190 * simulation.getNumberOfNodesFast();
             corePerNode = 48;
         } else {
             coreCount = simulation.getNumberOfNodesStandardLowPriority() * 16;
@@ -637,7 +644,9 @@ public class SimulationService {
         walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
         String simulationFileName = getCustomerSimulationFilePathGadi(simulation);
         String podKeyToSubmit = podKey;
+        String licensePath = trampoLicensePath;
         if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
+            licensePath=trampoLicensePath;
             podKeyToSubmit = simulation.getPodKey();
         }
         boolean meshOnly = false;
@@ -650,7 +659,7 @@ public class SimulationService {
         }
         jobService.submitJob(simulation.getId(), "" + coreCount, memory + "", queueType,
                 backendScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
-                meshAndRunMacroPath, simulationFileName, podKeyToSubmit,
+                meshAndRunMacroPath, simulationFileName,licensePath, podKeyToSubmit,
                 getCustomerDataRoot(simulation).toString(), getJobRunningFolderPath(simulation).toString(),
                 getJobRunningFolderPathGadi(simulation).toString(), starCcmPlusVersionPath, meshOnly,
                 runOnly, corePerNode);
@@ -857,6 +866,7 @@ public class SimulationService {
         File[] directoryListing = source.listFiles();
         if (directoryListing != null) {
             for (File child : directoryListing) {
+                 LOGGER.info("directoryListing now Conditiona Move Files = " + child.getName());
                 if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)
                         && child.getName().toLowerCase().contains(string.toLowerCase())) {
                     LOGGER.info("directoryListing child.getName = " + child.getName());
@@ -879,6 +889,7 @@ public class SimulationService {
         File[] directoryListing = source.listFiles();
         if (directoryListing != null) {
             for (File child : directoryListing) {
+                LOGGER.info("directoryListing now Conditional Move Fiels NO String= " + child.getName());
                 if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)) {
                     LOGGER.info("directoryListing child.getName = " + child.getName());
                     try {
@@ -900,6 +911,7 @@ public class SimulationService {
         File[] directoryListing = source.listFiles();
         if (directoryListing != null) {
             for (File child : directoryListing) {
+                LOGGER.info("directoryListing now Conditional Copy Files  = " + child.getName());
                 if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)) {
                     LOGGER.info("directoryListing child.getName = " + child.getName());
                     try {
