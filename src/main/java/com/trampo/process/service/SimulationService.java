@@ -610,7 +610,7 @@ public class SimulationService {
             queueType = "express";
             memory = 30 * simulation.getNumberOfNodesStandardLowPriority();
         } else if (simulation.getProcessorType().equals("FAST")) {
-            coreCount = simulation.getNumberOfNodesFast() * 48;
+            coreCount = simulation.getNumberOfNodesFast();
             queueType = "normal";
             memory = 190 * simulation.getNumberOfNodesFast();
             corePerNode = 48;
