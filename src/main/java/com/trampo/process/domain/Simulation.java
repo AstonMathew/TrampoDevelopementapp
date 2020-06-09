@@ -1,6 +1,5 @@
 package com.trampo.process.domain;
 
-import java.net.InetAddress;
 import java.time.LocalDateTime;
 
 public class Simulation {
