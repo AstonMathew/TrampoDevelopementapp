@@ -1,5 +1,6 @@
 package com.trampo.process.domain;
 
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 
 public class Simulation {
@@ -12,6 +13,8 @@ public class Simulation {
   private int fileCount;
   private Integer numberOfCoresStandardLowPriority;
   private Integer numberOfCoresFast;
+  private String licenceServerIp;
+  private Integer lmgrdPort;
   private String errorMessage;
   private SimulationStatus status;
   private SimulationFileTransferMethod fileTransferMethod;
@@ -87,7 +90,21 @@ public class Simulation {
   public void setNumberOfCoresFast(Integer numberOfCoresFast) {
     this.numberOfCoresFast = numberOfCoresFast;
   }
-
+  
+ public String getLicenceServerIp() {
+    return licenceServerIp;
+  }
+  public void setLicenceServerIp(String licenceServerIp) {
+    this.licenceServerIp = licenceServerIp;
+  }
+  
+  public Integer getLmgrdPort() {
+    return lmgrdPort;
+  }
+  public void setLmgrdPort(Integer lmgrdPort) {
+    this.lmgrdPort = lmgrdPort;
+  }
+  
   public SimulationFileTransferMethod getFileTransferMethod() {
     return fileTransferMethod;
   }

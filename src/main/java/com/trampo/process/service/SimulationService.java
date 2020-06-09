@@ -645,6 +645,11 @@ public class SimulationService {
             licensePath=trampoLicensePath;
             podKeyToSubmit = simulation.getPodKey();
         }
+        if (simulation.getByoLicensingType().equals(ByoLicensingType.OTHER)) {
+            
+            licensePath=simulation.getLmgrdPort().toString()+"@"+simulation.getLicenceServerIp();
+            podKeyToSubmit = simulation.getPodKey();
+        }
         boolean meshOnly = false;
         if (simulation.getMesh() != null) {
             meshOnly = simulation.getMesh();
