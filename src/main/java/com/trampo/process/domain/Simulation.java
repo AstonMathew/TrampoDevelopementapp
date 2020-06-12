@@ -82,7 +82,7 @@ public class Simulation {
     this.numberOfCoresStandardLowPriority = numberOfCoresStandardLowPriority;
   }
 
-  public Integer getNumberOfNodesFast() {
+  public Integer getNumberOfCoresFast() {
     return numberOfCoresFast;
   }
 
