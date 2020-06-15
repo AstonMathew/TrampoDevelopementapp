@@ -503,7 +503,7 @@ public class SimulationService {
                         LOGGER.error("File " + child.getName() + " extension is not supported");
                         error(simulation, null, "Unsafe uploaded files extension");
                     } else {
-                        if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[3])) { //
+                        if (child.getName().toLowerCase().endsWith(ValidExtensions.EXTENSIONS[5])) { //
 //              Scan scan = new Scan(child);
 //              if (!scan.scan()) {
 //                LOGGER.error("!scan.scan()=" + !scan.scan());
@@ -524,6 +524,7 @@ public class SimulationService {
         // Check files count
         int count = 0;
         int simCount = 0;
+
         try {
             Iterator<Path> fileIt
                     = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
@@ -549,7 +550,11 @@ public class SimulationService {
         } else {
             LOGGER.info("Actual file count matches nominated file count !!!");
         }
+        
+      
+        
     }
+    
 
     private void RunJob(Simulation simulation) {
         LOGGER.info("starting run job");
@@ -640,6 +645,7 @@ public class SimulationService {
         }
         walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
         String simulationFileName = getCustomerSimulationFilePathGadi(simulation);
+        String dmprjFileName = getDmprjSimulationFilePathGadi(simulation);
         String podKeyToSubmit = podKey;
         String licensePath = trampoLicensePath;
         if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
@@ -659,6 +665,47 @@ public class SimulationService {
         if (simulation.getRun() != null) {
             runOnly = simulation.getRun();
         }
+        int count=0;
+        int dmprjCount = 0;
+         try {
+            Iterator<Path> fileIt
+                    = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+            while (fileIt.hasNext()) {
+                Path file = fileIt.next();
+                if (Files.isRegularFile(file)) {
+                    count++;
+                }
+                if (file.toString().endsWith(".dmprj")) {
+                    dmprjCount++;
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Unable to count files in "
+                    + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+            count = 0;
+        }
+         int count1 = 0;
+        int simCount = 0;
+
+        try {
+            Iterator<Path> fileIt
+                    = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+            while (fileIt.hasNext()) {
+                Path file = fileIt.next();
+                if (Files.isRegularFile(file)) {
+                    count1++;
+                }
+                if (file.toString().endsWith(".sim")) {
+                    simCount++;
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Unable to count files in "
+                    + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+            count1 = 0;
+        }
+   
+         if(dmprjCount==0){
         jobService.submitJob(simulation.getId(), "" + coreCount, memory + "", queueType,
                 backendScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
                 meshAndRunMacroPath, simulationFileName,licensePath, podKeyToSubmit,
@@ -667,13 +714,38 @@ public class SimulationService {
                 runOnly, corePerNode);
         updateStatus(simulation.getId(), SimulationStatus.SUBMITTED);
     }
-
+         else if(simCount==1){
+             jobService.submitJob1(simulation.getId(), "" + coreCount, memory + "", queueType,
+                backendScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
+                meshAndRunMacroPath, dmprjFileName,licensePath, podKeyToSubmit,
+                getCustomerDataRoot(simulation).toString(), getJobRunningFolderPath(simulation).toString(),
+                getJobRunningFolderPathGadi(simulation).toString(), starCcmPlusVersionPath, meshOnly,
+                runOnly, corePerNode);
+        updateStatus(simulation.getId(), SimulationStatus.SUBMITTED);
+        
+         }
+         
+    }
     private String getCustomerSimulationFilePathGadi(Simulation simulation) {
         try {
             Iterator<Path> fileIt = Files.list(getJobRunningFolderPath(simulation)).iterator();
             while (fileIt.hasNext()) {
                 Path file = fileIt.next();
                 if (file.toString().endsWith(".sim")) {
+                    return getJobRunningFolderPathGadi(simulation).resolve(file.getFileName()).toString();
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
+        }
+        return null;
+    }
+      private String getDmprjSimulationFilePathGadi(Simulation simulation) {
+        try {
+            Iterator<Path> fileIt = Files.list(getJobRunningFolderPath(simulation)).iterator();
+            while (fileIt.hasNext()) {
+                Path file = fileIt.next();
+                if (file.toString().endsWith(".dmprj")) {
                     return getJobRunningFolderPathGadi(simulation).resolve(file.getFileName()).toString();
                 }
             }
