@@ -76,6 +76,7 @@ public class SimulationService {
     private String runRootGadi;
     private Integer maxWaitForFilesInDays;
     private String backendScriptPath;
+    private String backendDmprjScriptPath;
     private String podKey;
     private String trampoLicensePath;
     private String macroPath;
@@ -96,6 +97,7 @@ public class SimulationService {
             @Value("${trampo.simulation.runRootGadi}") String runRootGadi,
             @Value("${trampo.simulation.maxWaitForFilesInDays}") Integer maxWaitForFilesInDays,
             @Value("${trampo.simulation.backendScriptPath}") String backendScriptPath,
+            @Value("${trampo.simulation.backendDmprjScriptPath}") String backendDmprjScriptPath,
             @Value("${trampo.simulation.podKey}") String podKey,
              @Value("${trampo.simulation.trampoLicensePath}") String trampoLicensePath,
             @Value("${trampo.simulation.macroPath}") String macroPath,
@@ -115,6 +117,7 @@ public class SimulationService {
         this.maxWaitForFilesInDays = maxWaitForFilesInDays;
         this.jobService = jobService;
         this.backendScriptPath = backendScriptPath;
+        this.backendDmprjScriptPath = backendDmprjScriptPath;
         this.podKey = podKey;
         this.trampoLicensePath= trampoLicensePath;
         this.macroPath = macroPath;
@@ -535,6 +538,7 @@ public class SimulationService {
                 }
                 if (file.toString().endsWith(".sim")) {
                     simCount++;
+                    LOGGER.info("simCount in check="+simCount);
                 }
             }
         } catch (IOException e) {
@@ -560,7 +564,7 @@ public class SimulationService {
         LOGGER.info("starting run job");
 
         String runRoot = getJobRunningFolderPathGadi(simulation).toString();
-
+                
         if ((simulation.getMesh() == null || !simulation.getMesh())
                 && (simulation.getRun() == null || !simulation.getRun())) {
 
@@ -669,7 +673,7 @@ public class SimulationService {
         int dmprjCount = 0;
          try {
             Iterator<Path> fileIt
-                    = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+                    = Files.list(getJobRunningFolderPath(simulation)).iterator();
             while (fileIt.hasNext()) {
                 Path file = fileIt.next();
                 if (Files.isRegularFile(file)) {
@@ -677,19 +681,20 @@ public class SimulationService {
                 }
                 if (file.toString().endsWith(".dmprj")) {
                     dmprjCount++;
+                    LOGGER.error("dmprjCount="+dmprjCount);
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Unable to count files in "
-                    + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+            LOGGER.error("dmprjCount-Unable to count files in "
+                    + getJobRunningFolderPathGadi(simulation), e);
             count = 0;
         }
          int count1 = 0;
         int simCount = 0;
-
+            
         try {
             Iterator<Path> fileIt
-                    = Files.list(getCustomerSynchronisedFolderSimulationFolderFullPath(simulation)).iterator();
+                    = Files.list(getJobRunningFolderPath(simulation)).iterator();
             while (fileIt.hasNext()) {
                 Path file = fileIt.next();
                 if (Files.isRegularFile(file)) {
@@ -697,11 +702,12 @@ public class SimulationService {
                 }
                 if (file.toString().endsWith(".sim")) {
                     simCount++;
+                    LOGGER.error("simCount="+simCount);
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Unable to count files in "
-                    + getCustomerSynchronisedFolderSimulationFolderFullPath(simulation), e);
+            LOGGER.error("simCount-Unable to count files in "
+                    + getJobRunningFolderPathGadi(simulation), e);
             count1 = 0;
         }
    
@@ -712,15 +718,19 @@ public class SimulationService {
                 getCustomerDataRoot(simulation).toString(), getJobRunningFolderPath(simulation).toString(),
                 getJobRunningFolderPathGadi(simulation).toString(), starCcmPlusVersionPath, meshOnly,
                 runOnly, corePerNode);
+        LOGGER.error("submitJOB "+getJobRunningFolderPathGadi(simulation)+simulationFileName+dmprjCount);
+        LOGGER.error("submitJOB dmprj count= "+dmprjCount +"simcount="+simCount);
         updateStatus(simulation.getId(), SimulationStatus.SUBMITTED);
     }
          else if(simCount==1){
-             jobService.submitJob1(simulation.getId(), "" + coreCount, memory + "", queueType,
-                backendScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
+             jobService.submitJob(simulation.getId(), "" + coreCount, memory + "", queueType,
+                backendDmprjScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
                 meshAndRunMacroPath, dmprjFileName,licensePath, podKeyToSubmit,
                 getCustomerDataRoot(simulation).toString(), getJobRunningFolderPath(simulation).toString(),
                 getJobRunningFolderPathGadi(simulation).toString(), starCcmPlusVersionPath, meshOnly,
                 runOnly, corePerNode);
+             LOGGER.error("submitJOB1 dmprj "+getJobRunningFolderPathGadi(simulation)+dmprjFileName+dmprjCount);
+             LOGGER.error("submitJOB1 dmprj count= "+dmprjCount +"simcount="+simCount);
         updateStatus(simulation.getId(), SimulationStatus.SUBMITTED);
         
          }
@@ -733,10 +743,11 @@ public class SimulationService {
                 Path file = fileIt.next();
                 if (file.toString().endsWith(".sim")) {
                     return getJobRunningFolderPathGadi(simulation).resolve(file.getFileName()).toString();
+                    
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
+            LOGGER.error("getCustomerSimulationFilePathGadi- Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
         }
         return null;
     }
@@ -746,11 +757,11 @@ public class SimulationService {
             while (fileIt.hasNext()) {
                 Path file = fileIt.next();
                 if (file.toString().endsWith(".dmprj")) {
-                    return getJobRunningFolderPathGadi(simulation).resolve(file.getFileName()).toString();
+                    return getJobRunningFolderPath(simulation).resolve(file.getFileName()).toString();
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
+            LOGGER.error("getDmprjSimulationFilePathGadi-Unable to count files in " + getRunSimulationFolderFullPath(simulation), e);
         }
         return null;
     }

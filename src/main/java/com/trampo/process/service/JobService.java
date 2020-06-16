@@ -149,38 +149,4 @@ public class JobService {
     LOGGER.info("submitting job fnished");
   }
 
-    public void submitJob1(String jobName, String coreCount, String memory, String queueType,
-      String scriptPath, String walltime, String gadiLogRoot, String macroPath, String meshAndRunMacroPath,
-      String simulationPath, String licensePath , String podKey, String customerDataRoot, String customerRunRoot,
-      String runRoot, String starCcmPlusVersion, Boolean meshOnly, Boolean runOnly, int corePerNode) {
-
-    FileUtils.runChmod(customerRunRoot);
-    FileUtils.runChmod(customerDataRoot);
-    
-    String batchFlagCommand = meshAndRunMacroPath;
-    if(meshOnly && runOnly){
-      batchFlagCommand ="meshrun";
-    }else if(meshOnly){
-      batchFlagCommand ="mesh";
-    }else if(runOnly){
-      batchFlagCommand = "";
-    }
-    
-    // No spaces in qsub command
-    String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus="
-        + coreCount + " -e " + gadiLogRoot + "/error.txt -o " + gadiLogRoot + "/output.txt -lmem="
-        + memory + "GB -lwalltime=" + walltime + " -v StarCcmRunVersionPath=" + starCcmPlusVersion
-        + ",BatchFlagCommand=" + batchFlagCommand + ",SimulationPath=" + simulationPath + ",LicensePath="+licensePath + ",Podkey=" + podKey
-        + ",CorePerNode=" + corePerNode + " " + scriptPath + ";";
-    LOGGER.info("submit job command: " + command);
-    List<String> result = sshService.execCommand(command);
-    LOGGER.info("submitting job ");
-    for (String string : result) {
-      LOGGER.info(string);
-    }
-    LOGGER.info("submitting job fnished");
-  }
-    
-    
-    
 }
