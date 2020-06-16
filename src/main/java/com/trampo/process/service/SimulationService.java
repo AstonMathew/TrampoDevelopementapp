@@ -686,7 +686,7 @@ public class SimulationService {
             }
         } catch (IOException e) {
             LOGGER.error("dmprjCount-Unable to count files in "
-                    + getJobRunningFolderPathGadi(simulation), e);
+                    + getJobRunningFolderPath(simulation), e);
             count = 0;
         }
          int count1 = 0;
@@ -707,7 +707,7 @@ public class SimulationService {
             }
         } catch (IOException e) {
             LOGGER.error("simCount-Unable to count files in "
-                    + getJobRunningFolderPathGadi(simulation), e);
+                    + getJobRunningFolderPath(simulation), e);
             count1 = 0;
         }
    
@@ -757,7 +757,7 @@ public class SimulationService {
             while (fileIt.hasNext()) {
                 Path file = fileIt.next();
                 if (file.toString().endsWith(".dmprj")) {
-                    return getJobRunningFolderPath(simulation).resolve(file.getFileName()).toString();
+                    return getJobRunningFolderPathGadi(simulation).resolve(file.getFileName()).toString();
                 }
             }
         } catch (IOException e) {
