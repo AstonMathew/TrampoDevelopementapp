@@ -54,6 +54,8 @@ import com.trampo.process.util.Scan;
 import com.trampo.process.util.SendEmail;
 import com.trampo.process.util.StarCcmPlusUtil;
 import com.trampo.process.util.ValidExtensions;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 
 @Component
 public class SimulationService {
@@ -392,13 +394,16 @@ public class SimulationService {
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[1]);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
-
             destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
-            ConditionalMoveFiles(sourceDirectory, destinationDirectory);
+            copyDirectory(sourceDirectory, destinationDirectory);
+             LOGGER.info("destinationDirectory=:"+destinationDirectory+"copied from sourceDirectory ="+sourceDirectory);      
+            
+            destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
+            ConditionalMoveFiles(sourceDirectory, destinationDirectory);            
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Trampo");
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
-
+             
             if ((simulation.getMesh() == null || !simulation.getMesh())
                     && (simulation.getRun() == null || !simulation.getRun())) {
 
@@ -429,7 +434,7 @@ public class SimulationService {
             LOGGER.info("Finished backup move files");
 
             // list all files before deleting run folder
-            Files.walk(getJobRunningFolderPath(simulation)).forEach(p -> LOGGER.info(p.toString()));
+            Files.walk(getJobRunningFolderPath(simulation)).forEach(p -> LOGGER.info("files="+p.toString()));
 
             // deletes run folder
             org.apache.tomcat.util.http.fileupload.FileUtils
@@ -657,9 +662,14 @@ public class SimulationService {
             podKeyToSubmit = simulation.getPodKey();
         }
         if (simulation.getByoLicensingType().equals(ByoLicensingType.OTHER)) {
-            
-            licensePath=simulation.getLmgrdPort().toString()+"@"+simulation.getLicenceServerIp();
+            if(simulation.getLicenceServerIp()==null)
+            {
+                licensePath=trampoLicensePath;
+                podKeyToSubmit = simulation.getPodKey();
+            }else{
+            licensePath=trampoLicensePath+":"+simulation.getLmgrdPort().toString()+"@"+simulation.getLicenceServerIp();
             podKeyToSubmit = simulation.getPodKey();
+        }
         }
         boolean meshOnly = false;
         if (simulation.getMesh() != null) {
@@ -770,6 +780,11 @@ public class SimulationService {
         return Paths.get(getJobRunningFolderPath(simulation).toString(), "PowerPoint");
     }
 
+    private Path getMdxRunTimeRunFolderPath(Simulation simulation) {
+       return Paths.get(getJobRunningFolderPath(simulation).toString(), ".mdxruntime");
+          }
+     
+    
     private Path getStarViewRunFolderPath(Simulation simulation) {
         return Paths.get(getJobRunningFolderPath(simulation).toString(), "StarView");
     }
@@ -1010,6 +1025,31 @@ public class SimulationService {
             }
         }
     }
+   
+    public static void copyDirectory(File sourceDir, File targetDir) throws IOException {
+        
+        if (sourceDir.isDirectory()) {
+            copyDirectoryRecursively(sourceDir, targetDir);
+             LOGGER.info(" Calling reculsivedirmove="+sourceDir);
+        } else {
+            Files.copy(sourceDir.toPath(), targetDir.toPath());
+            LOGGER.info(" Copying using copy dir="+sourceDir);
+        }
+    }
+
+                                                                            // recursive method to copy directory and sub-diretory 
+    private static void copyDirectoryRecursively(File source, File target)
+    throws IOException {
+        if (!target.exists()) {
+            target.mkdir();
+        }
+
+        for (String child : source.list()) {
+            copyDirectory(new File(source, child), new File(target, child));
+            LOGGER.info(" copying using copy dirRecu="+child);
+        }
+    }
+    
 
     private void createLogHeader(Simulation simulation) {
         LOGGER.info(

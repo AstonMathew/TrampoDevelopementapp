@@ -1,5 +1,6 @@
 package com.trampo.process.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -109,4 +110,12 @@ public class FileUtils {
       LOGGER.error("Error while running chmod", e);
     }
   }
+
+    public static void copyDirectory(File sourceDirectory, File destinationDirectory) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public static void copyDirectory(File sourceDirectory, File destinationDirectory, String mdxruntime) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
