@@ -395,8 +395,7 @@ public class SimulationService {
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[2]);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[3]);
             destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
-            copyDirectory(sourceDirectory, destinationDirectory);
-             LOGGER.info("destinationDirectory=:"+destinationDirectory+"copied from sourceDirectory ="+sourceDirectory);      
+            copyDirectory(sourceDirectory, destinationDirectory.toPath());
             
             destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
             ConditionalMoveFiles(sourceDirectory, destinationDirectory);            
@@ -432,7 +431,9 @@ public class SimulationService {
             // getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
             LOGGER.info("Finished backup move files");
-
+            destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
+            copyDirectory(sourceDirectory, destinationDirectory.toPath());
+             LOGGER.info("Finished CopyDir function");
             // list all files before deleting run folder
             Files.walk(getJobRunningFolderPath(simulation)).forEach(p -> LOGGER.info("files="+p.toString()));
 
@@ -1010,7 +1011,7 @@ public class SimulationService {
         if (directoryListing != null) {
             for (File child : directoryListing) {
                 if (Files.isRegularFile(child.toPath(), LinkOption.NOFOLLOW_LINKS)) {
-                    LOGGER.info("directoryListing child.getName = " + child.getName());
+                    
                     try {
                         Files.copy(child.toPath(), destination.toPath().resolve(child.getName()));
                         // FileUtils.runChmod(destination.toString());
@@ -1026,14 +1027,25 @@ public class SimulationService {
         }
     }
    
-    public static void copyDirectory(File sourceDir, File targetDir) throws IOException {
+    public static void copyDirectory(File sourceDir, Path targetDir) throws IOException {
         
         if (sourceDir.isDirectory()) {
-            copyDirectoryRecursively(sourceDir, targetDir);
-             LOGGER.info(" Calling reculsivedirmove="+sourceDir);
+            
+             copyDirectoryRecursively(sourceDir, targetDir.toFile());
+
         } else {
-            Files.copy(sourceDir.toPath(), targetDir.toPath());
-            LOGGER.info(" Copying using copy dir="+sourceDir);
+             if (Files.isRegularFile(sourceDir.toPath(), LinkOption.NOFOLLOW_LINKS)) {
+                    
+                    try {
+                        Files.move(sourceDir.toPath(), targetDir);
+                        
+                    } catch (Exception e) {
+                        LOGGER.error("copyDirectory failed to move the child to = " + targetDir, e);
+                    }
+                    LOGGER.info(" targetDir.toPath().resolve(sourceDir.getName() = "+ targetDir.resolve(sourceDir.getName()));
+                 
+                }
+
         }
     }
 
@@ -1043,13 +1055,14 @@ public class SimulationService {
         if (!target.exists()) {
             target.mkdir();
         }
-
-        for (String child : source.list()) {
-            copyDirectory(new File(source, child), new File(target, child));
-            LOGGER.info(" copying using copy dirRecu="+child);
+        File[] directoryListing = source.listFiles();   
+        for (File child : directoryListing) {
+            LOGGER.info(" copyDirectory(child="+child+",target.toPath().resolve(child.getName())="+target.toPath().resolve(child.getName()));
+            copyDirectory(child,target.toPath().resolve(child.getName()));
+         
         }
     }
-    
+   
 
     private void createLogHeader(Simulation simulation) {
         LOGGER.info(
