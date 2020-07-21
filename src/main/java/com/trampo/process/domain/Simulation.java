@@ -16,7 +16,7 @@ public class Simulation {
   private Integer lmgrdPort;
   private String errorMessage;
   private SimulationStatus status;
-  private SimulationFileTransferMethod fileTransferMethod;
+//  private SimulationFileTransferMethod fileTransferMethod;
   private String processorType;
   private StarCcmPrecision starCcmPrecision;
   private ByoLicensingType byoLicensingType;
@@ -104,13 +104,13 @@ public class Simulation {
     this.lmgrdPort = lmgrdPort;
   }
   
-  public SimulationFileTransferMethod getFileTransferMethod() {
-    return fileTransferMethod;
-  }
-
-  public void setFileTransferMethod(SimulationFileTransferMethod fileTransferMethod) {
-    this.fileTransferMethod = fileTransferMethod;
-  }
+//  public SimulationFileTransferMethod getFileTransferMethod() {
+//    return fileTransferMethod;
+//  }
+//
+//  public void setFileTransferMethod(SimulationFileTransferMethod fileTransferMethod) {
+//    this.fileTransferMethod = fileTransferMethod;
+//  }
 
   public String getProcessorType() {
     return processorType;

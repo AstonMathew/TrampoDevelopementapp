@@ -419,19 +419,24 @@ public class SimulationService {
                 ConditionalMoveFiles(sourceDirectory, destinationDirectory);
             }
             LOGGER.info("Finished condional move files");
+            
             sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
             destinationDirectory = getJobBackupPath(simulation).toFile();
             ConditionalCopyFiles(sourceDirectory, destinationDirectory);
+            LOGGER.info("Finished backup move files to run");
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
-            // sourceDirectory = getJobSynchronisedFolderPath(simulation).toFile();
-            // destinationDirectory =
-            // getCustomerSynchronisedFolderSimulationFolderFullPath(simulation).toFile();
-            // ConditionalMoveFiles(sourceDirectory, destinationDirectory, "Backup");
-            LOGGER.info("Finished backup move files");
+             sourceDirectory = getJobBackupPath(simulation).toFile();
+             destinationDirectory =getJobSynchronisedFolderBackupPath(simulation).toFile();
+             ConditionalMoveFiles(sourceDirectory, destinationDirectory);
+             
+//             copyDirectory(sourceDirectory, destinationDirectory.toPath());
+            LOGGER.info("Finished backup move files to sync");
+            
             destinationDirectory = getJobSynchronisedFolderPath(simulation).toFile();
+            sourceDirectory = pbWorkingDirectory;
             copyDirectory(sourceDirectory, destinationDirectory.toPath());
              LOGGER.info("Finished CopyDir function");
             // list all files before deleting run folder
@@ -894,7 +899,7 @@ public class SimulationService {
     private Path getScenesSyncFolderPath(Simulation simulation) {
         return Paths.get(getJobSynchronisedFolderPath(simulation).toString(), "Scenes");
     }
-
+   
     private void selectStarCCMPlusRunVersion(Simulation simulation) {
         if (starCcmPlusVersionPath == null) {
             LOGGER.info("simulationCcmPlusVersion is NOT installed on compute node");
@@ -978,7 +983,7 @@ public class SimulationService {
                         LOGGER.error("ConditionalMoveFiles failed to move the child to = "
                                 + destination.toPath().resolve(child.getName()), e);
                     }
-                    LOGGER.info(" directoryListing child moved to  = "
+                    LOGGER.info(" CM directoryListing child moved to  = "
                             + destination.toPath().resolve(child.getName()));
                 }
             }
@@ -1017,8 +1022,7 @@ public class SimulationService {
                         // FileUtils.runChmod(destination.toString());
                         // FileUtils.logFilePermissions(destination.toPath());
                     } catch (Exception e) {
-                        LOGGER.error("ConditionalCopyFiles failed to move the child to = "
-                                + destination.toPath().resolve(child.getName()), e);
+                        LOGGER.error("ConditionalCopyFiles failed to move the child to = "+child.toPath()+"  ,,,destination="+ destination.toPath().resolve(child.getName()), e);
                     }
                     LOGGER.info(" directoryListing child moved to  = "
                             + destination.toPath().resolve(child.getName()));
@@ -1062,7 +1066,6 @@ public class SimulationService {
          
         }
     }
-   
 
     private void createLogHeader(Simulation simulation) {
         LOGGER.info(

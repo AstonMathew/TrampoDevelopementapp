@@ -125,7 +125,7 @@ public class JobService {
     FileUtils.runChmod(customerRunRoot);
     FileUtils.runChmod(customerDataRoot);
     
-    String batchFlagCommand = meshAndRunMacroPath;
+    String batchFlagCommand = macroPath;
     if(meshOnly && runOnly){
       batchFlagCommand ="meshrun";
     }else if(meshOnly){
