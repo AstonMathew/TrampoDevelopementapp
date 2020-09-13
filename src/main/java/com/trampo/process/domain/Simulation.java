@@ -10,8 +10,8 @@ public class Simulation {
   private long maxWalltime;
   private long actualWalltime;
   private int fileCount;
-  private Integer numberOfCoresStandardLowPriority;
-  private Integer numberOfCoresFast;
+  //private Integer numberOfCoresStandardLowPriority;
+  private Integer numberOfCores;
   private String licenceServerIp;
   private Integer lmgrdPort;
   private String errorMessage;
@@ -74,20 +74,20 @@ public class Simulation {
     this.dateUpdated = dateUpdated;
   }
 
-  public Integer getNumberOfNodesStandardLowPriority() {
-    return numberOfCoresStandardLowPriority;
+  //public Integer getNumberOfNodesStandardLowPriority() {
+   // return numberOfCoresStandardLowPriority;
+  //}
+
+//  public void setNumberOfCoresStandardLowPriority(Integer numberOfCoresStandardLowPriority) {
+//    this.numberOfCoresStandardLowPriority = numberOfCoresStandardLowPriority;
+//  }
+
+  public Integer getNumberOfCores() {
+    return numberOfCores;
   }
 
-  public void setNumberOfCoresStandardLowPriority(Integer numberOfCoresStandardLowPriority) {
-    this.numberOfCoresStandardLowPriority = numberOfCoresStandardLowPriority;
-  }
-
-  public Integer getNumberOfCoresFast() {
-    return numberOfCoresFast;
-  }
-
-  public void setNumberOfCoresFast(Integer numberOfCoresFast) {
-    this.numberOfCoresFast = numberOfCoresFast;
+  public void setNumberOfCores(Integer numberOfCores) {
+    this.numberOfCores = numberOfCores;
   }
   
  public String getLicenceServerIp() {
