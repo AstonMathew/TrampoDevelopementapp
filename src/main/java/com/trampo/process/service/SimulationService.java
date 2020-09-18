@@ -627,20 +627,23 @@ public class SimulationService {
         long memory;
         if (simulation.getProcessorType().equals("INSTANT")) {
             coreCount = simulation.getNumberOfCores();
-            queueType = "express";
-            memory = 30 * simulation.getNumberOfCores();
-            corePerNode = 48;
+            queueType = "expressbw";
+            corePerNode = 28;
+            memory = (long) Math.floor(125 * simulation.getNumberOfCores()/corePerNode);
+            
         } else if (simulation.getProcessorType().equals("FAST")) {
             coreCount = simulation.getNumberOfCores();
             queueType = "normal";
-            memory = (long) Math.floor(190 * simulation.getNumberOfCores()/48);
-          
             corePerNode = 48;
+            memory = (long) Math.floor(190 * simulation.getNumberOfCores()/corePerNode);
+          
+            
         } else {
             coreCount = simulation.getNumberOfCores();
-            queueType = "normal";
-            memory = 30 * simulation.getNumberOfCores();
-            corePerNode = 48;
+            queueType = "normalbw";
+            corePerNode = 28;
+            memory = (long) Math.floor(125 * simulation.getNumberOfCores()/corePerNode);
+            
         }
         if (productionOrTestingSwitch.equals("test")) {
             coreCount = 1;
