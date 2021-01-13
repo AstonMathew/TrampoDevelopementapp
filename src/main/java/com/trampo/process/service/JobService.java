@@ -126,6 +126,7 @@ public class JobService {
     FileUtils.runChmod(customerDataRoot);
     
     String batchFlagCommand = macroPath;
+    LOGGER.info("macroPath= " + macroPath);
     if(meshOnly && runOnly){
       batchFlagCommand ="meshrun";
     }else if(meshOnly){
@@ -133,7 +134,7 @@ public class JobService {
     }else if(runOnly){
       batchFlagCommand = "";
     }
-    
+    LOGGER.info("batchFlagCommand= " + batchFlagCommand);
     // No spaces in qsub command
     String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus="
         + coreCount + " -e " + gadiLogRoot + "/error.txt -o " + gadiLogRoot + "/output.txt -lmem="

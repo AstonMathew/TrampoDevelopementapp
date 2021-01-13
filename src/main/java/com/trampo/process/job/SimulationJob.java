@@ -96,6 +96,14 @@ public class SimulationJob {
                 Simulation simulation = runningSimulations.get(job.getSimulationId());
                 if (simulationService.isFinishedWithError(simulation)) {
                   simulationService.error(simulation, job, "Failed During Execution");
+                  if (job.getWalltime().contains(":")) {
+                    String[] times = job.getWalltime().split(":");
+                    int walltime = (Integer.parseInt(times[0]) * 60) + Integer.parseInt(times[1]);
+                    if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
+                      walltime = walltime + 1;
+                    }
+                    simulationService.updateWalltime(job.getSimulationId(), walltime);
+                  }
                 } else {
                   simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
                   mailService.sendSimulationCompletedEmails(simulation, job);
@@ -117,6 +125,15 @@ public class SimulationJob {
                     && !simulation.getStatus().equals(SimulationStatus.CANCELREFUNDED)) {
                   if (simulationService.isFinishedWithError(simulation)) {
                     simulationService.error(simulation, job, "Failed During Execution");
+                    
+                    if (job.getWalltime().contains(":")) {
+                    String[] times = job.getWalltime().split(":");
+                    int walltime = (Integer.parseInt(times[0]) * 60) + Integer.parseInt(times[1]);
+                    if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
+                      walltime = walltime + 1;
+                    }
+                    simulationService.updateWalltime(job.getSimulationId(), walltime);
+                    }
                   } else {
                     simulationService.updateStatus(job.getSimulationId(), SimulationStatus.COMPLETED);
                     mailService.sendSimulationCompletedEmails(simulation, job);
@@ -149,6 +166,9 @@ public class SimulationJob {
               Simulation simulation = simulationService.getSimulation(job.getSimulationId());
               if (simulation.getStatus().equals(SimulationStatus.CANCELLED)) {
                 jobService.cancelJob(job.getId());
+                int walltime=0;
+                simulationService.updateWalltime(job.getSimulationId(), walltime);
+                    simulationService.updateStatus(job.getSimulationId(), SimulationStatus.CANCELREFUNDED);
               } else {
                 simulationService.updateStatus(job.getSimulationId(), SimulationStatus.QUEUED);
               }
