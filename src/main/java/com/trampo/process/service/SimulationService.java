@@ -690,8 +690,8 @@ public class SimulationService {
         if (simulation.getRun() != null) {
             runOnly = simulation.getRun();
         }
-        int count=0;
-        int dmprjCount = 0;
+         int count=0;
+        int dmprjCount = 0;      
          try {
             Iterator<Path> fileIt
                     = Files.list(getJobRunningFolderPath(simulation)).iterator();
