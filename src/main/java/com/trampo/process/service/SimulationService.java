@@ -428,9 +428,9 @@ public class SimulationService {
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[0]);
             // ConditionalMoveFiles(sourceDirectory, destinationDirectory, ValidExtensions.EXTENSIONS[4]);
 
-             sourceDirectory = getJobBackupPath(simulation).toFile();
-             destinationDirectory =getJobSynchronisedFolderBackupPath(simulation).toFile();
-             ConditionalMoveFiles(sourceDirectory, destinationDirectory);
+//             sourceDirectory = getJobBackupPath(simulation).toFile();
+//             destinationDirectory =getJobSynchronisedFolderBackupPath(simulation).toFile();
+//             ConditionalMoveFiles(sourceDirectory, destinationDirectory);
              
 //             copyDirectory(sourceDirectory, destinationDirectory.toPath());
             LOGGER.info("Finished backup move files to sync");
@@ -932,6 +932,7 @@ public class SimulationService {
                     LOGGER.info(string);
                     Set<CcmPlus> list = StarCcmPlusUtil.getInstalledCcmPluses();
                     for (CcmPlus ccmPlus : list) {
+                        LOGGER.info("list of ccm+=" + list.toString());
                         if (ccmPlus.getPrecision().equals(StarCcmPrecision.MIXED)
                                 && string.contains(ccmPlus.getVersion())) {
                             starCcmPlusVersionPath = ccmPlus.getPath();
