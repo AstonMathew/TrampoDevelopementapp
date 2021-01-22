@@ -1120,22 +1120,22 @@ public class SimulationService {
 
     private Path getJobBackupPath(Simulation simulation) {
         return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
-                "Job_" + simulation.getId(), "backup");
+                "Job_" + simulation.getId()+"_"+ simulation.getFolderName(), "backup");
     }
 
     private Path getJobLogsPath(Simulation simulation) {
         return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
-                "Job_" + simulation.getId(), "logs");
+                "Job_" + simulation.getId()+"_"+ simulation.getFolderName(), "logs");
     }
 
     private Path getCustomerDataRoot(Simulation simulation) {
         return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation),
-                "Job_" + simulation.getId());
+                "Job_" + simulation.getId()+"_"+ simulation.getFolderName());
     }
 
     private Path getJobLogsPathGadi(Simulation simulation) {
         return Paths.get(dataRootGadi, getCustomerFolderRelativePath(simulation),
-                "Job_" + simulation.getId(), "logs");
+                "Job_" + simulation.getId()+"_"+ simulation.getFolderName(), "logs");
     }
 
     private void createJobRunAndSyncFolders(Simulation simulation) {
@@ -1175,7 +1175,7 @@ public class SimulationService {
         // where trampo send the results
         // back live.
         return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation), "Synchronised_Folder",
-                "Job_" + simulation.getId());
+                "Job_" + simulation.getId()+"_"+ simulation.getFolderName());
     }
 
     private Path getJobSynchronisedFolderBackupPath(Simulation simulation) {// the Job synchronised
@@ -1183,18 +1183,18 @@ public class SimulationService {
         // where trampo send the results
         // back live.
         return Paths.get(dataRoot, getCustomerFolderRelativePath(simulation), "Synchronised_Folder",
-                "Job_" + simulation.getId() + "/backup");
+                "Job_" + simulation.getId()+"_"+ simulation.getFolderName() + "/backup");
     }
 
     private Path getJobRunningFolderPath(Simulation simulation) {// the Job running folder
         return Paths.get(runRoot, getCustomerFolderRelativePath(simulation),
-                "Job_" + simulation.getId());
+                "Job_" + simulation.getId()+"_"+ simulation.getFolderName());
     }
 
     private Path getJobRunningFolderPathGadi(Simulation simulation) {// the Job running folder from
         // Raijin
         return Paths.get(runRootGadi, getCustomerFolderRelativePath(simulation),
-                "Job_" + simulation.getId());
+                "Job_" + simulation.getId()+"_"+ simulation.getFolderName());
     }
 
     private String getCustomerFolderRelativePath(Simulation simulation) {
