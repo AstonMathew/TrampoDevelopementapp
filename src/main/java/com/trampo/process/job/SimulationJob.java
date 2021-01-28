@@ -72,6 +72,21 @@ public class SimulationJob {
             if (job.getStatus().equals(JobStatus.R)) {
               if (!runningSimulations.containsKey(job.getSimulationId())) {
                 Simulation simulation = simulationService.getSimulation(job.getSimulationId());
+                if (job.getWalltime().contains(":")) {
+                    String[] times = job.getWalltime().split(":");
+                    int walltime = (Integer.parseInt(times[0]) * 60) + Integer.parseInt(times[1]);
+                    if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
+                      walltime = walltime + 1;
+                      LOGGER.info("Walltime in SimulationJob= "+walltime + "maxWalltime ="+simulation.getMaxWalltime());
+                    }
+                   if(walltime >= simulation.getMaxWalltime()){
+                   simulationService.endSave(simulation, job);
+                   LOGGER.info("Walltime= "+walltime +"Checkpoint created ");
+                       
+                   }
+                       
+                  }
+                
                 if (simulation.getStatus().equals(SimulationStatus.CANCELLED)) {
                   if (!cancelled.contains(simulation.getId())) {
                     simulationService.cancelSimulation(simulation, job);

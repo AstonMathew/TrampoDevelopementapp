@@ -99,7 +99,7 @@ public class JobService {
         job.setStatus(JobStatus.valueOf(status));
         job.setId(jobId);
         job.setWalltime(actualWalltime);
-        list.add(job);
+        list.add(job);       
       }
     }
     return list;

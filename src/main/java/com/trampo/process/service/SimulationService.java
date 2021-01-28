@@ -295,7 +295,19 @@ public class SimulationService {
             }
         }
     }
-
+    public void endSave(Simulation simulation, Job job) {
+      
+        File file = new File(getJobRunningFolderPath(simulation) + "/CHECKPOINT");
+        try {
+            // Create the file
+            file.createNewFile();
+            LOGGER.info("CHECKPOINT File is created! " + file.getAbsolutePath());
+        } catch (IOException ex) {
+            LOGGER.error("CHECKPOINT File already exists or the operation failed for some reason", ex);
+        }
+        
+    }
+    
     public void cancelSimulation(Simulation simulation, Job job) {
         File file = new File(getJobRunningFolderPath(simulation) + "/ABORT");
         try {
@@ -314,6 +326,15 @@ public class SimulationService {
         } catch (IOException ex) {
             LOGGER.error("LOOPABORT File already exists or the operation failed for some reason", ex);
         }
+        
+        File file2 = new File(getJobRunningFolderPath(simulation) + "/CHECKPOINT");
+        try {
+            // Create the file
+            file2.createNewFile();
+            LOGGER.info("CHECKPOINT File is created! " + file2.getAbsolutePath());
+        } catch (IOException ex) {
+            LOGGER.error("CHECKPOINT File already exists or the operation failed for some reason", ex);
+        }
 
         Runnable r = () -> {
             try {
@@ -325,6 +346,7 @@ public class SimulationService {
                 List<Job> list = jobService.getCurrentJobs();
                 for (Job j : list) {
                     if (j.getId().equals(job.getId()) && job.getStatus().equals(JobStatus.R)) {
+                        LOGGER.error("Simulation service-jobservice,canceljob= job.getid=",job.getId());
                         jobService.cancelJob(job.getId());
                     }
                 }
