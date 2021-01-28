@@ -61,6 +61,25 @@ public class SimulationJob {
       for (Job job : currentJobs) {
         LOGGER.info("found job; simulationId: " + job.getSimulationId() + " job status: "
             + job.getStatus());
+        LOGGER.info("Walltime= "+job.getWalltime());
+        
+                    Simulation simulation1 = simulationService.getSimulation(job.getSimulationId());
+                      
+                         if (job.getWalltime().contains(":")) {
+                        String[] times = job.getWalltime().split(":");
+                        int walltime = (Integer.parseInt(times[0]) * 60) + Integer.parseInt(times[1]);
+                        if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
+                        walltime = walltime + 1;
+                                     }
+                   if(walltime >= simulation1.getMaxWalltime()){
+                   simulationService.endSave(simulation1, job);
+                   LOGGER.info("Walltime= "+job.getWalltime() +"Checkpoint created ");
+                       
+                   }
+                      }
+                       
+        
+        
         try {
           Long.parseLong(job.getSimulationId());
         } catch (Exception e) {
@@ -72,20 +91,7 @@ public class SimulationJob {
             if (job.getStatus().equals(JobStatus.R)) {
               if (!runningSimulations.containsKey(job.getSimulationId())) {
                 Simulation simulation = simulationService.getSimulation(job.getSimulationId());
-                if (job.getWalltime().contains(":")) {
-                    String[] times = job.getWalltime().split(":");
-                    int walltime = (Integer.parseInt(times[0]) * 60) + Integer.parseInt(times[1]);
-                    if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
-                      walltime = walltime + 1;
-                      LOGGER.info("Walltime in SimulationJob= "+walltime + "maxWalltime ="+simulation.getMaxWalltime());
-                    }
-                   if(walltime >= simulation.getMaxWalltime()){
-                   simulationService.endSave(simulation, job);
-                   LOGGER.info("Walltime= "+walltime +"Checkpoint created ");
-                       
-                   }
-                       
-                  }
+               
                 
                 if (simulation.getStatus().equals(SimulationStatus.CANCELLED)) {
                   if (!cancelled.contains(simulation.getId())) {

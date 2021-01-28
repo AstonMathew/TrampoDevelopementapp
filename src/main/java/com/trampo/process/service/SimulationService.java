@@ -306,6 +306,15 @@ public class SimulationService {
             LOGGER.error("CHECKPOINT File already exists or the operation failed for some reason", ex);
         }
         
+        File file1 = new File(getJobRunningFolderPath(simulation) + "/ABORT");
+        try {
+            // Create the file
+            file1.createNewFile();
+            LOGGER.info("ABORT File are created! " + file.getAbsolutePath());
+        } catch (IOException ex) {
+            LOGGER.error("ABORT File already exists or the operation failed for some reason", ex);
+        }
+        
     }
     
     public void cancelSimulation(Simulation simulation, Job job) {
@@ -679,11 +688,13 @@ public class SimulationService {
         String walltime = "000:00:00";
         long hours = 0;
         long minutes = 0;
-        if (simulation.getMaxWalltime() > 60) {
-            hours = simulation.getMaxWalltime() / 60;
-            minutes = simulation.getMaxWalltime() - hours * 60;
+        long maxWalltime=simulation.getMaxWalltime()+8;
+        LOGGER.info("Maxwalltime+8=" +maxWalltime);
+        if (maxWalltime > 60) {
+            hours = maxWalltime / 60;
+            minutes = maxWalltime - hours * 60;
         } else {
-            minutes = simulation.getMaxWalltime();
+            minutes = maxWalltime;
         }
         walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
         String simulationFileName = getCustomerSimulationFilePathGadi(simulation);

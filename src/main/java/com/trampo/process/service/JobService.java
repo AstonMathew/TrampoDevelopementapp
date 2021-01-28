@@ -133,7 +133,7 @@ public class JobService {
       batchFlagCommand ="mesh";
     }else if(runOnly){
       batchFlagCommand = "";
-    }
+    }   
     LOGGER.info("batchFlagCommand= " + batchFlagCommand);
     // No spaces in qsub command
     String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus="
