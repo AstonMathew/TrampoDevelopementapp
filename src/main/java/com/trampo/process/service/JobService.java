@@ -134,7 +134,7 @@ public class JobService {
     }else if(runOnly){
       batchFlagCommand = "";
     }   
-    LOGGER.info("batchFlagCommand= " + batchFlagCommand);
+    LOGGER.info("batchFlagCommand= " + batchFlagCommand);    
     // No spaces in qsub command
     String command = "cd " + runRoot + "; qsub -N " + jobName + " -q " + queueType + " -lncpus="
         + coreCount + " -e " + gadiLogRoot + "/error.txt -o " + gadiLogRoot + "/output.txt -lmem="

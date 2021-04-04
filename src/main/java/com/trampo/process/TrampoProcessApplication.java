@@ -115,6 +115,7 @@ public class TrampoProcessApplication {
             ccmPlus.setPath(path);
             ccmPlus.setPrecision(StarCcmPrecision.MIXED);
             ccmPlus.setVersion(mixedVersion);
+            LOGGER.info("found mixed precision ccmplusPrecisionvalue=" +ccmPlus.getPrecision() +ccmPlus.getVersion());
             ccmPlusList.add(ccmPlus);
             break;
           }
@@ -129,11 +130,12 @@ public class TrampoProcessApplication {
             ccmPlus.setPrecision(StarCcmPrecision.DOUBLE);
             ccmPlus.setVersion(doubleVersion);
             ccmPlusList.add(ccmPlus);
+            LOGGER.info("found double precision ccmplusPrecisionvalue=" +ccmPlus.getPrecision() +ccmPlus.getVersion());
             break;
           }
         }
       }
-
+      
       StarCcmPlusUtil.setInstalledCcmPluses(ccmPlusList);
       LOGGER.warn("---------------------START-UP end-------------------");
 

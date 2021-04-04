@@ -71,15 +71,23 @@ public class SimulationJob {
                         if (times.length > 2 && Integer.parseInt(times[2]) > 0) {
                         walltime = walltime + 1;
                                      }
-                   if(walltime >= simulation1.getMaxWalltime()){
+                   if(walltime >= (simulation1.getMaxWalltime()-8)){
                    simulationService.endSave(simulation1, job);
                    LOGGER.info("Walltime= "+job.getWalltime() +"Checkpoint created ");
                        
                    }
-                      }
+                   if(walltime >= (simulation1.getMaxWalltime()-3)){
+                   simulationService.endAbort(simulation1, job);
+                   LOGGER.info("Walltime= "+job.getWalltime() +"Abort Command Success ");
+                   }
+                   if(walltime >= (simulation1.getMaxWalltime())){
+                   simulationService.endCancel(simulation1, job);
+                   LOGGER.info("Walltime= "+job.getWalltime() +"qdel Command Success ");
                        
-        
-        
+                   }
+                   
+                      }
+                
         try {
           Long.parseLong(job.getSimulationId());
         } catch (Exception e) {

@@ -46,6 +46,7 @@ import com.trampo.process.domain.JobStatus;
 import com.trampo.process.domain.Simulation;
 import com.trampo.process.domain.SimulationStatus;
 import com.trampo.process.domain.StarCcmPrecision;
+import static com.trampo.process.domain.StarCcmPrecision.MIXED;
 import com.trampo.process.exception.RestException;
 import com.trampo.process.util.FileUtils;
 import com.trampo.process.util.MoveTask;
@@ -306,14 +307,35 @@ public class SimulationService {
             LOGGER.error("CHECKPOINT File already exists or the operation failed for some reason", ex);
         }
         
+        
+        
+    }
+    public void endAbort(Simulation simulation, Job job) {
+        
         File file1 = new File(getJobRunningFolderPath(simulation) + "/ABORT");
         try {
             // Create the file
             file1.createNewFile();
-            LOGGER.info("ABORT File are created! " + file.getAbsolutePath());
+            LOGGER.info("ABORT File are created! " + file1.getAbsolutePath());
         } catch (IOException ex) {
             LOGGER.error("ABORT File already exists or the operation failed for some reason", ex);
         }
+        
+    }
+    
+    public void endCancel(Simulation simulation, Job job) {
+        
+        try {
+                List<Job> list = jobService.getCurrentJobs();
+                for (Job j : list) {
+                    if (j.getId().equals(job.getId()) && job.getStatus().equals(JobStatus.R)) {
+                        LOGGER.error("Simulation service-jobservice,canceljob= job.getid=",job.getId());
+                        jobService.cancelJob(job.getId());
+                    }
+                }
+            } catch (JSchException | IOException e) {
+                LOGGER.error("Error while cancelling simulation", e);
+            }
         
     }
     
@@ -764,7 +786,15 @@ public class SimulationService {
                     + getJobRunningFolderPath(simulation), e);
             count1 = 0;
         }
-   
+        LOGGER.error("simulation.getStarCcmPrecision= "+simulation.getStarCcmPrecision());
+   if(simulation.getStarCcmPrecision().equals(MIXED)) // getting the Precision wich customer chose in the website
+   {
+       starCcmPlusVersionPath=StarCcmPlusUtil.getDefaultMixedPrecisionVersion().getPath();
+       LOGGER.error("StarCcmPlusUtil.getDefaultMixedPrecisionVersion().toString()= "+StarCcmPlusUtil.getDefaultMixedPrecisionVersion().getPath());
+   } else {
+       starCcmPlusVersionPath=StarCcmPlusUtil.getDefaultDoublePrecisionVersion().getPath();
+       LOGGER.error("StarCcmPlusUtil.getDefaultDoublePrecisionVersion().toString()="+StarCcmPlusUtil.getDefaultDoublePrecisionVersion().getPath());
+   }
          if(dmprjCount==0){
         jobService.submitJob(simulation.getId(), "" + coreCount, memory + "", queueType,
                 backendScriptPath, walltime, getJobLogsPathGadi(simulation).toString(), macroPath,
@@ -970,7 +1000,10 @@ public class SimulationService {
                                 && string.contains(ccmPlus.getVersion())) {
                             starCcmPlusVersionPath = ccmPlus.getPath();
                             starCcmPlusVersion = ccmPlus.getVersion();
-                            LOGGER.info("starCcmPlusVersionPath selected: " + starCcmPlusVersionPath);
+                            LOGGER.info("starCcmPlusVersionPath selected: " + starCcmPlusVersionPath +"version="+starCcmPlusVersion);
+                        }
+                        else{
+                            LOGGER.info("getCustomerStarCCMPlusVersion double else=" +starCcmPlusVersion);
                         }
                     }
                 }
@@ -1131,10 +1164,10 @@ public class SimulationService {
             LOGGER.info(" getJobBackupPath Folder created " + getJobBackupPath(simulation));
             FileUtils.logFilePermissions(getJobBackupPath(simulation));
 
-            Files.createDirectories(getJobSynchronisedFolderBackupPath(simulation), fileAttributes);
-            LOGGER.info(" getJobSynchronisedFolderBackupPath Folder created "
-                    + getJobSynchronisedFolderBackupPath(simulation));
-            FileUtils.logFilePermissions(getJobSynchronisedFolderBackupPath(simulation));
+//            Files.createDirectories(getJobSynchronisedFolderBackupPath(simulation), fileAttributes);
+//            LOGGER.info(" getJobSynchronisedFolderBackupPath Folder created "
+//                    + getJobSynchronisedFolderBackupPath(simulation));
+//            FileUtils.logFilePermissions(getJobSynchronisedFolderBackupPath(simulation));
 
             File log = getJobLogsPath(simulation).resolve("job_" + simulation.getId() + ".log").toFile();
             LOGGER.info("HERE writing job_" + simulation.getId() + ".log at path= " + log.toString());
