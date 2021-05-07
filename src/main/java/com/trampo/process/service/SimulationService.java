@@ -82,6 +82,7 @@ public class SimulationService {
     private String backendDmprjScriptPath;
     private String podKey;
     private String trampoLicensePath;
+    private String siemensLicensePath;
     private String macroPath;
     private String meshAndRunMacroPath;
     private SshService sshService;
@@ -103,6 +104,7 @@ public class SimulationService {
             @Value("${trampo.simulation.backendDmprjScriptPath}") String backendDmprjScriptPath,
             @Value("${trampo.simulation.podKey}") String podKey,
              @Value("${trampo.simulation.trampoLicensePath}") String trampoLicensePath,
+             @Value("${trampo.simulation.siemensLicensePath}") String siemensLicensePath,
             @Value("${trampo.simulation.macroPath}") String macroPath,
             @Value("${trampo.simulation.meshAndRunMacroPath}") String meshAndRunMacroPath) {
         restTemplate = builder.rootUri(apiRoot).build();
@@ -123,6 +125,7 @@ public class SimulationService {
         this.backendDmprjScriptPath = backendDmprjScriptPath;
         this.podKey = podKey;
         this.trampoLicensePath= trampoLicensePath;
+        this.siemensLicensePath= siemensLicensePath;
         this.macroPath = macroPath;
         this.meshAndRunMacroPath = meshAndRunMacroPath;
         this.sshService = sshService;
@@ -722,18 +725,22 @@ public class SimulationService {
         String simulationFileName = getCustomerSimulationFilePathGadi(simulation);
         String dmprjFileName = getDmprjSimulationFilePathGadi(simulation);
         String podKeyToSubmit = podKey;
+        if (podKeyToSubmit.isEmpty()) // if customer select license server option and keeps PODkey blank this will put a dummy podkey there to keep the script working.
+        {
+            podKeyToSubmit="dummypodkey";
+        }
         String licensePath = trampoLicensePath;
         if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
-            licensePath=trampoLicensePath;
+            licensePath=siemensLicensePath;
             podKeyToSubmit = simulation.getPodKey();
         }
         if (simulation.getByoLicensingType().equals(ByoLicensingType.OTHER)) {
             if(simulation.getLicenceServerIp()==null)
             {
-                licensePath=trampoLicensePath;
+                licensePath=siemensLicensePath;
                 podKeyToSubmit = simulation.getPodKey();
             }else{
-            licensePath=trampoLicensePath+":"+simulation.getLmgrdPort().toString()+"@"+simulation.getLicenceServerIp();
+            licensePath=siemensLicensePath+":"+simulation.getLmgrdPort().toString()+"@"+simulation.getLicenceServerIp();
             podKeyToSubmit = simulation.getPodKey();
         }
         }
