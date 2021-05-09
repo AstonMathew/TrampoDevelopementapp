@@ -724,11 +724,7 @@ public class SimulationService {
         walltime = String.format("%03d", hours) + ":" + String.format("%02d", minutes) + ":00";
         String simulationFileName = getCustomerSimulationFilePathGadi(simulation);
         String dmprjFileName = getDmprjSimulationFilePathGadi(simulation);
-        String podKeyToSubmit = podKey;
-        if (podKeyToSubmit.isEmpty()) // if customer select license server option and keeps PODkey blank this will put a dummy podkey there to keep the script working.
-        {
-            podKeyToSubmit="dummypodkey";
-        }
+        String podKeyToSubmit = podKey;       
         String licensePath = trampoLicensePath;
         if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
             licensePath=siemensLicensePath;
@@ -743,6 +739,15 @@ public class SimulationService {
             licensePath=siemensLicensePath+":"+simulation.getLmgrdPort().toString()+"@"+simulation.getLicenceServerIp();
             podKeyToSubmit = simulation.getPodKey();
         }
+        }
+        
+        if (podKeyToSubmit.isEmpty()) // if customer select license server option and keeps PODkey blank this will put a dummy podkey there to keep the script working.
+        {
+            podKeyToSubmit="dummypodkey";
+        }
+        if (simulation.getByoLicensingType().equals(ByoLicensingType.TRAMPO))
+        {
+            podKeyToSubmit="TrampoPODkey";
         }
         boolean meshOnly = false;
         if (simulation.getMesh() != null) {
