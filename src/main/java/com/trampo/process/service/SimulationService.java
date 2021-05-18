@@ -725,15 +725,15 @@ public class SimulationService {
         String simulationFileName = getCustomerSimulationFilePathGadi(simulation);
         String dmprjFileName = getDmprjSimulationFilePathGadi(simulation);
         String podKeyToSubmit = podKey;       
-        String licensePath = trampoLicensePath;
+        String licensePath = "TrampoLP"; //scripts reads from the variable file and replaces with real path
         if (simulation.getByoLicensingType().equals(ByoLicensingType.POD)) {
-            licensePath=siemensLicensePath;
+            licensePath="SiemensLP"; //scripts reads from the variable file and replaces with real path
             podKeyToSubmit = simulation.getPodKey();
         }
         if (simulation.getByoLicensingType().equals(ByoLicensingType.OTHER)) {
             if(simulation.getLicenceServerIp()==null)
             {
-                licensePath=siemensLicensePath;
+                licensePath="SiemensLP"; // scripts reads from the variable file and replaces with real path
                 podKeyToSubmit = simulation.getPodKey();
             }else{
             licensePath=siemensLicensePath+":"+simulation.getLmgrdPort().toString()+"@"+simulation.getLicenceServerIp();
